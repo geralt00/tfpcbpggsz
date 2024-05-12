@@ -260,7 +260,3 @@ dependencies:
       - tf-keras==2.16.0
       - werkzeug==3.0.2
       - wrapt==1.16.0
-variables:
-  CUDNN_PATH: /software/pc24403/miniconda3/envs/tfdev/lib/python3.12/site-packages/nvidia/cudnn
-  LD_LIBRARY_PATH: /cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/lib64:/cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/lib:/cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/usr/lib64:/cvmfs/grid.cern.ch/centos7-umd4-wn-4.0.5-1_191112/usr/lib:/software/pc24403/miniconda3/envs/tfdev/lib/python3.12/site-packages/nvidia/cudnn/lib:/software/pc24403/miniconda3/envs/tfdev/lib/python3.12/site-packages/nvidia/cudnn/lib
-prefix: /software/pc24403/miniconda3/envs/tfdev
