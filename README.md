@@ -1,21 +1,29 @@
 # TF-PCGAMMA
 
 ## Description
-TF-PCGAMMA is a TensorFlow-based package developed to accelerate amplitude and mass fits for the B->Dh, D->Kspipi modes. This tool leverages TensorFlow's capabilities to handle large computations efficiently, aiming to improve the stability and accuracy of phase correction orders in particle physics research.
+TF-PCGAMMA is a TensorFlow-based tool designed for enhancing amplitude and mass fits in the B->Dh, D->Kspipi modes. It utilizes TensorFlow's efficient computation handling to significantly improve the stability and accuracy of phase correction orders in particle physics research.
+
+### Key Components
+- **analysis/tf_fit_autograd.py**: Main example fit script, recently optimized for better memory management.
+- **analysis/read_result*.ipynb**: Jupyter notebooks for output analysis using iminuit.
+- **func/**: Directory containing mass-related functions.
+- **Core/**: Stores the fitted functions, Legendre functions, and a new bias generator (planned).
+- **Example/**: Directory planned for clearer demonstrations in future updates.
 
 ## Installation
 
 ### Prerequisites
-Ensure you have TensorFlow installed on your system as it is the primary dependency for this package.
+- TensorFlow: Ensure TensorFlow is installed on your system.
+- Cudatoolkit >= 11.5: Required for running the tool.
 
-Cudatoolkit >= 11.5 
- 
-Please check if its work when tensorflow is installed, since some known issue happen see [[Issue report](https://github.com/tensorflow/tensorflow/issues/63362#issuecomment-2016019354)]
+### Known Issues
+- There may be compatibility issues with certain versions of TensorFlow. See the [issue report on GitHub](https://github.com/tensorflow/tensorflow/issues/63362#issuecomment-2016019354) for more details.
 
 ### Setup
-To install TF-PCGAMMA, clone the repository and install the required dependencies listed in `requirements.yml`:
+Clone the repository and set up the required environment using Conda:
 
 ```bash
 git clone https://github.com/shenghui/tf-pcgamma.git
 cd tf-pcgamma
 conda env create -f requirements.yml
+```
