@@ -17,7 +17,6 @@ def clip_log(x, _epsilon=1e-6):
     return tf.where(x > _epsilon, b_t, b_f)
 
 
-@tf.function(reduce_retracing=True)
 def norm_pdf(x, pdf):
     # Flatten the tensors for sorting purposes
     x_flat = tf.reshape(x, [-1])
@@ -36,7 +35,6 @@ def norm_pdf(x, pdf):
     return a
 
 
-@tf.function
 def HORNSdini(m, a, b, csi, shift, sigma, ratio_sigma, fraction_sigma):
 
     a_new = tf.cast(a, tf.float64)
@@ -60,7 +58,6 @@ def HORNSdini(m, a, b, csi, shift, sigma, ratio_sigma, fraction_sigma):
     CURVEG2 = tf.math.abs((1-csi)*secondG2 + (b_new*csi - a_new)*firstG2)
     return (fraction_sigma*CURVEG1 + (1-fraction_sigma)*CURVEG2)
 
-@tf.function
 def CruijffExtended(m, m0, sigmaL, sigmaR, alphaL, alphaR, beta):
     sigma = 0.0
     alpha = 0.0
@@ -75,7 +72,6 @@ def CruijffExtended(m, m0, sigmaL, sigmaR, alphaL, alphaR, beta):
     f = tf.cast(2.0*sigma*sigma + alpha*dx*dx, tf.float64)
     return tf.exp(-dx**2 *(1 + beta * dx **2)/f)  
 
-@tf.function
 def HORNSdini_misID(m,a,b,csi,m1,s1,m2,s2,m3,s3,m4,s4,f1,f2,f3):
     a_new = tf.cast(a, tf.float64)
     b_new = tf.cast(b, tf.float64)
@@ -115,7 +111,6 @@ def HORNSdini_misID(m,a,b,csi,m1,s1,m2,s2,m3,s3,m4,s4,f1,f2,f3):
 
     return tf.math.abs(f1*CURVEG1) + tf.math.abs(f2*CURVEG2) + tf.math.abs(f3*CURVEG3) + tf.math.abs((1-f1-f2-f3)*CURVEG4)
 
-@tf.function
 def CBShape(m,m0,sigma,alpha,n):
    t =tf.cast((m-m0)/sigma, tf.float64)
 
@@ -133,19 +128,17 @@ def CBShape(m,m0,sigma,alpha,n):
 
    val = tf.where(t >= -absAlpha, val_a, val_b)
    return val
-@tf.function
+
 def Exponential(m, c):
     c = tf.cast(c, tf.float64)
     return tf.math.exp(c*m)
 
 
-@tf.function
 def Gaussian(m, mu, sigma):
     mu = tf.cast(mu, dtype=tf.float64)
     sigma = tf.cast(sigma, dtype=tf.float64)
     return (tf.math.exp(-0.5*((m-mu)/sigma)**2))/(sigma*tf.math.sqrt(2.0*_PI))
 
-@tf.function
 def HILLdini(m,a,b,csi,shift,sigma,ratio_sigma,fraction_sigma):
     a_new = tf.cast(a, tf.float64)
     b_new = tf.cast(b, tf.float64)
@@ -165,7 +158,8 @@ def HILLdini(m,a,b,csi,shift,sigma,ratio_sigma,fraction_sigma):
     CURVEG2 = tf.math.abs((1-csi)/(b_new - a_new)*m + (b_new*csi - a_new)/(b_new-a_new))*tf.math.abs(firstG2)
 
     return tf.math.abs(fraction_sigma*CURVEG1) + tf.math.abs((1-fraction_sigma)*CURVEG2)
-@tf.function
+
+
 def HILLdini_misID(m,a,b,csi,m1,s1,m2,s2,m3,s3,m4,s4,f1,f2,f3):
     a_new = tf.cast(a, tf.float64)
     b_new = tf.cast(b, tf.float64)

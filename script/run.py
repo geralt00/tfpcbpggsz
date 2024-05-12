@@ -6,8 +6,8 @@ import math
 import matplotlib.pyplot as plt
 import sys
 sys.path.append('/software/pc24403/tfpcbpggsz/func')
-sys.path.append('/software/pc24403/tfpcbpggsz/amp')
-from PyD0ToKSpipi2018 import *
+sys.path.append('/software/pc24403/tfpcbpggsz/amp_ampgen')
+from D0ToKSpipi2018 import *
 import uproot as up
 import pickle
 import os
@@ -63,7 +63,7 @@ def get_p4(decay="b2dpi", cut='', index=1):
 def load_int_amp(args):
     p1, p2, p3 = args
 
-    return amp.Amp_PFT(p1.tolist(), p2.tolist(), p3.tolist())
+    return amp.AMP(p1.tolist(), p2.tolist(), p3.tolist())
 
 def inital_amp():
     # Load the amplitude model
@@ -72,7 +72,7 @@ def inital_amp():
     
 
     Bdecays = ['b2dpi', 'b2dk']
-    Types = ['LL', 'DD']
+    Types = ['DD', 'LL']
     Charges = ['p', 'm']
     for bdecay in Bdecays:
         for type in Types:
@@ -93,17 +93,23 @@ def inital_amp():
                 p3bar_np = cp.asnumpy(p3bar)
 
                 #- p3
-                data = [(p1_np[i], p3_np[i], p2_np[i]) for i in range(len(p1_np))]
+                data = [(p1_np[i], p2_np[i], p3_np[i]) for i in range(len(p1_np))]
                 with Pool(processes=120) as pool:
                     amplitude.append(pool.map(load_int_amp, data))
-                data_bar = [(p1bar_np[i], p2bar_np[i], p3bar_np[i]) for i in range(len(p1bar_np))]
+                data_bar = [(p1bar_np[i], p3bar_np[i], p2bar_np[i]) for i in range(len(p1bar_np))]
                 with Pool(processes=120) as pool:
                     amplitudeBar.append(pool.map(load_int_amp, data_bar))
+
 
                 amp_array = cp.asarray(amplitude)
                 ampbar_array = cp.asarray(amplitudeBar)
 
-                data_path = '/shared/scratch/pc24403/amp'
+                print(cp.mean(amp_array))
+
+                amp_array = amp_array
+                ampbar_array = ampbar_array
+
+                data_path = '/shared/scratch/pc24403/amp_ampgen'
                 os.makedirs(data_path, exist_ok=True)
                 cp.save(f'{data_path}/Int_{decay}_amp.npy', amp_array)
                 cp.save(f'{data_path}/Int_{decay}_ampbar.npy', ampbar_array)

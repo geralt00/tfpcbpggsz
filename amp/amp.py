@@ -30,12 +30,12 @@ def get_p4(decay="b2dpi", cut='', index=2):
                          "_2_pi#_E", "_2_pi#_Px", "_2_pi#_Py", "_2_pi#_Pz",
                          "_3_pi~_E", "_3_pi~_Px", "_3_pi~_Py", "_3_pi~_Pz", "B_M"]
         if cut == 'p':
-            #file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/add_sw/lhcb_toy_{decay}_{index}_CPrange.root:BplusDalitzEventList'
-            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x_test/{decay}_sig_{index}.root:Bplus_DalitzEventList'
+            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/add_sw/lhcb_toy_{decay}_{index}_CPrange.root:Bplus_DalitzEventList'
+            #file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x_test/{decay}_sig_{index}.root:Bplus_DalitzEventList'
 
         else:
-            #file_name = f'/software/pc24403/PCBPGGSZ/outputs/oy/mass_fit/add_sw/lhcb_toy_{decay}_{index}.root:BminusDalitzEventList'
-            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x_test/{decay}_sig_{index}.root:Bminus_DalitzEventList'
+            file_name = f'/software/pc24403/PCBPGGSZ/outputs/oy/mass_fit/add_sw/lhcb_toy_{decay}_{index}.root:Bminus_DalitzEventList'
+            #file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x_test/{decay}_sig_{index}.root:Bminus_DalitzEventList'
 
     tree = up.open(file_name)
   # Load the branches as arrays
@@ -78,10 +78,10 @@ def getAmp(decay='b2dpi', cut='int'):
     p2bar_np = np.array(p2bar)
     p3bar_np = np.array(p3bar)
 
-    data = [(p1_np[i], p3_np[i], p2_np[i]) for i in range(len(p1_np))]
+    data = [(p1_np[i], p2_np[i], p3_np[i]) for i in range(len(p1_np))]
     with Pool(processes=multiprocessing.cpu_count()) as pool:
         amplitude.append(pool.map(load_int_amp, data))
-    data_bar = [(p1bar_np[i], p2bar_np[i], p3bar_np[i]) for i in range(len(p1bar_np))]
+    data_bar = [(p1bar_np[i], p3bar_np[i], p2bar_np[i]) for i in range(len(p1bar_np))]
     with Pool(processes=multiprocessing.cpu_count()) as pool:
         amplitudeBar.append(pool.map(load_int_amp, data_bar))
     

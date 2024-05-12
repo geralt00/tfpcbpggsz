@@ -8,8 +8,9 @@ args = parser.parse_args()
 index=args.index
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]=args.gpu
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
+
+os.environ["CUDA_VISIBLE_DEVICES"]=args.gpu
 
 from importlib.machinery import SourceFileLoader
 import uproot as up
@@ -31,7 +32,7 @@ sys.path.append('/software/pc24403/tfpcbpggsz/func')
 sys.path.append('/software/pc24403/tfpcbpggsz/amp_ampgen')
 sys.path.append('/software/pc24403/tfpcbpggsz/core')
 from amp import *
-from core import *
+from core_test import *
 from tfmassshape import *
 
 
@@ -56,18 +57,18 @@ def get_p4(decay="b2dpi", cut='', index=index):
                          "_2_pi#_E", "_2_pi#_Px", "_2_pi#_Py", "_2_pi#_Pz",
                          "_3_pi~_E", "_3_pi~_Px", "_3_pi~_Py", "_3_pi~_Pz"]
         if cut == 'p':
-            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/add_sw/new_frac_sw_pg/{decay}_{index}_CPrange.root:DalitzEventList'
+            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x/{decay}_{index}.root:DalitzEventList'
 #            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/swap/{decay}_{comp}_{index}.root:Bplus_DalitzEventList'
 
         else:
-            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/add_sw/new_frac_sw_pg/{decay}_{index}_CPrange.root:DalitzEventList'
+            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x/{decay}_{index}.root:DalitzEventList'
 #            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/swap/{decay}_{comp}_{index}.root:Bminus_DalitzEventList'
 
     tree = up.open(file_name)
   # Load the branches as arrays
-    charge = '(Bac_ID>0)'
+    charge = '(Bac_ID>0) & (B_M> 5150)'
     if cut == 'm':
-        charge = '(Bac_ID<0)'
+        charge = '(Bac_ID<0)& (B_M> 5150)'
        
     array = tree.arrays(branch_names, charge)
     _p1 = np.asarray([array["_1_K0S0_E"], array["_1_K0S0_Px"], array["_1_K0S0_Py"], array["_1_K0S0_Pz"]])
@@ -135,18 +136,18 @@ def get_p4_v2(decay="b2dpi", cut='', index=index, comp='sig'):
                          "_2_pi#_E", "_2_pi#_Px", "_2_pi#_Py", "_2_pi#_Pz",
                          "_3_pi~_E", "_3_pi~_Px", "_3_pi~_Py", "_3_pi~_Pz", "B_M"]
         if cut == 'p':
-            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/add_sw/new_frac_sw_pg/{decay}_{index}_CPrange.root:DalitzEventList'
+            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x/{decay}_{index}.root:DalitzEventList'
 #            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/swap/{decay}_{comp}_{index}.root:Bplus_DalitzEventList'
 
         else:
-            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/add_sw/new_frac_sw_pg/{decay}_{index}_CPrange.root:DalitzEventList'
+            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/1x/{decay}_{index}.root:DalitzEventList'
 #            file_name = f'/software/pc24403/PCBPGGSZ/outputs/toy/swap/{decay}_{comp}_{index}.root:Bminus_DalitzEventList'
 
     tree = up.open(file_name)
   # Load the branches as arrays
-    charge = '(Bac_ID>0)'
+    charge = '(Bac_ID>0)& (B_M> 5150)'
     if cut == 'm':
-        charge = '(Bac_ID<0)'
+        charge = '(Bac_ID<0)& (B_M> 5150)'
     
     array = tree.arrays(branch_names, charge)
        
@@ -214,9 +215,12 @@ def getMass_v2(decay='b2dpi', cut='int', comp='sig', index=index):
 
 
 
-config_mass_shape_output = SourceFileLoader('config_mass_shape_output', '/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/config/lhcb/%s'%(f'config_cpfit_output_{index}.py')).load_module()
+#config_mass_shape_output = SourceFileLoader('config_mass_shape_output', '/software/pc24403/PCBPGGSZ/outputs/toy/mass_fit/config/%s'%(f'config_CPrange_input_{index}.py')).load_module()
+config_mass_shape_output = SourceFileLoader('config_mass_shape_output', '/software/pc24403/PCBPGGSZ/mass_fit/config/%s'%(f'config_CPrange_input_All.py')).load_module()
+
+
 varDict = config_mass_shape_output.getconfig()
-print_yields = False
+print_yields = True
 sig_yield = {}
 Bdecays = ['b2dk', 'b2dpi']
 Types = ['LL', 'DD']
@@ -246,12 +250,41 @@ for bdecay in Bdecays:
 
 
 
+pdfs_data = {}
+s12_data = {}
+s13_data = {}
+Bu_M = {}
+mass_pdfs = {}
+for decay in ['b2dk_LL', 'b2dk_DD', 'b2dpi_LL', 'b2dpi_DD']:
+    for charge in ['p', 'm']:
+        new_decay = decay + '_'+ charge
+        print('--- INFO: Building function for %s...'%new_decay)
+        s12_data[new_decay], s13_data[new_decay], Bu_M[new_decay] = getMass_v2(decay, charge, index)
+        Bu_M[new_decay] = tf.cast(Bu_M[new_decay], tf.float64)
+        pdfs_data[new_decay] = preparePdf_data(Bu_M[new_decay], varDict, decay)
+
+comps = ['sig', 'misid', 'comb', 'low', 'low_misID', 'low_Bs2DKPi']
+for decay in ['b2dk_LL', 'b2dk_DD', 'b2dpi_LL', 'b2dpi_DD']:
+    for charge in ['p', 'm']:
+        new_decay = decay + '_'+ charge
+        mass_pdfs[new_decay] = {}
+        for comp in comps:
+            if decay.split('_')[0] == 'b2dpi' and (comp == 'low_Bs2DKPi' or comp == 'low_misID'): continue
+            mass_pdfs[new_decay][comp] = pdfs_data[new_decay][comp](Bu_M[new_decay])
+time2 = time.time()
+        
+print('INFO: mass Function loaded...')
+
+
+
+
 logpath = '/dice/users/pc24403/BPGGSZ/sim_fit'
 if os.path.exists(logpath) == False:
     os.mkdir(logpath)
 
 
 print('INFO: Initialize the amplitudes...')
+
 amp_Data_dk_dd_m = []
 ampbar_Data_dk_dd_m = []
 amp_Data_dk_dd_p = []
@@ -315,32 +348,51 @@ ampbar_dpi_ll_p = np.load(mc_path + '/Int_b2dpi_LL_p_ampbar.npy')
 amp_dpi_ll_m = np.load(mc_path + '/Int_b2dpi_LL_m_amp.npy')
 ampbar_dpi_ll_m = np.load(mc_path + '/Int_b2dpi_LL_m_ampbar.npy')
 
+#Post to TF constant
+amp_Data_dk_dd_p = tf.constant(amp_Data_dk_dd_p, dtype=tf.complex128)
+ampbar_Data_dk_dd_p = tf.constant(ampbar_Data_dk_dd_p, dtype=tf.complex128)
+amp_Data_dk_dd_m = tf.constant(amp_Data_dk_dd_m, dtype=tf.complex128)
+ampbar_Data_dk_dd_m = tf.constant(ampbar_Data_dk_dd_m, dtype=tf.complex128)
+amp_Data_dk_ll_p = tf.constant(amp_Data_dk_ll_p, dtype=tf.complex128)
+ampbar_Data_dk_ll_p = tf.constant(ampbar_Data_dk_ll_p, dtype=tf.complex128)
+amp_Data_dk_ll_m = tf.constant(amp_Data_dk_ll_m, dtype=tf.complex128)
+ampbar_Data_dk_ll_m = tf.constant(ampbar_Data_dk_ll_m, dtype=tf.complex128)
+amp_dk_dd_p = tf.constant(amp_dk_dd_p, dtype=tf.complex128)
+ampbar_dk_dd_p = tf.constant(ampbar_dk_dd_p, dtype=tf.complex128)
+amp_dk_dd_m = tf.constant(amp_dk_dd_m, dtype=tf.complex128)
+ampbar_dk_dd_m = tf.constant(ampbar_dk_dd_m, dtype=tf.complex128)
+amp_dk_ll_p = tf.constant(amp_dk_ll_p, dtype=tf.complex128)
+ampbar_dk_ll_p = tf.constant(ampbar_dk_ll_p, dtype=tf.complex128)
+amp_dk_ll_m = tf.constant(amp_dk_ll_m, dtype=tf.complex128)
+ampbar_dk_ll_m = tf.constant(ampbar_dk_ll_m, dtype=tf.complex128)
+amp_dpi_dd_p = tf.constant(amp_dpi_dd_p, dtype=tf.complex128)
+ampbar_dpi_dd_p = tf.constant(ampbar_dpi_dd_p, dtype=tf.complex128)
+amp_dpi_dd_m = tf.constant(amp_dpi_dd_m, dtype=tf.complex128)
+ampbar_dpi_dd_m = tf.constant(ampbar_dpi_dd_m, dtype=tf.complex128)
+amp_dpi_ll_p = tf.constant(amp_dpi_ll_p, dtype=tf.complex128)
+ampbar_dpi_ll_p = tf.constant(ampbar_dpi_ll_p, dtype=tf.complex128)
+amp_dpi_ll_m = tf.constant(amp_dpi_ll_m, dtype=tf.complex128)
+ampbar_dpi_ll_m = tf.constant(ampbar_dpi_ll_m, dtype=tf.complex128)
+
+time3 = time.time()
 
 
-pdfs_data = {}
-s12_data = {}
-s13_data = {}
-Bu_M = {}
-for decay in ['b2dk_LL', 'b2dk_DD', 'b2dpi_LL', 'b2dpi_DD']:
-    for charge in ['p', 'm']:
-        new_decay = decay + '_'+ charge
-        print('--- INFO: Preparing pdfs for %s...'%new_decay)
-        s12_data[new_decay], s13_data[new_decay], Bu_M[new_decay] = getMass_v2(decay, charge, index)
-        Bu_M[new_decay] = tf.cast(Bu_M[new_decay], tf.float64)
-        pdfs_data[new_decay] = preparePdf_data(Bu_M[new_decay], varDict, decay)
-
-#for decay in ['b2dk_LL', 'b2dk_DD']:
-#    for charge in ['p', 'm']:
-#        new_decay = decay + '_'+ charge
-#        for comp in ['sig', 'misid', 'low', 'comb', 'low_misID', 'low_Bs2DKPi']:
-#            print(tf.reduce_sum(-2*clip_log(pdfs_data[new_decay][comp](Bu_M[new_decay]))))
-        
 @tf.function
-@tf.autograph.experimental.do_not_convert
 def prod_nll_dk_dd(x):
 
     decay = 'b2dk_DD'
-    fracDD = 0.33
+    fracDD = 0.53
+
+    nsig = x[6]*0.5
+    nmisid = x[9]/(varDict['pideff_DPi_KsPiPi_p_to_p_DD']) * varDict['pideff_DPi_KsPiPi_p_to_k_DD']*0.5
+    ncomb = x[7]*0.5
+    nlow = x[8]*0.5
+    frac_low_misID = varDict['cp_range_n_low_misID_DK_KsPiPi_DD']/varDict['cp_range_n_low_DPi_KsPiPi_DD']
+    nlow_misID = x[11]*frac_low_misID*0.5
+    nlow_Bs2DKPi = varDict['cp_range_n_low_Bs2DKPi_DK_KsPiPi_DD']*0.5
+
+
+
     normalisationCrossTerms_p = totalAmplitudeSquared_Integrated_crossTerm(amp_dk_dd_p, ampbar_dk_dd_p)
     normalisationCrossTerms_m = totalAmplitudeSquared_Integrated_crossTerm(amp_dk_dd_m, ampbar_dk_dd_m)
     misid_normalisationCrossTerms_p = totalAmplitudeSquared_Integrated_crossTerm(amp_dpi_dd_p, ampbar_dpi_dd_p)
@@ -356,22 +408,22 @@ def prod_nll_dk_dd(x):
     misid_normA_m = tf.math.reduce_mean(tf.math.abs(amp_dpi_dd_m)**2)
     misid_normAbar_m = tf.math.reduce_mean(tf.math.abs(ampbar_dpi_dd_m)**2)
 
-    sig_prob_p = prod_totalAmplitudeSquared_XY(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, pdfs_data[decay+'_p']['sig'], pdfs_data[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    sig_prob_m = prod_totalAmplitudeSquared_XY(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, pdfs_data[decay+'_p']['sig'], pdfs_data[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    misid_prob_p = prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    misid_prob_m = prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    comb_prob_p = prod_comb(amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
-    comb_prob_m = prod_comb(amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
-    low_prob_p = prod_low(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low')
-    low_prob_m = prod_low(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low')
-    low_misID_prob_p = prod_low(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low_misID')
-    low_misID_prob_m = prod_low(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low_misID')
-    low_Bs2DKPi_prob_p = prod_low(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low_Bs2DKPi')
-    low_Bs2DKPi_prob_m = prod_low(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low_Bs2DKPi')
+    sig_prob_p = nsig * mass_pdfs[decay+'_p']['sig'] * prod_totalAmplitudeSquared_XY(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    sig_prob_m = nsig * mass_pdfs[decay+'_m']['sig'] * prod_totalAmplitudeSquared_XY(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    misid_prob_p = nmisid * mass_pdfs[decay+'_p']['misid'] * prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    misid_prob_m = nmisid * mass_pdfs[decay+'_m']['misid'] * prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    comb_prob_p = ncomb * mass_pdfs[decay+'_p']['comb'] * prod_comb(amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
+    comb_prob_m = ncomb * mass_pdfs[decay+'_m']['comb'] * prod_comb(amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
+    low_prob_p = nlow * mass_pdfs[decay+'_p']['low'] * prod_low(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low')
+    low_prob_m = nlow * mass_pdfs[decay+'_m']['low'] * prod_low(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low')
+    low_misID_prob_p =  nlow_misID * mass_pdfs[decay+'_p']['low_misID'] * prod_low(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low_misID')
+    low_misID_prob_m =  nlow_misID * mass_pdfs[decay+'_m']['low_misID'] * prod_low(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low_misID')
+    low_Bs2DKPi_prob_p = nlow_Bs2DKPi * mass_pdfs[decay+'_p']['low_Bs2DKPi'] * prod_low(1, amp_Data_dk_dd_p, ampbar_Data_dk_dd_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low_Bs2DKPi')
+    low_Bs2DKPi_prob_m = nlow_Bs2DKPi * mass_pdfs[decay+'_m']['low_Bs2DKPi'] * prod_low(-1, amp_Data_dk_dd_m, ampbar_Data_dk_dd_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low_Bs2DKPi')
 
 
 
-    total_yield = 1#tf.cast((x[6] + x[7] + x[8] + x[9] + x[10] + x[11])/2, tf.float64)
+    total_yield = (nsig + nmisid + ncomb + nlow + nlow_misID + nlow_Bs2DKPi)*2
     
     normalisation_Bplus = totalAmplitudeSquared_Integrated(1, normA_p, normAbar_p, normalisationCrossTerms_p, x)
     normalisation_Bminus = totalAmplitudeSquared_Integrated(-1, normA_m, normAbar_m, normalisationCrossTerms_m, x)
@@ -387,18 +439,27 @@ def prod_nll_dk_dd(x):
 
     ll_data_p = clip_log((sig_prob_p/normalisation_Bplus) + (misid_prob_p/misid_normalisation_Bplus) + (comb_prob_p/comb_normalisation_Bplus) + (low_prob_p/low_normalisation_Bplus) + (low_misID_prob_p/low_normalisation_Bplus) + (low_Bs2DKPi_prob_p/low_Bs2DKPi_normalisation_Bplus))
     ll_data_m = clip_log((sig_prob_m/normalisation_Bminus) + (misid_prob_m/misid_normalisation_Bminus) + (comb_prob_m/comb_normalisation_Bminus) + (low_prob_m/low_normalisation_Bminus) + (low_misID_prob_m/low_normalisation_Bminus) + (low_Bs2DKPi_prob_m/low_Bs2DKPi_normalisation_Bminus))
-#    ll_data_p = clip_log((comb_prob_p/comb_normalisation_Bplus) + (low_prob_p/low_normalisation_Bplus) + (low_misID_prob_p/low_normalisation_Bplus) + (low_Bs2DKPi_prob_p/low_Bs2DKPi_normalisation_Bplus))
-#    ll_data_m = clip_log((comb_prob_m/comb_normalisation_Bminus) + (low_prob_m/low_normalisation_Bminus) + (low_misID_prob_m/low_normalisation_Bminus) + (low_Bs2DKPi_prob_m/low_Bs2DKPi_normalisation_Bminus))
 
 
-    return (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m))
+    ext_nll = (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m) + 2 * total_yield)
+    nll = tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m)  
+    return ext_nll
 
 @tf.function
-@tf.autograph.experimental.do_not_convert
 def prod_nll_dk_ll(x):
 
     decay = 'b2dk_LL'
-    fracDD = 0.30
+    fracDD = 0.86
+
+
+    nsig = x[6]*0.5
+    nmisid = x[9]/(varDict['pideff_DPi_KsPiPi_p_to_p_LL']) * varDict['pideff_DPi_KsPiPi_p_to_k_LL']*0.5
+    ncomb = x[7]*0.5
+    nlow = x[8]*0.5
+    frac_low_misID = varDict['cp_range_n_low_misID_DK_KsPiPi_LL']/varDict['cp_range_n_low_DPi_KsPiPi_LL']
+    nlow_misID = x[11]*frac_low_misID*0.5
+    nlow_Bs2DKPi = varDict['cp_range_n_low_Bs2DKPi_DK_KsPiPi_LL']*0.5
+
     normalisationCrossTerms_p = totalAmplitudeSquared_Integrated_crossTerm(amp_dk_ll_p, ampbar_dk_ll_p)
     normalisationCrossTerms_m = totalAmplitudeSquared_Integrated_crossTerm(amp_dk_ll_m, ampbar_dk_ll_m)
     misid_normalisationCrossTerms_p = totalAmplitudeSquared_Integrated_crossTerm(amp_dpi_ll_p, ampbar_dpi_ll_p)
@@ -417,19 +478,22 @@ def prod_nll_dk_ll(x):
     sig_prob_m = prod_totalAmplitudeSquared_XY(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, pdfs_data[decay+'_p']['sig'], pdfs_data[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
 
 
-    misid_prob_p = prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    misid_prob_m = prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    comb_prob_p = prod_comb(amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
-    comb_prob_m = prod_comb(amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
-    low_prob_p = prod_low(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low')
-    low_prob_m = prod_low(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low')
-    low_misID_prob_p = prod_low(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low_misID')
-    low_misID_prob_m = prod_low(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low_misID')
-    low_Bs2DKPi_prob_p = prod_low(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low_Bs2DKPi')
-    low_Bs2DKPi_prob_m = prod_low(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low_Bs2DKPi')
+    sig_prob_p = nsig * mass_pdfs[decay+'_p']['sig'] * prod_totalAmplitudeSquared_XY(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    sig_prob_m = nsig * mass_pdfs[decay+'_m']['sig'] * prod_totalAmplitudeSquared_XY(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    misid_prob_p = nmisid * mass_pdfs[decay+'_p']['misid'] * prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    misid_prob_m = nmisid * mass_pdfs[decay+'_m']['misid'] * prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    comb_prob_p = ncomb * mass_pdfs[decay+'_p']['comb'] * prod_comb(amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
+    comb_prob_m = ncomb * mass_pdfs[decay+'_m']['comb'] * prod_comb(amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
+    low_prob_p = nlow * mass_pdfs[decay+'_p']['low'] * prod_low(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low')
+    low_prob_m = nlow * mass_pdfs[decay+'_m']['low'] * prod_low(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low')
+    low_misID_prob_p =  nlow_misID * mass_pdfs[decay+'_p']['low_misID'] * prod_low(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low_misID')
+    low_misID_prob_m =  nlow_misID * mass_pdfs[decay+'_m']['low_misID'] * prod_low(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low_misID')
+    low_Bs2DKPi_prob_p = nlow_Bs2DKPi * mass_pdfs[decay+'_p']['low_Bs2DKPi'] * prod_low(1, amp_Data_dk_ll_p, ampbar_Data_dk_ll_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low_Bs2DKPi')
+    low_Bs2DKPi_prob_m = nlow_Bs2DKPi * mass_pdfs[decay+'_m']['low_Bs2DKPi'] * prod_low(-1, amp_Data_dk_ll_m, ampbar_Data_dk_ll_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low_Bs2DKPi')
 
 
-    total_yield = 1# tf.cast((x[6] + x[7] + x[8] + x[9] + x[10] + x[11])/2, tf.float64)
+
+    total_yield = (nsig + nmisid + ncomb + nlow + nlow_misID + nlow_Bs2DKPi)*2
 
     
     normalisation_Bplus = totalAmplitudeSquared_Integrated(1, normA_p, normAbar_p, normalisationCrossTerms_p, x)
@@ -448,17 +512,20 @@ def prod_nll_dk_ll(x):
     ll_data_p = clip_log((sig_prob_p/normalisation_Bplus) + (misid_prob_p/misid_normalisation_Bplus) + (comb_prob_p/comb_normalisation_Bplus) + (low_prob_p/low_normalisation_Bplus) + (low_misID_prob_p/low_normalisation_Bplus) + (low_Bs2DKPi_prob_p/low_Bs2DKPi_normalisation_Bplus))
     ll_data_m = clip_log((sig_prob_m/normalisation_Bminus) + (misid_prob_m/misid_normalisation_Bminus) + (comb_prob_m/comb_normalisation_Bminus) + (low_prob_m/low_normalisation_Bminus) + (low_misID_prob_m/low_normalisation_Bminus) + (low_Bs2DKPi_prob_m/low_Bs2DKPi_normalisation_Bminus))
 
-#    ll_data_p = clip_log((sig_prob_p/normalisation_Bplus) +(comb_prob_p/comb_normalisation_Bplus) + (low_prob_p/low_normalisation_Bplus) + (low_misID_prob_p/low_normalisation_Bplus) + (low_Bs2DKPi_prob_p/low_Bs2DKPi_normalisation_Bplus))
-#    ll_data_m = clip_log((sig_prob_m/normalisation_Bminus) +(comb_prob_m/comb_normalisation_Bminus) + (low_prob_m/low_normalisation_Bminus) + (low_misID_prob_m/low_normalisation_Bminus) + (low_Bs2DKPi_prob_m/low_Bs2DKPi_normalisation_Bminus))
-
-    return (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m))
+    ext_nll = (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m) + 2 * total_yield)
+    nll = tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m)  
+    return ext_nll
 
 @tf.function
-@tf.autograph.experimental.do_not_convert
 def prod_nll_dpi_dd(x):
 
     decay = 'b2dpi_DD'
     fracDD = 0.27
+
+    nsig = x[9] * 0.5
+    nmisid = x[6]/(varDict['pideff_DK_KsPiPi_k_to_k_DD']) * varDict['pideff_DK_KsPiPi_k_to_p_DD'] * 0.5
+    ncomb = x[10] * 0.5 
+    nlow = x[11] * 0.5
 
     normalisationCrossTerms_p = totalAmplitudeSquared_Integrated_crossTerm(amp_dpi_dd_p, ampbar_dpi_dd_p)
     normalisationCrossTerms_m = totalAmplitudeSquared_Integrated_crossTerm(amp_dpi_dd_m, ampbar_dpi_dd_m)
@@ -476,19 +543,17 @@ def prod_nll_dpi_dd(x):
     misid_normAbar_m = tf.math.reduce_mean(tf.math.abs(ampbar_dk_dd_m)**2)
 
 
-    sig_prob_p = prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, pdfs_data[decay+'_p']['sig'], pdfs_data[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    sig_prob_m = prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, pdfs_data[decay+'_p']['sig'], pdfs_data[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    sig_prob_p = nsig * mass_pdfs[decay+'_p']['sig'] * prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    sig_prob_m = nsig * mass_pdfs[decay+'_m']['sig'] * prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
 
-    misid_prob_p = prod_totalAmplitudeSquared_XY(1, amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    misid_prob_m = prod_totalAmplitudeSquared_XY(-1, amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    comb_prob_p = prod_comb(amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
-    comb_prob_m = prod_comb(amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
-    low_prob_p = prod_low(1, amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low')
-    low_prob_m = prod_low(-1, amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low')
+    misid_prob_p = nmisid * mass_pdfs[decay+'_p']['misid'] * prod_totalAmplitudeSquared_XY(1, amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    misid_prob_m = nmisid * mass_pdfs[decay+'_m']['misid'] * prod_totalAmplitudeSquared_XY(-1, amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    comb_prob_p = ncomb * mass_pdfs[decay+'_p']['comb'] * prod_comb(amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
+    comb_prob_m = ncomb * mass_pdfs[decay+'_m']['comb'] * prod_comb(amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
+    low_prob_p = nlow * mass_pdfs[decay+'_p']['low'] * prod_low(1, amp_Data_dpi_dd_p, ampbar_Data_dpi_dd_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low')
+    low_prob_m = nlow * mass_pdfs[decay+'_m']['low'] * prod_low(-1, amp_Data_dpi_dd_m, ampbar_Data_dpi_dd_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low')
 
-
-
-    total_yield = 1#tf.cast((x[6] + x[7] + x[8] + x[9])/2, tf.float64)
+    total_yield = (nsig + nmisid + ncomb + nlow)*2.0
     
     normalisation_Bplus = totalAmplitudeSquared_DPi_Integrated(1, normA_p, normAbar_p, normalisationCrossTerms_p, x)
     normalisation_Bminus = totalAmplitudeSquared_DPi_Integrated(-1, normA_m, normAbar_m, normalisationCrossTerms_m, x)
@@ -504,14 +569,21 @@ def prod_nll_dpi_dd(x):
     ll_data_p = clip_log(((sig_prob_p/normalisation_Bplus) + (misid_prob_p/misid_normalisation_Bplus) + (comb_prob_p/comb_normalisation_Bplus) + (low_prob_p/low_normalisation_Bplus) ))
     ll_data_m = clip_log(((sig_prob_m/normalisation_Bminus) + (misid_prob_m/misid_normalisation_Bminus) + (comb_prob_m/comb_normalisation_Bminus) + (low_prob_m/low_normalisation_Bminus)))
 
-    return (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m))
+    ext_nll = (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m) + 2 * total_yield)
+    nll = tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m)  
+    return ext_nll
 
 @tf.function
-@tf.autograph.experimental.do_not_convert
 def prod_nll_dpi_ll(x):
 
     decay = 'b2dpi_LL'
     fracDD = 0.48
+
+    nsig = x[9] * 0.5
+    nmisid = x[6]/(varDict['pideff_DK_KsPiPi_k_to_k_LL']) * varDict['pideff_DK_KsPiPi_k_to_p_LL'] * 0.5
+    ncomb = x[10] * 0.5 
+    nlow = x[11] * 0.5
+
     normalisationCrossTerms_p = totalAmplitudeSquared_Integrated_crossTerm(amp_dpi_ll_p, ampbar_dpi_ll_p)
     normalisationCrossTerms_m = totalAmplitudeSquared_Integrated_crossTerm(amp_dpi_ll_m, ampbar_dpi_ll_m)
     misid_normalisationCrossTerms_p = totalAmplitudeSquared_Integrated_crossTerm(amp_dk_ll_p, ampbar_dk_ll_p)
@@ -528,21 +600,19 @@ def prod_nll_dpi_ll(x):
     misid_normAbar_m = tf.math.reduce_mean(tf.math.abs(ampbar_dk_ll_m)**2)
 
 
-    sig_prob_p = prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, pdfs_data[decay+'_p']['sig'], pdfs_data[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    sig_prob_m = prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, pdfs_data[decay+'_p']['sig'], pdfs_data[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    sig_prob_p = nsig * mass_pdfs[decay+'_p']['sig'] * prod_totalAmplitudeSquared_DPi_XY(1, amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    sig_prob_m = nsig * mass_pdfs[decay+'_m']['sig'] * prod_totalAmplitudeSquared_DPi_XY(-1, amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, mass_pdfs[decay+'_p']['sig'], mass_pdfs[decay+'_m']['sig'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    misid_prob_p = nmisid * mass_pdfs[decay+'_p']['misid'] * prod_totalAmplitudeSquared_XY(1, amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    misid_prob_m = nmisid * mass_pdfs[decay+'_m']['misid'] * prod_totalAmplitudeSquared_XY(-1, amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, mass_pdfs[decay+'_p']['misid'], mass_pdfs[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
+    comb_prob_p = ncomb * mass_pdfs[decay+'_p']['comb'] * prod_comb(amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
+    comb_prob_m = ncomb * mass_pdfs[decay+'_m']['comb'] * prod_comb(amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
+    low_prob_p = nlow * mass_pdfs[decay+'_p']['low'] * prod_low(1, amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, mass_pdfs[decay+'_p'], Bu_M[decay+'_p'], type='low')
+    low_prob_m = nlow * mass_pdfs[decay+'_m']['low'] * prod_low(-1, amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, mass_pdfs[decay+'_m'], Bu_M[decay+'_m'], type='low')
 
 
-    misid_prob_p = prod_totalAmplitudeSquared_XY(1, amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    misid_prob_m = prod_totalAmplitudeSquared_XY(-1, amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, pdfs_data[decay+'_p']['misid'], pdfs_data[decay+'_m']['misid'], Bu_M[decay+'_p'], Bu_M[decay+'_m'])
-    comb_prob_p = prod_comb(amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], fracDD=fracDD)
-    comb_prob_m = prod_comb(amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], fracDD=fracDD)
-    low_prob_p = prod_low(1, amp_Data_dpi_ll_p, ampbar_Data_dpi_ll_p, x, pdfs_data[decay+'_p'], Bu_M[decay+'_p'], type='low')
-    low_prob_m = prod_low(-1, amp_Data_dpi_ll_m, ampbar_Data_dpi_ll_m, x, pdfs_data[decay+'_m'], Bu_M[decay+'_m'], type='low')
-
-
-
-    total_yield = 1#tf.cast((x[6] + x[7] + x[8] + x[9])/2, tf.float64)
+    total_yield = (nsig + nmisid + ncomb + nlow)*2.0
     
+
     normalisation_Bplus = totalAmplitudeSquared_DPi_Integrated(1, normA_p, normAbar_p, normalisationCrossTerms_p, x)
     normalisation_Bminus = totalAmplitudeSquared_DPi_Integrated(-1, normA_m, normAbar_m, normalisationCrossTerms_m, x)
     misid_normalisation_Bplus = totalAmplitudeSquared_Integrated(1, misid_normA_p, misid_normAbar_p, misid_normalisationCrossTerms_p, x)
@@ -557,7 +627,9 @@ def prod_nll_dpi_ll(x):
     ll_data_p = clip_log(((sig_prob_p/normalisation_Bplus) + (misid_prob_p/misid_normalisation_Bplus) + (comb_prob_p/comb_normalisation_Bplus) + (low_prob_p/low_normalisation_Bplus) ))
     ll_data_m = clip_log(((sig_prob_m/normalisation_Bminus) + (misid_prob_m/misid_normalisation_Bminus) + (comb_prob_m/comb_normalisation_Bminus) + (low_prob_m/low_normalisation_Bminus) ))
 
-    return (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m))
+    ext_nll = (tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m) + 2 * total_yield)
+    nll = tf.reduce_sum( -2* ll_data_p) + tf.reduce_sum( -2*ll_data_m)  
+    return ext_nll
 
 def nll_dk_dd(x):
     x1 = x[:12]
@@ -591,22 +663,41 @@ def nll_dpi(x):
     print(prod_nll_dpi_dd(x3) + prod_nll_dpi_ll(x4))
     return prod_nll_dpi_dd(x3) + prod_nll_dpi_ll(x4)
 
+@tf.function
 def nll(x):
-    x1 = np.array(x[:12])
-    x2 = np.append(x[:6], x[12:18])
-    x3 = np.append(x[:6], x[18:22])
-    x4 = np.append(x[:6], x[22:26])
-
-    print(prod_nll_dpi_dd(x3) + prod_nll_dpi_ll(x4) + prod_nll_dk_dd(x1) + prod_nll_dk_ll(x2))
-    return prod_nll_dpi_dd(x3) + prod_nll_dpi_ll(x4) + prod_nll_dk_dd(x1) + prod_nll_dk_ll(x2)
+    x1 = x[:12]
+    x2 = tf.concat([x[:6], x[12:18]],0)
+    #x2 = np.append(x[:6], x[12:])
 
 
+    return prod_nll_dpi_dd(x1) + prod_nll_dpi_ll(x2) + prod_nll_dk_dd(x1) + prod_nll_dk_ll(x2)
 
-x = [0., 0., 0., 0., 0., 0., varDict['n_sig_DK_KsPiPi_DD'], varDict['n_misid_DK_KsPiPi_DD'], varDict['n_comb_DK_KsPiPi_DD'], varDict['n_low_DK_KsPiPi_DD'], varDict['n_low_misID_DK_KsPiPi_DD'], varDict['n_low_Bs2DKPi_DK_KsPiPi_DD'], varDict['n_sig_DK_KsPiPi_LL'], varDict['n_misid_DK_KsPiPi_LL'], varDict['n_comb_DK_KsPiPi_LL'], varDict['n_low_DK_KsPiPi_LL'], varDict['n_low_misID_DK_KsPiPi_LL'], varDict['n_low_Bs2DKPi_DK_KsPiPi_LL'], varDict['n_misid_DPi_KsPiPi_DD'],  varDict['n_sig_DPi_KsPiPi_DD'], varDict['n_comb_DPi_KsPiPi_DD'], varDict['n_low_DPi_KsPiPi_DD'],  varDict['n_misid_DPi_KsPiPi_LL'], varDict['n_sig_DPi_KsPiPi_LL'], varDict['n_comb_DPi_KsPiPi_LL'], varDict['n_low_DPi_KsPiPi_LL']]
+
+@tf.function
+def neg_like_and_gradient(parms):
+    return tfp.math.value_and_gradient(nll, parms)
+
+#Val = tf.Variable([0., 0., 0., 0., 0., 0., varDict['n_sig_DK_KsPiPi_DD'],  varDict['n_comb_DK_KsPiPi_DD'], varDict['n_low_DK_KsPiPi_DD'], varDict['n_sig_DPi_KsPiPi_DD'], varDict['n_comb_DPi_KsPiPi_DD'], varDict['n_low_DPi_KsPiPi_DD'], varDict['n_sig_DK_KsPiPi_LL'],  varDict['n_comb_DK_KsPiPi_LL'], varDict['n_low_DK_KsPiPi_LL'], varDict['n_sig_DPi_KsPiPi_LL'], varDict['n_comb_DPi_KsPiPi_LL'], varDict['n_low_DPi_KsPiPi_LL']], shape=(18), dtype=tf.float64)
+if False:
+    Val = tf.Variable(np.zeros(18), shape=(18), dtype=tf.float64)
 
 
+# optimization
+    optim_results = tfp.optimizer.bfgs_minimize(
+        neg_like_and_gradient, Val, tolerance=1e-8)
+
+    est_params = optim_results.position.numpy()
+    est_serr = np.sqrt(np.diagonal(optim_results.inverse_hessian_estimate.numpy()))
+    print("Estimated parameters: ", est_params)
+    print("Estimated standard errors: ", est_serr)
+
+x = [0., 0., 0., 0., 0., 0., varDict['n_sig_DK_KsPiPi_DD'], varDict['n_comb_DK_KsPiPi_DD'], varDict['n_low_DK_KsPiPi_DD'],  varDict['n_sig_DPi_KsPiPi_DD'],  varDict['n_comb_DPi_KsPiPi_DD'], varDict['n_low_DPi_KsPiPi_DD'],  varDict['n_sig_DK_KsPiPi_LL'],  varDict['n_comb_DK_KsPiPi_LL'], varDict['n_low_DK_KsPiPi_LL'],  varDict['n_sig_DPi_KsPiPi_LL'], varDict['n_comb_DPi_KsPiPi_LL'], varDict['n_low_DPi_KsPiPi_LL']]
+n_data = {'n_dk_dd': amp_Data_dk_dd_p.shape[1] + amp_Data_dk_dd_m.shape[1], 'n_dpi_dd': amp_Data_dpi_dd_p.shape[1] + amp_Data_dpi_dd_m.shape[1], 'n_dk_ll': amp_Data_dk_ll_p.shape[1] + amp_Data_dk_ll_m.shape[1], 'n_dpi_ll': amp_Data_dpi_ll_p.shape[1] + amp_Data_dpi_ll_m.shape[1]}
+#x = np.zeros(18)
 m = iminuit.Minuit(nll, x)
-m.fixed = [False, False, False, False, False, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+#m.limits = [None, None, None, None, None, None, (-n_data['n_dk_dd'], n_data['n_dk_dd']), (-n_data['n_dk_dd'], n_data['n_dk_dd']), (-n_data['n_dk_dd'], n_data['n_dk_dd']), (-n_data['n_dpi_dd'], n_data['n_dpi_dd']), (-n_data['n_dpi_dd'], n_data['n_dpi_dd']), (-n_data['n_dpi_dd'], n_data['n_dpi_dd']), (-n_data['n_dk_ll'], n_data['n_dk_ll']), (-n_data['n_dk_ll'], n_data['n_dk_ll']), (-n_data['n_dk_ll'], n_data['n_dk_ll']), (-n_data['n_dpi_ll'], n_data['n_dpi_ll']), (-n_data['n_dpi_ll'], n_data['n_dpi_ll']), (-n_data['n_dpi_ll'], n_data['n_dpi_ll'])]
+m.fixed = [False, False, False, False, False, False, True, True, True, True, True, True, True, True, True, True, True, True]
+m.hesse()
 mg = m.migrad()
 
 with open(f'{logpath}/simfit_output_{index}.txt', 'w') as f:
@@ -617,5 +708,8 @@ with open(f'{logpath}/simfit_output_{index}.txt', 'w') as f:
     print(m.nfcn, file=f)
     print(m.covariance, file=f)
 
-time2 = time.time()
-print(f'Fitting finished in {time2-time1} seconds')
+time4 = time.time()
+print(f'Mass builder finished in {time2-time1} seconds')
+print(f'Amplitude builder finished in {time3-time2} seconds')
+print(f'Fit finished in {time4-time3} seconds')
+print(f'Total time: {time4-time1} seconds')
