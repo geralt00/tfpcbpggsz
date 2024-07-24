@@ -12,7 +12,7 @@ from .masspdfs import *
 _PI = tf.constant(np.pi, dtype=tf.float64)
 def DeltadeltaD(A, Abar):
 
-    var_a = tf.math.angle(A*np.conj(Abar))+_PI
+    var_a = tf.math.angle(A*np.conj(Abar))+ _PI
     var_b = tf.where(var_a > _PI, var_a - 2*_PI, var_a)
     var = tf.where(var_b < -_PI, var_b + 2*_PI, var_b)
 
