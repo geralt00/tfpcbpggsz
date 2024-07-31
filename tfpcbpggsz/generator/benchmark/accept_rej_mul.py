@@ -24,7 +24,9 @@ def get_mass(p1,p2):
     return ((p1[:,0]+p2[:,0])**2 - (p1[:,1]+p2[:,1])**2 - (p1[:,2]+p2[:,2])**2 - (p1[:,3]+p2[:,3])**2)
 
 def amp(data):
-
+    """
+    Calculate the amplitude (Kspipi model) of the decay from momenta.
+    """
     #time_cal_amp_start = time.time()
     p1,p2,p3 = data
     amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
@@ -122,7 +124,7 @@ gen = PhaseSpaceGenerator().generate
 
 
 
-N = 1000
+N = 1000000
 max_N = 200000
 
 ret, status = multi_sampling(

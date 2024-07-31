@@ -24,3 +24,48 @@ def phsp_to_srd(x_valid, y_valid):
     stretchedAntiSymCoord_dp = (antiSym_scale * (stretchedAntiSymCoord)) / (antiSym_offset + stretchedSymCoord)
     return np.array([stretchedSymCoord, stretchedAntiSymCoord_dp]).T
 
+
+def deg_to_rad(deg):
+    return deg*np.pi/180
+
+def rad_to_deg(rad):
+    return rad*180/np.pi
+
+def get_xy_xi(physics_param):
+    ''' 
+    takes an input vector with [gamma, rB, deltaB] and returns x, y
+    angles in RADIANS
+    '''
+    gamma  = physics_param[0]
+    r_dk   = physics_param[1]
+    d_dk   = physics_param[2]
+    r_dpi  = physics_param[3]
+    d_dpi  = physics_param[4]
+
+    xm = r_dk * np.cos(d_dk - gamma)
+    xp = r_dk * np.cos(d_dk + gamma)
+    ym = r_dk * np.sin(d_dk - gamma)
+    yp = r_dk * np.sin(d_dk + gamma)
+
+    x_xi = (r_dpi/r_dk)*np.cos(d_dpi-d_dk)
+    y_xi = (r_dpi/r_dk)*np.sin(d_dpi-d_dk)
+
+    return [xp, yp, xm, ym, x_xi, y_xi]
+
+def get_xy(physics_param):
+    ''' 
+    takes an input vector with [gamma, rB, deltaB] and returns x, y
+    angles in RADIANS
+    '''
+    gamma  = physics_param[0]
+    r_dk   = physics_param[1]
+    d_dk   = physics_param[2]
+
+
+    xm = r_dk * np.cos(d_dk - gamma)
+    xp = r_dk * np.cos(d_dk + gamma)
+    ym = r_dk * np.sin(d_dk - gamma)
+    yp = r_dk * np.sin(d_dk + gamma)
+
+
+    return [xp, yp, xm, ym] 

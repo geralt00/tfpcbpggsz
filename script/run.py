@@ -4,16 +4,13 @@ import time
 import math
 import matplotlib.pyplot as plt
 import sys
-sys.path.append('/software/pc24403/tfpcbpggsz/func')
-sys.path.append('/software/pc24403/tfpcbpggsz/amp_ampgen_test')
-from D0ToKSpipi2018 import *
+from tfpcbpggsz.amp import * 
 import uproot as up
 import os
 from multiprocessing import Pool
 
-amp = PyD0ToKSpipi2018()
-amp.init()
-
+Kspipi = PyD0ToKSpipi2018()
+Kspipi.init()
 def get_mass(p1,p2):
     return ((p1[:,0]+p2[:,0])**2 - (p1[:,1]+p2[:,1])**2 - (p1[:,2]+p2[:,2])**2 - (p1[:,3]+p2[:,3])**2)
 
@@ -21,7 +18,7 @@ def get_p4(decay="b2dpi", cut='', index=1):
 
     file_name = ''
     if cut == 'int':
-        file_name = f'/software/pc24403/PCBPGGSZ/Int/forGen/weighted_{decay}.root:DalitzEventList'
+        file_name = f'/software/pc24403/PCBPGGSZ/Int/test/weighted_{decay}.root:DalitzEventList'
     if cut == 'Int':
         file_name = f'/software/pc24403/PCBPGGSZ/Int/flat_{decay}.root:DalitzEventList'
     
@@ -63,7 +60,7 @@ def get_p4(decay="b2dpi", cut='', index=1):
 def load_int_amp(args):
     p1, p2, p3 = args
 
-    return amp.AMP(p1.tolist(), p2.tolist(), p3.tolist())
+    return Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())
 
 def inital_amp():
     # Load the amplitude model
@@ -71,7 +68,7 @@ def inital_amp():
     print('Loading the amplitude model')
     
 
-    Bdecays = ['b2dpi']
+    Bdecays = ['b2dk']
     Types = ['DD', 'LL']
     Charges = ['p', 'm']
     for bdecay in Bdecays:
@@ -107,7 +104,7 @@ def inital_amp():
                 amp_array = amp_array
                 ampbar_array = ampbar_array
 
-                data_path = '/shared/scratch/pc24403/amp_ampgen'
+                data_path = '/shared/scratch/pc24403/amp_ampgen_big'
                 os.makedirs(data_path, exist_ok=True)
                 np.save(f'{data_path}/Int_{decay}_amp.npy', amp_array)
                 np.save(f'{data_path}/Int_{decay}_ampbar.npy', ampbar_array)
