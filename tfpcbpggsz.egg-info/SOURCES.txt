@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+tfpcbpggsz/__init__.py
+tfpcbpggsz/angle.py
+tfpcbpggsz/config_loader.py
+tfpcbpggsz/core.py
+tfpcbpggsz/data.py
+tfpcbpggsz/fit.py
+tfpcbpggsz/masspdfs.py
+tfpcbpggsz/phasespace.py
+tfpcbpggsz/plotter.py
+tfpcbpggsz/version.py
+tfpcbpggsz.egg-info/PKG-INFO
+tfpcbpggsz.egg-info/SOURCES.txt
+tfpcbpggsz.egg-info/dependency_links.txt
+tfpcbpggsz.egg-info/requires.txt
+tfpcbpggsz.egg-info/top_level.txt
