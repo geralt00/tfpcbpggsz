@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tfpcbpggsz"  
+version = "0.1.0"  
+description = "phase-corrected BPGGSZ analysis framework driven by TensorFlow"
+authors = [
+    {name = "Shenghui Zeng", email = "shenghui.zeng@cern.ch"},
+]
+readme = "README.md"
+license = {file = "LICENSE"}  # Or specify "text = ..." if you inline the license
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",  
+    "Operating System :: OS Independent",
+]
+
+#dependencies = [
+#    "tensorflow"]
+
+[tool.setuptools]
+packages = ["tfpcbpggsz"]  # This is based on your project's top-level module
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.mypy]
+strict = true
