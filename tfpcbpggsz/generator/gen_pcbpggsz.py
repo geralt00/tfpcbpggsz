@@ -4,14 +4,14 @@ from tfpcbpggsz.ulti import get_mass, phsp_to_srd, deg_to_rad
 from tfpcbpggsz.generator.generator import GenTest, BaseGenerator, ARGenerator
 from tfpcbpggsz.generator.data import data_mask, data_merge, data_shape
 from tfpcbpggsz.amp_test import *
-from tfpcbpggsz.generator.generator import single_sampling2, multi_sampling
+from tfpcbpggsz.generator.generator import single_sampling2, multi_sampling, multi_sampling2
 from tfpcbpggsz.amp_test import PyD0ToKSpipi2018
 from tfpcbpggsz.core import DeltadeltaD
 class pcbpggsz_generator:
     """
     A generator for the decay D0 -> Ks0 pi+ pi-.
     type: str
-        The type of the generator. Can be flav, flavbar, cp_even, cp_odd, cp_mix, d2dh
+        The type of the generator. Can be flav, flavbar, cp_even, cp_odd, cp_mixed, d2dh
     """
     def __init__(self, **kwargs):
         self.type = type
@@ -44,20 +44,32 @@ class pcbpggsz_generator:
             max_N = kwargs['max_N']
 
         fun = self.formula()
-        ret, status = multi_sampling(
-            phsp,
-            fun,
-            N,
-            force=True,
-        )
-        return ret
+        if type != 'cp_mixed':
+            ret, status = multi_sampling(
+                phsp,
+                fun,
+                N,
+                force=True,
+            )
+
+            return ret
+        else:
+            ret_sig, ret_tag, status = multi_sampling2(
+                phsp,
+                fun,
+                N,
+                force=True,
+            )
+
+            return ret_sig, ret_tag
+
 
 
 
     def amp(self, data):
         """
         Calculate the amplitude (Kspipi model) of the decay from momenta.
-        """
+        """    
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
         p1,p2,p3 = data
@@ -73,17 +85,45 @@ class pcbpggsz_generator:
         #time_cal_amp_start = time.time()
         p1,p2,p3 = data
         p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-        amp_i_bar = Kspipi.AMP(p1bar.numpy().tolist(), p2bar.numpy().tolist(), p3bar.numpy().tolist())
-        amp_i_bar = tf.cast(amp_i_bar, tf.complex128)
+        amp_i_bar = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
+        amp_i_bar = tf.cast(tf.negative(amp_i_bar), tf.complex128)
         return amp_i_bar
+
+    @tf.function
+    def amp_ag(self, data):
+        """
+        Calculate the amplitude (Kspipi model) of the decay from momenta.
+        """    
+        Kspipi = self.Kspipi
+        #time_cal_amp_start = time.time()
+        p1,p2,p3 = data
+        # Convert TensorFlow tensors to DLPack capsules
+        tf.print(p1.shape )
+        # wrap with tf.py_function
+        amp_i = Kspipi.AMP(p1, p2, p3)
+        return amp_i
     
+    @tf.function
+    def ampbar_ag(self, data):
+        """
+        Calculate the amplitude (Kspipi model) of the decay from momenta.
+        """
+        Kspipi = self.Kspipi
+        #time_cal_amp_start = time.time()
+        p1,p2,p3 = data
+        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
+        p1bar, p2bar, p3bar = tf.stack([tf.unstack(p1bar, axis=1)]), tf.stack([tf.unstack(p2bar, axis=1)]), tf.stack([tf.unstack(p3bar, axis=1)])
+        amp_i_bar = Kspipi.AMP(p1bar, p3bar, p2bar)  # Pass tensors directly
+        #amp_i_bar = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
+        amp_i_bar = tf.cast(tf.negative(amp_i_bar), tf.complex128)
+        return amp_i_bar 
     
     def formula(self):
         if self.type[:4] == 'flav':
             return  self.flavour
         elif self.type == 'cp_even' or self.type == 'cp_odd':
             return  self.cp_tag
-        elif self.type == 'cp_mix':
+        elif self.type == 'cp_mixed':
             return  self.cp_mixed
         elif self.type == 'b2dh':
             return self.b2dh
@@ -93,41 +133,55 @@ class pcbpggsz_generator:
  
 
         if self.type == 'flav':
-            absAmp = tf.abs(self.amp(data))**2
+            absAmp = tf.abs(self.ampbar(data))**2
             Gamma = absAmp
             self.Gamma = Gamma
 
         elif self.type == 'flavbar':
-            absAmp = tf.abs(self.ampbar(data))**2
+            absAmp = tf.abs(self.amp(data))**2
             Gamma = absAmp
             self.Gamma = Gamma
+
+        return Gamma
 
     def cp_tag(self, data):
         """
         Decay rate for CP tag
         """
 
+        DD_sign=-1
         phase = DeltadeltaD(self.amp(data), self.ampbar(data))
         absAmp = tf.abs(self.amp(data))
         absAmpbar = tf.abs(self.ampbar(data))
         cp_sign=1 if self.type == 'cp_even' else -1
-        Gamma = absAmp**2 + absAmpbar**2 + 2*cp_sign* absAmp * absAmpbar * tf.math.cos(phase)
+        Gamma = absAmp**2 + absAmpbar**2 + 2*DD_sign*cp_sign* absAmp * absAmpbar * tf.math.cos(phase)
         self.Gamma = Gamma
+        return Gamma
 
-    def cp_mixed(self, data):
+
+    def cp_mixed(self, data_sig, data_tag):
         """
         Decay rate for CP mixed tag
         """
+#        phase_sig = DeltadeltaD(self.amp_ag(data_sig), self.ampbar_ag(data_sig))
+#        absAmp_sig = tf.abs(self.amp_ag(data_sig))
+#        absAmpbar_sig = tf.abs(self.ampbar_ag(data_sig))
+#        phase_tag = DeltadeltaD(self.amp_ag(data_tag), self.ampbar_ag(data_tag))
+#        absAmp_tag = tf.abs(self.amp_ag(data_tag))
+#        absAmpbar_tag = tf.abs(self.ampbar_ag(data_tag))
 
-        phase_sig = DeltadeltaD(self.amp, self.ampbar)
-        absAmp_sig = tf.abs(self.amp)
-        absAmpbar_sig = tf.abs(self.ampbar)
-        phase_tag = DeltadeltaD(self.amp, self.ampbar)
-        absAmp_tag = tf.abs(self.amp)
-        absAmpbar_tag = tf.abs(self.ampbar)
+
+        phase_sig = DeltadeltaD(self.amp(data_sig), self.ampbar(data_sig))
+        absAmp_sig = tf.abs(self.amp(data_sig))
+        absAmpbar_sig = tf.abs(self.ampbar(data_sig))
+        phase_tag = DeltadeltaD(self.amp(data_tag), self.ampbar(data_tag))
+        absAmp_tag = tf.abs(self.amp(data_tag))
+        absAmpbar_tag = tf.abs(self.ampbar(data_tag))
 
         Gamma = (absAmp_sig*absAmpbar_tag)**2 + (absAmpbar_sig*absAmp_tag)**2 - 2*absAmp_sig*absAmpbar_tag*absAmpbar_sig*absAmp_tag*tf.math.cos(phase_sig-phase_tag)
         self.Gamma = Gamma
+
+        return Gamma
 
     def b2dh(self, data):
         """
