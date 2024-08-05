@@ -200,13 +200,13 @@ def double_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     data_tag = data_mask(data_tag, cut)
     time7 = time.time()
 
-    print(f"Time taken for phsp: {time2-time1}")
-    print(f"Time taken for amp: {time3-time2}")
-    print(f"Time taken for importance_f: {time4-time3}")
-    print(f"Time taken for rnd: {time5-time4}")
-    print(f"Time taken for cut: {time6-time5}")
-    print(f"Time taken for data_mask: {time7-time6}")
-    print(f"Total time taken: {time7-time1}")
+    #print(f"Time taken for phsp: {time2-time1}")
+    #print(f"Time taken for amp: {time3-time2}")
+    #print(f"Time taken for importance_f: {time4-time3}")
+    #print(f"Time taken for rnd: {time5-time4}")
+    #print(f"Time taken for cut: {time6-time5}")
+    #print(f"Time taken for data_mask: {time7-time6}")
+    #print(f"Total time taken: {time7-time1}")
     return data_sig, data_tag, max_weight
 
 
@@ -227,7 +227,7 @@ def single_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     rnd = tf.random.uniform(weight.shape, dtype=weight.dtype)
     cut = rnd * max_weight < weight
     data = data_mask(data, cut)
-    print(f"Time taken for amp: {time2-time1}")
+    #print(f"Time taken for amp: {time2-time1}")
     return data, max_weight
 
 
