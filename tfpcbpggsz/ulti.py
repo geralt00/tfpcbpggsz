@@ -34,6 +34,15 @@ def p4_to_srd(data):
     srd = phsp_to_srd(m12, m13)
     return srd
 
+def p4_to_phsp(data):
+    """
+    Convert the momenta to the PHSP coordinates
+    """
+    p1, p2, p3 = data
+    m12 = get_mass(p1, p2)
+    m13 = get_mass(p1, p3)
+    coords = np.array([m12, m13])
+    return coords
 
 def deg_to_rad(deg):
     return deg*np.pi/180

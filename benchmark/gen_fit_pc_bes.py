@@ -82,6 +82,8 @@ amp_cp_even, ampbar_cp_even = pcgen.amp(ret_cp_even), pcgen.ampbar(ret_cp_even)
 #Double Kspipi
 amp_sig, ampbar_sig = pcgen.amp(ret_sig), pcgen.ampbar(ret_sig)
 amp_tag, ampbar_tag = pcgen.amp(ret_tag), pcgen.ampbar(ret_tag)
+
+
 #PHSP
 phsp = PhaseSpaceGenerator().generate
 phsp_p, phsp_m = phsp(1000000), phsp(1000000)

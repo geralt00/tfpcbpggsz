@@ -165,7 +165,7 @@ class PhaseCorrection:
             bias += self.bias(coords, i)
         return bias
 
-    def eval_corr(self, coords):
+    def eval_corr_norm(self, coords):
         """
         Returns the phase correction for the given coordinates
         """
@@ -176,8 +176,8 @@ class PhaseCorrection:
             corr += self.polynomial(coords, int(self.iTerms_[i].split('_')[1]), int( self.iTerms_[i].split('_')[2])) * self.coefficients[self.iTerms_[i]]
         return corr
 
-    def eval_corr_tf(self, coords):
-        return tf.function(self.eval_corr)(coords)  
+    def eval_corr(self, coords):
+        return tf.function(self.eval_corr_norm)(coords)  
     
     def term_to_string(self, i):
         """

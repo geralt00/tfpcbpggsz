@@ -1,6 +1,6 @@
 from tfpcbpggsz.tensorflow_wrapper import *
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
-from tfpcbpggsz.ulti import get_mass, phsp_to_srd, deg_to_rad, p4_to_srd
+from tfpcbpggsz.ulti import get_mass, phsp_to_srd, deg_to_rad, p4_to_phsp
 from tfpcbpggsz.generator.generator import GenTest, BaseGenerator, ARGenerator
 from tfpcbpggsz.generator.data import data_mask, data_merge, data_shape
 from tfpcbpggsz.amp_test import *
@@ -25,15 +25,17 @@ class pcbpggsz_generator:
         self.charge = 1
         self.fun = None
         self.pc = None
+        self.DEBUG = False
 
     def add_bias(self, correctionType="singleBias"):
         self.pc = PhaseCorrection()
+        self.pc.DEBUG = self.DEBUG
         self.pc.correctionType=correctionType
         self.pc.PhaseCorrection()
 
 
     def eval_bias(self, data):
-        return self.pc.eval_bias(p4_to_srd(data))
+        return self.pc.eval_bias(p4_to_phsp(data))
 
     def generate(self, N=1000, type="b2dh", **kwargs):
         """
@@ -54,8 +56,7 @@ class pcbpggsz_generator:
         if kwargs.get('max_N') is not None:
             max_N = kwargs['max_N']
 
-        if self.fun is None:
-            self.fun = self.formula()
+        self.fun = self.formula()
 
 
         if type != 'cp_mixed':
@@ -99,9 +100,9 @@ class pcbpggsz_generator:
         #time_cal_amp_start = time.time()
         p1,p2,p3 = data
         p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-        amp_i_bar = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-        amp_i_bar = tf.cast(tf.negative(amp_i_bar), tf.complex128)
-        return amp_i_bar
+        ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
+        ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
+        return ampbar_i
 
     @tf.function
     def amp_ag(self, data):
@@ -189,6 +190,7 @@ class pcbpggsz_generator:
 
         phase_sig = DeltadeltaD(self.amp(data_sig), self.ampbar(data_sig))
         phase_correction_sig = tf.zeros_like(phase_sig) if self.pc is None else self.eval_bias(data_sig)
+        print(phase_correction_sig) if self.DEBUG else None
         phase_sig = phase_sig + phase_correction_sig
         absAmp_sig = tf.abs(self.amp(data_sig))
         absAmpbar_sig = tf.abs(self.ampbar(data_sig))
@@ -213,6 +215,7 @@ class pcbpggsz_generator:
         phase = DeltadeltaD(self.amp(data), self.ampbar(data))
         phase_correction = tf.zeros_like(phase) if self.pc is None else self.eval_bias(data)
         phase = phase + phase_correction
+        print(phase_correction) if self.DEBUG else None
 
         
         if self.charge==1:

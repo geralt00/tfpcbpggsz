@@ -20,18 +20,18 @@ s12, s13, s23 = get_mass(p1, p2), get_mass(p1, p3), get_mass(p2, p3)
 
 srd = phsp_to_srd(s12, s13)
 pc.correctionType="antiSym_legendre"
-pc.order = 6
+pc.order = 4
 pc.PhaseCorrection()
-fitted_coefficients = np.array([0.054954, -1.064545, 0.262564, -2.424909, -3.430244, -2.056977, 0.249967, 1.159846, -0.656559, -0.722374, 0.134728, -0.143797])
+fitted_coefficients = np.array([-0.609190, -1.826173, 0.765715, 0.695342, -0.936132, 0.208572])
 pc.set_coefficients(fitted_coefficients)
-value = pc.eval_corr_tf(srd)
+value = pc.eval_corr(srd)
 plt.scatter(s12, s13, c=value)
 plt.colorbar()
 plt.savefig("plot_pc.png")
 plt.clf()
-fitted_coefficients = np.array([-0.200354, 100, 0.110016, -1.747495, -2.797758, -1.596963, 0.10734, 1.08292, -0.34064, -0.400786, 0.081452, 0.125092])
+fitted_coefficients = np.array([-0.609190, -1.826173, 0.765715, 0.695342, -0.936132, 0.208572])
 pc.set_coefficients(fitted_coefficients)
-value = pc.eval_corr_tf(srd)
+value = pc.eval_corr(srd)
 plt.scatter(s12, s13, c=value)
 plt.colorbar()
 plt.savefig("plot_pc2.png")
