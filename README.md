@@ -1,14 +1,8 @@
-# TF-PCGAMMA
+# TF-PCBPGGSZ
 
 ## Description
-TF-PCGAMMA is a TensorFlow-based tool designed for enhancing amplitude and mass fits in the B->Dh, D->Kspipi modes. It utilizes TensorFlow's efficient computation handling to significantly improve the stability and accuracy of phase correction orders in particle physics research.
+TF-PCBPGGSZ is a TensorFlow-based tool designed for enhancing amplitude and mass fits in the B->Dh, D->Kspipi modes. It utilizes TensorFlow's efficient computation handling to significantly improve the stability and accuracy of phase correction orders in particle physics research.
 
-### Key Components
-- **analysis/tf_fit_autograd.py**: Main example fit script, recently optimized for better memory management.
-- **analysis/read_result*.ipynb**: Jupyter notebooks for output analysis using iminuit.
-- **func/**: Directory containing mass-related functions.
-- **Core/**: Stores the fitted functions, Legendre functions, and a new bias generator (planned).
-- **Example/**: Directory planned for clearer demonstrations in future updates.
 
 ## Installation
 
@@ -22,8 +16,14 @@ TF-PCGAMMA is a TensorFlow-based tool designed for enhancing amplitude and mass 
 ### Setup
 Clone the repository and set up the required environment using Conda:
 
+ 
 ```bash
 git clone https://github.com/shenghui/tf-pcgamma.git
 cd tf-pcgamma
 conda env create -f requirements.yml
+```
+
+### Install the package
+```bash
+pip install -e . --no-deps
 ```

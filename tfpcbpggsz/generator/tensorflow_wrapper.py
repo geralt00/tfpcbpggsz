@@ -1,7 +1,7 @@
 import os
 import warnings
 # default configurations
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 # os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" # for Mac
 os.environ['CUDA_VISIBLE_DEVICES'] = '5'
 
