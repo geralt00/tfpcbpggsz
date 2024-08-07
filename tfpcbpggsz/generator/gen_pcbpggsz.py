@@ -1,6 +1,6 @@
 from tfpcbpggsz.tensorflow_wrapper import *
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
-from tfpcbpggsz.ulti import get_mass, phsp_to_srd, deg_to_rad, p4_to_phsp
+from tfpcbpggsz.ulti import get_mass, phsp_to_srd, deg_to_rad, p4_to_phsp, p4_to_srd
 from tfpcbpggsz.generator.generator import GenTest, BaseGenerator, ARGenerator
 from tfpcbpggsz.generator.data import data_mask, data_merge, data_shape
 from tfpcbpggsz.amp_test import *
@@ -8,6 +8,7 @@ from tfpcbpggsz.generator.generator import single_sampling2, multi_sampling, mul
 from tfpcbpggsz.amp_test import PyD0ToKSpipi2018
 from tfpcbpggsz.core import DeltadeltaD
 from tfpcbpggsz.phasecorrection import PhaseCorrection
+from tfpcbpggsz.core import eff_fun
 class pcbpggsz_generator:
     """
     A generator for the decay D0 -> Ks0 pi+ pi-.
@@ -26,6 +27,7 @@ class pcbpggsz_generator:
         self.fun = None
         self.pc = None
         self.DEBUG = False
+        self.apply_eff = True
 
     def add_bias(self, correctionType="singleBias"):
         self.pc = PhaseCorrection()
@@ -33,9 +35,23 @@ class pcbpggsz_generator:
         self.pc.correctionType=correctionType
         self.pc.PhaseCorrection()
 
+    def add_eff(self, charge, decay):
+        self.charge = charge
+        self.decay = decay
+
+        print(f'Efficiency applied with: {decay}_{charge}')
 
     def eval_bias(self, data):
         return self.pc.eval_bias(p4_to_phsp(data))
+    
+    def eval_eff(self, data):
+        return eff_fun(p4_to_srd(data), self.charge, self.decay)
+    
+    def make_eff_fun(self):
+        return self.eval_eff 
+
+    def make_fun(self):
+        return  lambda data:   self.make_eff_fun()(data) * self.formula()(data) 
 
     def generate(self, N=1000, type="b2dh", **kwargs):
         """
@@ -57,12 +73,14 @@ class pcbpggsz_generator:
             max_N = kwargs['max_N']
 
         self.fun = self.formula()
+        self.prod_fun = self.make_fun() if self.apply_eff else self.formula()
+
 
 
         if type != 'cp_mixed':
             ret, status = multi_sampling(
                 phsp,
-                self.fun,
+                self.prod_fun,
                 N,
                 force=True,
             )
@@ -71,7 +89,7 @@ class pcbpggsz_generator:
         else:
             ret_sig, ret_tag, status = multi_sampling2(
                 phsp,
-                self.fun,
+                self.prod_fun,
                 N,
                 force=True,
             )
@@ -142,6 +160,10 @@ class pcbpggsz_generator:
             return  self.cp_mixed
         elif self.type == 'b2dh':
             return self.b2dh
+        elif self.type == 'phsp':
+            return self.phsp_fun
+        else:
+            print('Invalid type')
 
     
     def flavour(self, data):
@@ -224,4 +246,12 @@ class pcbpggsz_generator:
             Gamma = absAmp**2 + absAmpbar**2*rb**2 + 2*rb*absAmp*absAmpbar*tf.math.cos(phase - (deltaB - gamma))
 
         self.Gamma = Gamma
+        return Gamma
+    
+    def phsp_fun(self, data):
+        """
+        Phase space decay rate
+        """
+
+        Gamma = tf.ones_like(data[0][:,0], dtype=tf.float64)
         return Gamma
