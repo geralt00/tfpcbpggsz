@@ -17,8 +17,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-#dependencies = [
-#    "tensorflow"]
+dependencies = [
+    "tensorflow",
+    "sphinx_gallery"]
 
 [tool.setuptools]
 packages = ["tfpcbpggsz"]  # This is based on your project's top-level module
