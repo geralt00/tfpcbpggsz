@@ -1,0 +1,7 @@
+tfpcbpggsz.fit module
+=====================
+
+.. automodule:: tfpcbpggsz.fit
+   :members:
+   :undoc-members:
+   :show-inheritance:

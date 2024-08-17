@@ -1,0 +1,7 @@
+tfpcbpggsz.core module
+======================
+
+.. automodule:: tfpcbpggsz.core
+   :members:
+   :undoc-members:
+   :show-inheritance:

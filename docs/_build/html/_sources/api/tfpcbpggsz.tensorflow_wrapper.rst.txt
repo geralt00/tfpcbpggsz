@@ -1,0 +1,7 @@
+tfpcbpggsz.tensorflow\_wrapper module
+=====================================
+
+.. automodule:: tfpcbpggsz.tensorflow_wrapper
+   :members:
+   :undoc-members:
+   :show-inheritance:

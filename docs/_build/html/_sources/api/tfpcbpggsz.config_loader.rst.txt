@@ -1,0 +1,7 @@
+tfpcbpggsz.config\_loader module
+================================
+
+.. automodule:: tfpcbpggsz.config_loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
