@@ -1,0 +1,7 @@
+tfpcbpggsz.plotter module
+=========================
+
+.. automodule:: tfpcbpggsz.plotter
+   :members:
+   :undoc-members:
+   :show-inheritance:

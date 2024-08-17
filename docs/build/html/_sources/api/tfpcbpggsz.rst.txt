@@ -1,0 +1,26 @@
+tfpcbpggsz package
+==================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   tfpcbpggsz.config_loader
+   tfpcbpggsz.core
+   tfpcbpggsz.fit
+   tfpcbpggsz.masspdfs
+   tfpcbpggsz.phasecorrection
+   tfpcbpggsz.plotter
+   tfpcbpggsz.tensorflow_wrapper
+   tfpcbpggsz.ulti
+   tfpcbpggsz.version
+
+Module contents
+---------------
+
+.. automodule:: tfpcbpggsz
+   :members:
+   :undoc-members:
+   :show-inheritance:
