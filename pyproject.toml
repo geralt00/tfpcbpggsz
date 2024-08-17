@@ -19,6 +19,7 @@ classifiers = [
 
 dependencies = [
     "tensorflow",
+    "matplotlib",
     "sphinx_gallery"]
 
 [tool.setuptools]
