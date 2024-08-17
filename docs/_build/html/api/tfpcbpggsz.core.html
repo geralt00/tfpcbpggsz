@@ -27,7 +27,9 @@
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="tfpcbpggsz.fit module" href="tfpcbpggsz.fit.html" />
+    <link rel="prev" title="tfpcbpggsz.config_loader module" href="tfpcbpggsz.config_loader.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,64 +51,29 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">tfpcbpggsz.core module</a><ul>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator</span></code></a><ul>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.initialise"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.initialise()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.make_prob"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.make_prob()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.make_prod_prob"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.make_prod_prob()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.nll"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.nll()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.norm"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.norm()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.norm_bkg"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.norm_bkg()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_DPi_XY"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.totalAmplitudeSquared_DPi_XY()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_XY"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.totalAmplitudeSquared_XY()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_comb"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.totalAmplitudeSquared_comb()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_low"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.totalAmplitudeSquared_low()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_low_Bs2DKPi"><code class="docutils literal notranslate"><span class="pre">DecayNLLCalculator.totalAmplitudeSquared_low_Bs2DKPi()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="tfpcbpggsz.html">tfpcbpggsz package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="tfpcbpggsz.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.config_loader.html">tfpcbpggsz.config_loader module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">tfpcbpggsz.core module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.fit.html">tfpcbpggsz.fit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.masspdfs.html">tfpcbpggsz.masspdfs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.phasecorrection.html">tfpcbpggsz.phasecorrection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.plotter.html">tfpcbpggsz.plotter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.tensorflow_wrapper.html">tfpcbpggsz.tensorflow_wrapper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.ulti.html">tfpcbpggsz.ulti module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfpcbpggsz.version.html">tfpcbpggsz.version module</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.DeltadeltaD"><code class="docutils literal notranslate"><span class="pre">DeltadeltaD()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm</span></code></a><ul>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.AAbar"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.AAbar()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.AAbar_misid"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.AAbar_misid()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_4p()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p_a"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_4p_a()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p_sig"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_4p_sig()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_6p"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_6p()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_6p_sig"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_6p_sig()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_BacTerms"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_BacTerms()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_BacTerms_misid"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_BacTerms_misid()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_CP_tag"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_CP_tag()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_crossTerms_misid"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_crossTerms_misid()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Integrated_fullchain"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Integrated_fullchain()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.Update_crossTerms"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.Update_crossTerms()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.add_pc"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.add_pc()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.debug"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.debug()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.initialise"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.initialise()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.initialise_misid"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.initialise_misid()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.normA"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.normA()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.normA_misid"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.normA_misid()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.normAbar"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.normAbar()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.normAbar_misid"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.normAbar_misid()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.phase"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.phase()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.phase_misid"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.phase_misid()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.Normalisation_Charm.setParams"><code class="docutils literal notranslate"><span class="pre">Normalisation_Charm.setParams()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.clip_log"><code class="docutils literal notranslate"><span class="pre">clip_log()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.dalitz_transform"><code class="docutils literal notranslate"><span class="pre">dalitz_transform()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.eff_fun"><code class="docutils literal notranslate"><span class="pre">eff_fun()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.name_convert"><code class="docutils literal notranslate"><span class="pre">name_convert()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.prob_comb"><code class="docutils literal notranslate"><span class="pre">prob_comb()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.prob_totalAmplitudeSquared_CP_mix"><code class="docutils literal notranslate"><span class="pre">prob_totalAmplitudeSquared_CP_mix()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.prob_totalAmplitudeSquared_CP_tag"><code class="docutils literal notranslate"><span class="pre">prob_totalAmplitudeSquared_CP_tag()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.prob_totalAmplitudeSquared_DPi_XY"><code class="docutils literal notranslate"><span class="pre">prob_totalAmplitudeSquared_DPi_XY()</span></code></a></li>
-<li><a class="reference internal" href="#tfpcbpggsz.core.prob_totalAmplitudeSquared_XY"><code class="docutils literal notranslate"><span class="pre">prob_totalAmplitudeSquared_XY()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfpcbpggsz.html#module-tfpcbpggsz">Module contents</a></li>
 </ul>
 </li>
 </ul>
-</div>
+</li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -121,6 +88,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="tfpcbpggsz.html">tfpcbpggsz package</a></li>
       <li class="breadcrumb-item active">tfpcbpggsz.core module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/tfpcbpggsz.core.rst.txt" rel="nofollow"> View page source</a>
@@ -668,7 +637,10 @@ float64: phase between the amplitude and the conjugate amplitude for the misid d
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tfpcbpggsz.config_loader.html" class="btn btn-neutral float-left" title="tfpcbpggsz.config_loader module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tfpcbpggsz.fit.html" class="btn btn-neutral float-right" title="tfpcbpggsz.fit module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

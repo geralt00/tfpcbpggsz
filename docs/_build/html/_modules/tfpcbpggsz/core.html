@@ -7,7 +7,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css?v=7f9a90b1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -88,7 +88,7 @@
 <span class="c1">#Common functions</span>
 <span class="n">_PI</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 <div class="viewcode-block" id="DeltadeltaD">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DeltadeltaD">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DeltadeltaD">[docs]</a>
 <span class="k">def</span> <span class="nf">DeltadeltaD</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Abar</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to calculate the phase difference between the amplitude and the conjugate amplitude</span>
@@ -110,7 +110,7 @@
 
 
 <div class="viewcode-block" id="name_convert">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.name_convert">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.name_convert">[docs]</a>
 <span class="k">def</span> <span class="nf">name_convert</span><span class="p">(</span><span class="n">decay_str</span><span class="o">=</span><span class="s1">&#39;b2dk_LL_p&#39;</span><span class="p">):</span>
 
 
@@ -122,7 +122,7 @@
 
     
 <div class="viewcode-block" id="clip_log">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.clip_log">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.clip_log">[docs]</a>
 <span class="k">def</span> <span class="nf">clip_log</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;clip log to allowed large value&quot;&quot;&quot;</span>
     <span class="n">x_cut</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">_epsilon</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">_epsilon</span><span class="p">)</span>
@@ -136,7 +136,7 @@
 
 
 <div class="viewcode-block" id="dalitz_transform">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.dalitz_transform">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.dalitz_transform">[docs]</a>
 <span class="k">def</span> <span class="nf">dalitz_transform</span><span class="p">(</span><span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">):</span>
     <span class="n">rotatedSymCoord</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_valid</span> <span class="o">+</span> <span class="n">x_valid</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>  <span class="c1">#z_+</span>
     <span class="n">rotatedAntiSymCoord</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_valid</span> <span class="o">-</span> <span class="n">x_valid</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="c1">#z_-</span>
@@ -155,7 +155,7 @@
 
 
 <div class="viewcode-block" id="eff_fun">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.eff_fun">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.eff_fun">[docs]</a>
 <span class="k">def</span> <span class="nf">eff_fun</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="s1">&#39;dk_LL&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to calculate the efficiency value for the B2DK and B2Dpi decays</span>
@@ -227,7 +227,7 @@
 
 
 <div class="viewcode-block" id="prob_totalAmplitudeSquared_XY">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_XY">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_XY">[docs]</a>
 <span class="k">def</span> <span class="nf">prob_totalAmplitudeSquared_XY</span><span class="p">(</span><span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="p">[],</span> <span class="n">ampbar</span><span class="o">=</span><span class="p">[],</span> <span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">pc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to calculate the amplitude squared for the B2DK and B2Dpi decays</span>
@@ -267,7 +267,7 @@
 
 
 <div class="viewcode-block" id="prob_totalAmplitudeSquared_CP_mix">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_CP_mix">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_CP_mix">[docs]</a>
 <span class="k">def</span> <span class="nf">prob_totalAmplitudeSquared_CP_mix</span><span class="p">(</span><span class="n">amp_sig</span><span class="o">=</span><span class="p">[],</span> <span class="n">ampbar_sig</span><span class="o">=</span><span class="p">[],</span><span class="n">amp_tag</span><span class="o">=</span><span class="p">[],</span> <span class="n">ampbar_tag</span><span class="o">=</span><span class="p">[],</span> <span class="n">pc_sig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pc_tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to calculate the amplitude squared for the D0-&gt;KsPiPi and D0bar-&gt;KsPiPi decays</span>
@@ -302,7 +302,7 @@
 
 
 <div class="viewcode-block" id="prob_totalAmplitudeSquared_CP_tag">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_CP_tag">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_CP_tag">[docs]</a>
 <span class="k">def</span> <span class="nf">prob_totalAmplitudeSquared_CP_tag</span><span class="p">(</span><span class="n">CPsign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="p">[],</span> <span class="n">ampbar</span><span class="o">=</span><span class="p">[],</span> <span class="n">pc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to calculate the amplitude squared for the CP tag decay</span>
@@ -333,7 +333,7 @@
 
 
 <div class="viewcode-block" id="prob_totalAmplitudeSquared_DPi_XY">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_DPi_XY">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.prob_totalAmplitudeSquared_DPi_XY">[docs]</a>
 <span class="k">def</span> <span class="nf">prob_totalAmplitudeSquared_DPi_XY</span><span class="p">(</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="p">[],</span> <span class="n">ampbar</span><span class="o">=</span><span class="p">[],</span> <span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to calculate the amplitude squared for the B2Dpi decay, the ratio between B2DK and B2Dpi is used, then two additional parameters are added</span>
@@ -377,7 +377,7 @@
 
 
 <div class="viewcode-block" id="prob_comb">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.prob_comb">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.prob_comb">[docs]</a>
 <span class="k">def</span> <span class="nf">prob_comb</span><span class="p">(</span><span class="n">amp</span><span class="o">=</span><span class="p">[],</span> <span class="n">ampbar</span><span class="o">=</span><span class="p">[],</span> <span class="n">normA</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">normAbar</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">fracDD</span><span class="o">=</span><span class="mf">0.82</span><span class="p">,</span> <span class="n">eff1</span><span class="o">=</span><span class="p">[],</span> <span class="n">eff2</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to calculate the amplitude squared for the combinatorial background in the B2DK and B2Dpi decays</span>
@@ -411,7 +411,7 @@
 
 <span class="c1">#Probabily just for validation stage, should be more general for the Normalisation class</span>
 <div class="viewcode-block" id="Normalisation_Charm">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm">[docs]</a>
 <span class="k">class</span> <span class="nc">Normalisation_Charm</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Normalisation class, contains the formula we need with charm dataset</span>
@@ -460,7 +460,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tagged_i</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Normalisation_Charm.add_pc">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.add_pc">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.add_pc">[docs]</a>
     <span class="k">def</span> <span class="nf">add_pc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function to add the phase correction to the phase</span>
@@ -475,13 +475,13 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.debug">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.debug">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.debug">[docs]</a>
     <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_DEBUG</span> <span class="o">=</span> <span class="kc">True</span></div>
 
         
 <div class="viewcode-block" id="Normalisation_Charm.initialise">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.initialise">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.initialise">[docs]</a>
     <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function to initialise the normalisation terms</span>
@@ -497,7 +497,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.initialise_misid">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.initialise_misid">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.initialise_misid">[docs]</a>
     <span class="k">def</span> <span class="nf">initialise_misid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>     
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function to initialise the normalisation terms for the misid decay</span>
@@ -517,13 +517,13 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.setParams">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.setParams">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.setParams">[docs]</a>
     <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">x</span></div>
 
 
 <div class="viewcode-block" id="Normalisation_Charm.phase">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.phase">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.phase">[docs]</a>
     <span class="k">def</span> <span class="nf">phase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the phase related terms, including:</span>
@@ -554,7 +554,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.normA">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normA">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normA">[docs]</a>
     <span class="k">def</span> <span class="nf">normA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the normalisation of the amplitude squared for the decay.</span>
@@ -578,7 +578,7 @@
 
     
 <div class="viewcode-block" id="Normalisation_Charm.normAbar">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normAbar">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normAbar">[docs]</a>
     <span class="k">def</span> <span class="nf">normAbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the normalisation of the amplitude squared for the decay.</span>
@@ -601,7 +601,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.AAbar">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.AAbar">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.AAbar">[docs]</a>
     <span class="k">def</span> <span class="nf">AAbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the product of the amplitude and the conjugate amplitude for the decay.</span>
@@ -625,7 +625,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Update_crossTerms">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Update_crossTerms">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Update_crossTerms">[docs]</a>
     <span class="k">def</span> <span class="nf">Update_crossTerms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the cross terms between the amplitude and the conjugate amplitude.</span>
@@ -651,7 +651,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_BacTerms">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_BacTerms">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_BacTerms">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_BacTerms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the Bachelor terms for the decay </span>
@@ -672,7 +672,7 @@
 
     
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_4p">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_4p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -711,7 +711,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_4p_sig">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p_sig">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p_sig">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_4p_sig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -754,7 +754,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_CP_tag">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_CP_tag">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_CP_tag">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_CP_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CPsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -786,7 +786,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_4p_a">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p_a">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_4p_a">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_4p_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. math::  A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)</span>
@@ -825,7 +825,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_fullchain">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_fullchain">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_fullchain">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_fullchain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -865,7 +865,7 @@
 
         
 <div class="viewcode-block" id="Normalisation_Charm.phase_misid">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.phase_misid">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.phase_misid">[docs]</a>
     <span class="k">def</span> <span class="nf">phase_misid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the phase between the amplitude and the conjugate amplitude for the misid decay.</span>
@@ -884,7 +884,7 @@
     
 
 <div class="viewcode-block" id="Normalisation_Charm.normA_misid">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normA_misid">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normA_misid">[docs]</a>
     <span class="k">def</span> <span class="nf">normA_misid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the normalisation of the amplitude squared for the decay.</span>
@@ -904,7 +904,7 @@
 
     
 <div class="viewcode-block" id="Normalisation_Charm.normAbar_misid">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normAbar_misid">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.normAbar_misid">[docs]</a>
     <span class="k">def</span> <span class="nf">normAbar_misid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the normalisation of the amplitude squared for the decay.</span>
@@ -926,7 +926,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.AAbar_misid">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.AAbar_misid">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.AAbar_misid">[docs]</a>
     <span class="k">def</span> <span class="nf">AAbar_misid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the product of the amplitude and the conjugate amplitude for the decay.</span>
@@ -946,7 +946,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_crossTerms_misid">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_crossTerms_misid">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_crossTerms_misid">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_crossTerms_misid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the cross terms between the amplitude and the conjugate amplitude for the misid decay.</span>
@@ -973,7 +973,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_BacTerms_misid">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_BacTerms_misid">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_BacTerms_misid">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_BacTerms_misid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function calculates the Bachelor terms for the misid decay </span>
@@ -996,7 +996,7 @@
     
         
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_6p">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_6p">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_6p">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_6p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. math::</span>
@@ -1048,7 +1048,7 @@
 
 
 <div class="viewcode-block" id="Normalisation_Charm.Integrated_6p_sig">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_6p_sig">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.Normalisation_Charm.Integrated_6p_sig">[docs]</a>
     <span class="k">def</span> <span class="nf">Integrated_6p_sig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        .. math:: A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)</span>
@@ -1097,7 +1097,7 @@
 
 
 <div class="viewcode-block" id="DecayNLLCalculator">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator">[docs]</a>
 <span class="k">class</span> <span class="nc">DecayNLLCalculator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to calculate negative log-likelihood for various decay types.</span>
@@ -1124,7 +1124,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_phase_correction</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="DecayNLLCalculator.initialise">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.initialise">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.initialise">[docs]</a>
     <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the amplitude and phase.</span>
@@ -1148,7 +1148,7 @@
         <span class="c1">#print(&#39;Negative log-likelihood:&#39;, self._nll)</span>
 
 <div class="viewcode-block" id="DecayNLLCalculator.norm_bkg">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.norm_bkg">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.norm_bkg">[docs]</a>
     <span class="k">def</span> <span class="nf">norm_bkg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">]:</span>
@@ -1171,7 +1171,7 @@
 
 
 <div class="viewcode-block" id="DecayNLLCalculator.norm">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.norm">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.norm">[docs]</a>
     <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the normalisation of the amplitude squared.</span>
@@ -1211,7 +1211,7 @@
                     
 
 <div class="viewcode-block" id="DecayNLLCalculator.make_prob">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.make_prob">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.make_prob">[docs]</a>
     <span class="k">def</span> <span class="nf">make_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the Amplitude PDF</span>
@@ -1244,7 +1244,7 @@
 
 
 <div class="viewcode-block" id="DecayNLLCalculator.make_prod_prob">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.make_prod_prob">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.make_prod_prob">[docs]</a>
     <span class="k">def</span> <span class="nf">make_prod_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the negative log-likelihood.</span>
@@ -1262,7 +1262,7 @@
                     <span class="c1">#    print(f&#39;Mass PDF {keys} is empty for decay {decay}&#39;)</span>
 
 <div class="viewcode-block" id="DecayNLLCalculator.nll">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.nll">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.nll">[docs]</a>
     <span class="k">def</span> <span class="nf">nll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the negative log-likelihood.</span>
@@ -1273,7 +1273,7 @@
 
 
 <div class="viewcode-block" id="DecayNLLCalculator.totalAmplitudeSquared_XY">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_XY">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_XY">[docs]</a>
     <span class="k">def</span> <span class="nf">totalAmplitudeSquared_XY</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s1">&#39;_p&#39;</span> <span class="k">if</span> <span class="n">Bsign</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s1">&#39;_m&#39;</span>
@@ -1294,7 +1294,7 @@
 
     
 <div class="viewcode-block" id="DecayNLLCalculator.totalAmplitudeSquared_low">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_low">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_low">[docs]</a>
     <span class="k">def</span> <span class="nf">totalAmplitudeSquared_low</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the amplitude squared for the low mass contribution.</span>
@@ -1317,7 +1317,7 @@
 
 
 <div class="viewcode-block" id="DecayNLLCalculator.totalAmplitudeSquared_low_Bs2DKPi">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_low_Bs2DKPi">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_low_Bs2DKPi">[docs]</a>
     <span class="k">def</span> <span class="nf">totalAmplitudeSquared_low_Bs2DKPi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the amplitude squared for the low mass contribution.</span>
@@ -1340,7 +1340,7 @@
 
 
 <div class="viewcode-block" id="DecayNLLCalculator.totalAmplitudeSquared_DPi_XY">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_DPi_XY">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_DPi_XY">[docs]</a>
     <span class="k">def</span> <span class="nf">totalAmplitudeSquared_DPi_XY</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s1">&#39;_p&#39;</span> <span class="k">if</span> <span class="n">Bsign</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s1">&#39;_m&#39;</span>
@@ -1369,7 +1369,7 @@
 
         
 <div class="viewcode-block" id="DecayNLLCalculator.totalAmplitudeSquared_comb">
-<a class="viewcode-back" href="../../api/tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_comb">[docs]</a>
+<a class="viewcode-back" href="../../tfpcbpggsz.core.html#tfpcbpggsz.core.DecayNLLCalculator.totalAmplitudeSquared_comb">[docs]</a>
     <span class="k">def</span> <span class="nf">totalAmplitudeSquared_comb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Bsign</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s1">&#39;_p&#39;</span> <span class="k">if</span> <span class="n">Bsign</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">+</span><span class="s1">&#39;_m&#39;</span>
