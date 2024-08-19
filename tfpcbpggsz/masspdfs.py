@@ -181,7 +181,7 @@ def HILLdini_misID(m,a,b,csi,m1,s1,m2,s2,m3,s3,m4,s4,f1,f2,f3):
 
 
 def preparePdf_data(varDict, mode='b2dk_LL'):
-    '''
+    """
     Import constructed data sets and construct PDFs with RooFit functions.
     PDFs and data sets are saved together in a new RooWorkspace
 
@@ -189,7 +189,7 @@ def preparePdf_data(varDict, mode='b2dk_LL'):
         configDict: a dictionary containing the values of PDF shape parameters
         year: which subset of data to fit, can be any single year of data taking,
               or 'Run1', 'Run2', 'All'.
-    ''' 
+    """
 
     pdfList = {}
 
