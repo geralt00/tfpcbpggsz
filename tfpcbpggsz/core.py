@@ -9,6 +9,13 @@ import numpy as np
 #from tfpcbpggsz.phasecorrection import * #PhaseCorrection
 _PI = tf.constant(np.pi, dtype=tf.float64)
 
+class Module(object):
+    pass
+
+
+
+
+core = Module()
 
 def DeltadeltaD(A, Abar):
     """
