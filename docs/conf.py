@@ -68,14 +68,6 @@ intersphinx_mapping = {
 
 # -- Generate API skeleton ----------------------------------------------------
 shutil.rmtree("api", ignore_errors=True)
-
-# Define the modules to include explicitly
-modules_to_include = [
-    'generator', 
-
-    # ... add other module names you want to include
-]
-
 subprocess.call(
     " ".join(
         [

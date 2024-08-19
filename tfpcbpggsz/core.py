@@ -399,7 +399,7 @@ class Normalisation_Charm:
         self._params = x
 
     def phase(self):
-        """
+        r"""
         This function calculates the phase related terms, including:
         .. math::
 
@@ -448,7 +448,7 @@ class Normalisation_Charm:
         return self._normA
     
     def normAbar(self):
-        """
+        r"""
         This function calculates the normalisation of the amplitude squared for the decay.
 
         Returns:
@@ -468,7 +468,7 @@ class Normalisation_Charm:
         return self._normAbar
 
     def AAbar(self):
-        """
+        r"""
         This function calculates the product of the amplitude and the conjugate amplitude for the decay.
 
         Returns:
@@ -489,7 +489,7 @@ class Normalisation_Charm:
         return self._AAbar, self._AAbar_tag
 
     def Update_crossTerms(self):
-        """
+        r"""
         This function calculates the cross terms between the amplitude and the conjugate amplitude.
         if there is a phase correction, it will be added to the phase
 
@@ -512,7 +512,7 @@ class Normalisation_Charm:
         return self._crossTerms
 
     def Integrated_BacTerms(self):
-        """
+        r"""
         This function calculates the Bachelor terms for the decay 
 
         .. math:: |A|^2, |Abar|^2
@@ -530,7 +530,7 @@ class Normalisation_Charm:
         return self._BacTerms
     
     def Integrated_4p(self, Bsign=1):
-        """
+        r"""
 
         .. math:: A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
     
@@ -566,16 +566,14 @@ class Normalisation_Charm:
             return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus *crossTerm[0] + yMinus * crossTerm[1]), tf.float64)    
 
     def Integrated_4p_sig(self, Bsign=1):
-        """
+        r"""
 
-        .. math:: 
+        .. math:: A^2 * rb^2 + \bar{A}^2 + 2*|A||\bar{A}| * rb * cos(\delta_B + \gamma + \delta_D)
 
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
+        .. math:: A^2 + \bar{A}^2 * rb^2 + 2*|A||\bar{A}| * rb * cos(\delta_B + \gamma - \delta_D)
 
         Args:
-        Bsign: int, 1 for B+ and -1 for B-
+        Bsign: int, 1 for B^+ and -1 for B^-
 
         Returns:
         float64: Integrated amplitude squared, the normalisation is taking from the signal decay
@@ -606,7 +604,7 @@ class Normalisation_Charm:
 
 
     def Integrated_CP_tag(self, CPsign=1):
-        """
+        r"""
 
         .. math:: 
 
@@ -635,7 +633,7 @@ class Normalisation_Charm:
 
 
     def Integrated_4p_a(self, Bsign=1, x=(0,0,0,0)):
-        """
+        r"""
         .. math::  A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
 
 
@@ -671,7 +669,7 @@ class Normalisation_Charm:
 
 
     def Integrated_fullchain(self, Bsign=1):
-        """
+        r"""
 
         .. math:: 
 
@@ -741,7 +739,7 @@ class Normalisation_Charm:
         return self._normA_misid
     
     def normAbar_misid(self):
-        """
+        r"""
         This function calculates the normalisation of the amplitude squared for the decay.
 
         Returns:
@@ -760,7 +758,7 @@ class Normalisation_Charm:
         return self._normAbar_misid
 
     def AAbar_misid(self):
-        """
+        r"""
         This function calculates the product of the amplitude and the conjugate amplitude for the decay.
 
         Returns:
@@ -777,7 +775,7 @@ class Normalisation_Charm:
         return self._AAbar_misid
 
     def Integrated_crossTerms_misid(self):
-        """
+        r"""
         This function calculates the cross terms between the amplitude and the conjugate amplitude for the misid decay.
 
         Returns:
@@ -801,15 +799,15 @@ class Normalisation_Charm:
         return self._crossTerms_misid
 
     def Integrated_BacTerms_misid(self):
-        """
+        r"""
         This function calculates the Bachelor terms for the misid decay 
         
-        .. math:: |A|^2, |Abar|^2
+        .. math:: |A|^{2}, |Abar|^{2}
 
         Returns:
         float64: 
 
-        .. math:: |A|^2, |Abar|^2
+        .. math:: |A|^{2}, |Abar|^{2}
 
         """
 
@@ -821,15 +819,13 @@ class Normalisation_Charm:
     
         
     def Integrated_6p(self, Bsign=1):
-        """
-        .. math::
-        
-        \begin{aligned}
-        \Gamma_+ =  A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        \Gamma_- =  A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
+        r"""
+        .. math::     
+            \Gamma_{+} =  A^{2} * rb^{2} + Abar^{2} + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
 
-        \end{aligned}
+        .. math::     
+            \Gamma_{-} =  A^{2} + Abar^{2} * rb^{2} + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
+
 
         Args:
         Bsign: int, 1 for B+ and -1 for B-
@@ -870,7 +866,7 @@ class Normalisation_Charm:
             return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus_DPi *crossTerm[0] + yMinus_DPi * crossTerm[1]), tf.float64)
 
     def Integrated_6p_sig(self, Bsign=1):
-        """
+        r"""
         .. math:: A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
     
         .. math:: A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
