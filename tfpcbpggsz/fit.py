@@ -4,7 +4,11 @@ import numpy as np
 import iminuit
 from tfpcbpggsz.core import DecayNLLCalculator
 
+
 class fit:
+    """
+    Class for fitting the model to the data.
+    """
 
     def __init__(self, config, minimizer='iminuit'):
 
@@ -106,6 +110,12 @@ class fit:
 
 
     def fit_results(self):
+        """
+        Get the results of the fit.
+
+        Returns:
+            The fit results, vector of estimated parameters and vector of estimated standard errors.
+        """
         if self._fit_result is not None:
             if self._minimizer == 'iminuit':
                 return self._fit_result.values, self._fit_result.errors

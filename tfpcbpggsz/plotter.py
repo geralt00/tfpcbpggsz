@@ -12,7 +12,7 @@ import time
 
 class plotter:
     """
-    Class for plotting the data
+    Class for plotting the data, modifed the style of the plot
     """
 
     def __init__(self, fit, **kwargs):

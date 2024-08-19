@@ -83,14 +83,9 @@ subprocess.call(
             "--separate",
             "../tfpcbpggsz",
             # exclude_patterns
-            "../tfpcbpggsz/amp",
             "../tfpcbpggsz/amp_ag",
             "../tfpcbpggsz/amp_test",
             "../tfpcbpggsz/version.py",
-            "../tfpcbpggsz/fit.py",
-            "../tfpcbpggsz/config_loader.py",
-            "../tfpcbpggsz/masspdfs.py",
-            "../tfpcbpggsz/plotter.py",
 
 
 

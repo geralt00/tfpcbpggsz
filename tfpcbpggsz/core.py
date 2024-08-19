@@ -1,10 +1,5 @@
 import tensorflow as tf
-import time
-import uproot as up
 import numpy as np
-import sys
-import iminuit
-from importlib.machinery import SourceFileLoader
 from tfpcbpggsz.masspdfs import *
 from tfpcbpggsz.phasecorrection import * #PhaseCorrection
 
@@ -29,6 +24,9 @@ def DeltadeltaD(A, Abar):
     return var
 
 def name_convert(decay_str='b2dk_LL_p'):
+    """
+    Function to convert the name of the decay to the name used in the dataset
+    """
 
 
     decay_str = decay_str.split('_')[0]+'_'+decay_str.split('_')[1]+'_'+decay_str.split('_')[2]
@@ -1044,7 +1042,7 @@ class DecayNLLCalculator:
 
     def make_prod_prob(self):
         """
-        Calculate the negative log-likelihood.
+        Calculate the producted negative log-likelihood.
         """
         for charge in ['p', 'm']:
                 decay = self._name + '_' + charge

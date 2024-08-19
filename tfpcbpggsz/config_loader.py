@@ -16,6 +16,9 @@ def load_int_amp(args):
     return Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())    
 
 class ConfigLoader:
+    """
+    Class for loading data/mc with the configuration file
+    """
     def __init__(self, config_file):
 
         self.file_path = config_file
