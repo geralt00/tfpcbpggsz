@@ -109,9 +109,9 @@ ampbarMC={'charm_p':ampbar_phsp_p,'charm_m':ampbar_phsp_m}
 
 
 
-Norm_p = core.Normalisation_Charm(ampMC, ampbarMC, 'charm_p')
-Norm_cp_odd = core.Normalisation_Charm(ampMC, ampbarMC,'charm_p')
-Norm_cp_even = core.Normalisation_Charm(ampMC, ampbarMC,'charm_p')
+Norm_p = core.Normalisation(ampMC, ampbarMC, 'charm_p')
+Norm_cp_odd = core.Normalisation(ampMC, ampbarMC,'charm_p')
+Norm_cp_even = core.Normalisation(ampMC, ampbarMC,'charm_p')
 
 
 Norm_p.initialise()

@@ -86,6 +86,7 @@ subprocess.call(
             "../tfpcbpggsz/amp_ag",
             "../tfpcbpggsz/amp_test",
             "../tfpcbpggsz/version.py",
+            "*setup.py",
 
 
 

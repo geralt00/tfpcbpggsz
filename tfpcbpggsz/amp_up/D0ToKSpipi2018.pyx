@@ -13,7 +13,9 @@ cdef extern from "D0ToKSpipi2018.h":
         void init()
 
         vector[c_complex[double]] all_amplitudes(double[:] x1)        
-        c_complex[double] AMP(vector[double] k0l, vector[double] pip, vector[double] pim);
+        c_complex[double] get_amp(vector[double] k0l, vector[double] pip, vector[double] pim);
+        vector[c_complex[double]] AMP(vector[vector[double]] ks, vector[vector[double]] pi1, vector[vector[double]] pi2);
+
 
         c_complex[double] D0_K_0_s_1430_p_GLASS__K0S0_pip__pim_(double[:] x0, double[:] x1);
         c_complex[double] D0_K_0_s_1430_p_GLASS__K0S0_pip__pim__wParams(double[:] x1);
@@ -60,9 +62,8 @@ cdef extern from "D0ToKSpipi2018.h":
 
 cdef class PyD0ToKSpipi2018:
     """
-    This is a Python wrapper for the C++ class D0ToKSpipi2018.
+    Python wrapper for the D0ToKSpipi2018 class (upgraded version----tensorized version)    
     """
-
     cdef D0ToKSpipi2018* thisptr  # Pointer to the C++ class instance
 
     def __cinit__(self):
@@ -72,17 +73,33 @@ cdef class PyD0ToKSpipi2018:
         del self.thisptr
 
     def init(self):
-    """
-    Initialize the D0ToKSpipi2018 class.
-    """
+        """
+        Initialize the D0ToKSpipi2018 class.
+        """
         self.thisptr.init()
 
-    def AMP(self, list k0, list pip, list pim):
-    """
-    Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay.
-    """
+    def get_amp(self, list k0, list pip, list pim):
+        """
+        Get the amplitude for a given set of kinematic variables., tensorized version
+        """
         cdef vector[double] ck0 = k0
         cdef vector[double] cpip = pip
         cdef vector[double] cpim = pim
 
-        return self.thisptr.AMP(ck0, cpip, cpim)
+        return self.thisptr.get_amp(ck0, cpip, cpim)
+
+    def AMP(self, list[list[double]] ks, list[list[double]] pi1, list[list[double]] pi2):
+        """
+        Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay., old version, not tensorized
+        """
+        cdef vector[vector[double]] cks
+        cdef vector[vector[double]] cpi1
+        cdef vector[vector[double]] cpi2
+        cdef vector[c_complex[double]] result
+
+        for i in range(len(ks)):
+            result.push_back(self.get_amp(ks[i], pi1[i], pi2[i]))
+
+        return result
+
+

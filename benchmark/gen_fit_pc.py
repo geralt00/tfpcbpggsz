@@ -136,11 +136,11 @@ import tfpcbpggsz.core as core
 ampMC={'b2dk_p':amp_phsp_p,'b2dk_m':amp_phsp_m,'charm_p':amp_phsp_p,'charm_m':amp_phsp_m}
 ampbarMC={'b2dk_p':ampbar_phsp_p,'b2dk_m':ampbar_phsp_m,'charm_p':ampbar_phsp_p,'charm_m':ampbar_phsp_m}
 
-Norm_p = core.Normalisation_Charm(ampMC, ampbarMC, 'b2dk_p')
-Norm_m = core.Normalisation_Charm(ampMC, ampbarMC, 'b2dk_m')
-Norm_kspipi = core.Normalisation_Charm(ampMC, ampbarMC, 'charm_p')
-Norm_cp_odd = core.Normalisation_Charm(ampMC, ampbarMC,'charm_p')
-Norm_cp_even = core.Normalisation_Charm(ampMC, ampbarMC,'charm_p')
+Norm_p = core.Normalisation(ampMC, ampbarMC, 'b2dk_p')
+Norm_m = core.Normalisation(ampMC, ampbarMC, 'b2dk_m')
+Norm_kspipi = core.Normalisation(ampMC, ampbarMC, 'charm_p')
+Norm_cp_odd = core.Normalisation(ampMC, ampbarMC,'charm_p')
+Norm_cp_even = core.Normalisation(ampMC, ampbarMC,'charm_p')
 
 Norm_p.initialise()
 Norm_m.initialise()

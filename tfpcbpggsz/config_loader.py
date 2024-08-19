@@ -1,5 +1,7 @@
-from .amp import *
 import yaml
+import uproot as up
+import numpy as np
+import time
 from tfpcbpggsz.core import *
 from tfpcbpggsz.amp import D0ToKSpipi2018
 

@@ -300,7 +300,7 @@ def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], 
     return (prob1 * frac1 + prob2 * frac1 + prob3 * frac2)
 
 #Probabily just for validation stage, should be more general for the Normalisation class
-class Normalisation_Charm:
+class Normalisation:
     """
     Normalisation class, contains the formula we need with charm dataset
     Args:
