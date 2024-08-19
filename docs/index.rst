@@ -3,8 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-tfpcbpggsz documentation
+TFPCBPGGSZ documentation
 ========================
+TFPCBPGGSZ is a Python package for for the Phase-Corrected(PC) BPGGSZ analysis.
+It is developed using the TensorFlow library and boosting the performance of the BPGGSZ analysis, when running on a GPU.
+
 
 Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
@@ -13,5 +16,8 @@ documentation for details.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents: 
+
+   install
+   api
 
