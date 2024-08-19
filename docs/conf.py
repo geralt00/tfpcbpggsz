@@ -39,6 +39,7 @@ exclude_patterns = [
     "Thumbs.db",
     "_build",
     "*ipynb",
+    "*setup.py",
 
 ]
 source_suffix = [
@@ -60,6 +61,7 @@ autodoc_mock_imports = [
     "numpy",
     "importlib",
     "tensorflow_probability",
+    "plothist",
 ]
 
 # Cross-referencing configuration
@@ -83,12 +85,8 @@ subprocess.call(
             "--separate",
             "../tfpcbpggsz",
             # exclude_patterns
-            "../tfpcbpggsz/amp_ag",
             "../tfpcbpggsz/amp_test",
             "../tfpcbpggsz/version.py",
-            "*setup.py",
-
-
 
         ]
     ),
