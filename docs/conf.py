@@ -58,6 +58,7 @@ autodoc_mock_imports = [
     "tensorflow",
     "uproot",
     "numpy",
+    "importlib",
 ]
 
 # Cross-referencing configuration
