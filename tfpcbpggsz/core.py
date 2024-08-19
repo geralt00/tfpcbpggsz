@@ -6,7 +6,7 @@ import sys
 import iminuit
 from importlib.machinery import SourceFileLoader
 from tfpcbpggsz.masspdfs import *
-from tfpcbpggsz.phasecorrection import PhaseCorrection
+from tfpcbpggsz.phasecorrection import * #PhaseCorrection
 
 
 #Common functions

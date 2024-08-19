@@ -21,7 +21,10 @@ dependencies = [
     "tensorflow",
     "matplotlib",
     "sphinx_rtd_theme",
-    "sphinx_gallery"]
+    "sphinx_gallery"
+    "%(root)s"
+    "Sphinx"
+    ]
 
 [tool.setuptools]
 packages = ["tfpcbpggsz"]  # This is based on your project's top-level module
