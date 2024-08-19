@@ -1,7 +1,0 @@
-tfpcbpggsz.version module
-=========================
-
-.. automodule:: tfpcbpggsz.version
-   :members:
-   :undoc-members:
-   :show-inheritance:
