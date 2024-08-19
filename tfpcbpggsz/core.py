@@ -144,8 +144,6 @@ def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), p
         x (tuple, optional): the fitted params. Defaults to (0,0,0,0,0,0).
         pc (float, optional): the phase correction class. Defaults to None.
 
-    Returns:
-        float64: the amplitude squared
     """
 
     phase = DeltadeltaD(amp, ampbar)
@@ -171,7 +169,7 @@ def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), p
         return (absA**2  + absAbar **2 * rB2 + 2.0 * (absA * absAbar) * (xMinus * tf.cos(phase) + yMinus * tf.sin(phase)))
 
 def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampbar_tag=[], pc_sig=None, pc_tag=None):
-    """
+    r"""
     Function to calculate the amplitude squared for the D0->KsPiPi and D0bar->KsPiPi decays
 
     Args:
@@ -182,8 +180,6 @@ def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampb
         pc_sig (float, optional): the phase correction for the signal. Defaults to None.
         pc_tag (float, optional): the phase correction for the tag. Defaults to None.
 
-    Returns:
-        float64: the amplitude squared
     """
 
 
@@ -203,7 +199,7 @@ def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampb
     return (absA_sig*absAbar_tag)**2 + (absAbar_sig*absA_tag)**2 - 2*absA_sig*absAbar_tag*absAbar_sig*absA_tag*tf.math.cos(phase_sig-phase_tag)
 
 def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], pc=None):
-    """
+    r"""
     Function to calculate the amplitude squared for the CP tag decay
 
     Args:
@@ -212,8 +208,6 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], pc=None):
         ampbar (Amplitude Bar): the conjugate amplitude from sample
         pc (float, optional): the phase correction class. Defaults to None.
 
-    Returns:
-        float64: the amplitude squared
     """
 
 
@@ -231,7 +225,7 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], pc=None):
     return (absA**2  + absAbar **2  + 2.0 * DDsign * CPsign * (absA * absAbar) * tf.cos(phase))
 
 def prob_totalAmplitudeSquared_DPi_XY( Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0,0,0,0,0,0,0,0,0)):
-    """
+    r"""
     Function to calculate the amplitude squared for the B2Dpi decay, the ratio between B2DK and B2Dpi is used, then two additional parameters are added
 
     Args:
@@ -240,8 +234,6 @@ def prob_totalAmplitudeSquared_DPi_XY( Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,
         ampbar (Amplitude Bar): the conjugate amplitude from sample
         x (tuple, optional): the fitted params. Defaults to (0,0,0,0,0,0,0,0,0,0,0,0,0,0).
 
-    Returns:
-        float64: the amplitude squared
     """
 
     phase = DeltadeltaD(amp, ampbar)
@@ -272,7 +264,7 @@ def prob_totalAmplitudeSquared_DPi_XY( Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,
 
 
 def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], eff2=[]):
-    """
+    r"""
     Function to calculate the amplitude squared for the combinatorial background in the B2DK and B2Dpi decays
 
     Args:
@@ -284,8 +276,6 @@ def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], 
         eff1 (float, optional): the efficiency value for the B2DK decay. Defaults to [].
         eff2 (float, optional): the efficiency value for the B2Dpi decay. Defaults to [].
 
-    Returns:
-        float64: the amplitude squared
     """
 
     absA = tf.cast(tf.abs(amp), tf.float64)
