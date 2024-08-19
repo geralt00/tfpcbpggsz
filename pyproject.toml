@@ -21,9 +21,9 @@ dependencies = [
     "tensorflow",
     "matplotlib",
     "sphinx_rtd_theme",
-    "sphinx_gallery"
-    "%(root)s"
-    "Sphinx"
+    "sphinx_gallery",
+    "%(root)s",
+    "Sphinx",
     ]
 
 [tool.setuptools]
