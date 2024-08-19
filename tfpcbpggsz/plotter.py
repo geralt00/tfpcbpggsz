@@ -11,6 +11,9 @@ import os
 import time
 
 class plotter:
+    """
+    Class for plotting the data
+    """
 
     def __init__(self, fit, **kwargs):
         self._config = fit._config

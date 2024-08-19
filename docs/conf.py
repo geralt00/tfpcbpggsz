@@ -59,6 +59,7 @@ autodoc_mock_imports = [
     "uproot",
     "numpy",
     "importlib",
+    "tensorflow_probability",
 ]
 
 # Cross-referencing configuration
