@@ -62,6 +62,7 @@ autodoc_mock_imports = [
     "importlib",
     "tensorflow_probability",
     "plothist",
+    "yaml",
 ]
 
 # Cross-referencing configuration
