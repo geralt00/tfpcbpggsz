@@ -2,6 +2,7 @@ import yaml
 import uproot as up
 import numpy as np
 import time
+from importlib.machinery import SourceFileLoader
 from tfpcbpggsz.core import *
 from tfpcbpggsz.amp import D0ToKSpipi2018
 
@@ -305,16 +306,3 @@ class ConfigLoader:
                         for comp in comp_tag:
                             if name_convert(new_decay).split('_')[0] == 'DPi' and (comp == 'low_Bs2DKPi' or comp == 'low_misID'): continue
                             self._mass_pdfs[type][new_decay][comp] = self._mass_pdfs[type][new_decay][comp]*self._n_yields[new_decay][comp]
-
-
-    @classmethod
-    def register_function(cls, name=None):
-        def _f(f):
-            my_name = name
-            if my_name is None:
-                my_name = f.__name__
-            if hasattr(cls, my_name):
-                warnings.warn("override function {}".format(name))
-            setattr(cls, my_name, f)
-            return f
-        return _f
