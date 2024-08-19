@@ -218,6 +218,9 @@ def single_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     data = phsp(N)
     time1 = time.time()
     weight = amp(data)
+    if weight.numpy().any() < 0.0:
+        print("Negative weight found")
+        
     time2 = time.time()
     if importance_f is not None:
         weight = weight / importance_f(data)

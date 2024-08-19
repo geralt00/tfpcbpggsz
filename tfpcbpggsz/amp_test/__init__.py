@@ -1,6 +1,5 @@
 # __init__.py (within the "amp" directory)
 
 # Import core modules to make them easily accessible
-from .amp import *
-from .D0ToKSpipi2018 import *
+from tfpcbpggsz.amp_test.D0ToKSpipi2018 import *
 

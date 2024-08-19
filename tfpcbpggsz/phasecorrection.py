@@ -8,12 +8,6 @@ from tfpcbpggsz.ulti import get_mass, phsp_to_srd
 class PhaseCorrection:
     """
     Class for phase correction
-    order: int, default=0
-        The order of the phase correction
-    correctionType: str, default="singleBias", options=["singleBias", "doubleBias", "antiSym_legendre"]
-        The type of phase correction to be applied or the type of bias to be added
-    DEBUG: bool, default=True
-
     """
 
 
@@ -68,10 +62,11 @@ class PhaseCorrection:
 
     def PhaseCorrection(self):
         """
-        Returns the phase correction for the given coordinates
-        definition:
-        \delta_corr = \sum_{i=0}^{order} \sum_{j=0}^{(order-i)/2} C_{2j+1} P_i(z^prime_{+})P_{2j+1}(z^dual_prime_{-})
+        The phase correction for the given coordinates
+        .. math:: \delta_{corr} = \sum_{i=0}^{order} \sum_{j=0}^{(order-i)/2} C_{2j+1} P_i(z'_{+})P_{2j+1}(z^''_{-})
+
         """
+
         if self.correctionType == "singleBias" or self.correctionType == "doubleBias":
             self.do_bias()
             print(f"Setting up phase correction for a {self.correctionType}") if self.DEBUG else None
@@ -85,8 +80,10 @@ class PhaseCorrection:
     def set_coefficients(self, coefficients):
         """
         Sets the coefficients for the phase correction
+
         coefficients: dict or list
             The coefficients for the phase correction
+
         """
         if isinstance(coefficients, dict):
             self.coefficients = coefficients

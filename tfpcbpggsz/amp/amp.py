@@ -5,7 +5,7 @@ from multiprocessing import Pool
 import multiprocessing
 import sys
 
-from .D0ToKSpipi2018 import *
+from tfpcbpggsz.amp.D0ToKSpipi2018 import *
 
 #Kspipi = PyD0ToKSpipi2018()
 #Kspipi.init()

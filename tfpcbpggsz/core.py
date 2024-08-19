@@ -12,7 +12,17 @@ from tfpcbpggsz.phasecorrection import PhaseCorrection
 #Common functions
 _PI = tf.constant(np.pi, dtype=tf.float64)
 def DeltadeltaD(A, Abar):
+    """
+    Function to calculate the phase difference between the amplitude and the conjugate amplitude
+    
 
+    Args:
+        A (Amplitude): the amplitude from sample
+        Abar (Amplitude Bar): the conjugate amplitude from sample
+
+    Returns:
+        float64: phase difference between the amplitude and the conjugate amplitude
+    """
     var_a = tf.math.angle(A*np.conj(Abar))+ _PI
     var_b = tf.where(var_a > _PI, var_a - 2*_PI, var_a)
     var = tf.where(var_b < -_PI, var_b + 2*_PI, var_b)
@@ -57,7 +67,7 @@ def dalitz_transform(x_valid, y_valid):
 
 def eff_fun(x, charge='p', decay='dk_LL'):
     """
-    Function to calculate the efficiency function for the B2DK and B2Dpi decays
+    Function to calculate the efficiency value for the B2DK and B2Dpi decays
     
     """
     # in GeV !!
@@ -125,6 +135,19 @@ def eff_fun(x, charge='p', decay='dk_LL'):
     return( res+offset[decay])/mean[decay]
 
 def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), pc=None):
+    """
+    Function to calculate the amplitude squared for the B2DK and B2Dpi decays
+
+    Args:
+        Bsign (int, optional): the charge of B meson. Defaults to 1.
+        amp (Amplitude): the amplitude from sample
+        ampbar (Amplitude Bar): the conjugate amplitude from sample
+        x (tuple, optional): the fitted params. Defaults to (0,0,0,0,0,0).
+        pc (float, optional): the phase correction class. Defaults to None.
+
+    Returns:
+        float64: the amplitude squared
+    """
 
     phase = DeltadeltaD(amp, ampbar)
     if pc is not None:
@@ -149,6 +172,21 @@ def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), p
         return (absA**2  + absAbar **2 * rB2 + 2.0 * (absA * absAbar) * (xMinus * tf.cos(phase) + yMinus * tf.sin(phase)))
 
 def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampbar_tag=[], pc_sig=None, pc_tag=None):
+    """
+    Function to calculate the amplitude squared for the D0->KsPiPi and D0bar->KsPiPi decays
+
+    Args:
+        amp_sig (Amplitude): the amplitude from signal sample
+        ampbar_sig (Amplitude Bar): the conjugate amplitude from signal sample
+        amp_tag (Amplitude): the amplitude from tag sample
+        ampbar_tag (Amplitude Bar): the conjugate amplitude from tag sample
+        pc_sig (float, optional): the phase correction for the signal. Defaults to None.
+        pc_tag (float, optional): the phase correction for the tag. Defaults to None.
+
+    Returns:
+        float64: the amplitude squared
+    """
+
 
     phase_sig = DeltadeltaD(amp_sig, ampbar_sig)
     phase_tag = DeltadeltaD(amp_tag, ampbar_tag)
@@ -166,6 +204,19 @@ def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampb
     return (absA_sig*absAbar_tag)**2 + (absAbar_sig*absA_tag)**2 - 2*absA_sig*absAbar_tag*absAbar_sig*absA_tag*tf.math.cos(phase_sig-phase_tag)
 
 def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], pc=None):
+    """
+    Function to calculate the amplitude squared for the CP tag decay
+
+    Args:
+        CPsign (int, optional): the CP sign for the decay. Defaults to +.
+        amp (Amplitude): the amplitude from sample
+        ampbar (Amplitude Bar): the conjugate amplitude from sample
+        pc (float, optional): the phase correction class. Defaults to None.
+
+    Returns:
+        float64: the amplitude squared
+    """
+
 
 
     DDsign = -1
@@ -181,6 +232,18 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], pc=None):
     return (absA**2  + absAbar **2  + 2.0 * DDsign * CPsign * (absA * absAbar) * tf.cos(phase))
 
 def prob_totalAmplitudeSquared_DPi_XY( Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0,0,0,0,0,0,0,0,0)):
+    """
+    Function to calculate the amplitude squared for the B2Dpi decay, the ratio between B2DK and B2Dpi is used, then two additional parameters are added
+
+    Args:
+        Bsign (int, optional): the charge of B meson. Defaults to 1.
+        amp (Amplitude): the amplitude from sample
+        ampbar (Amplitude Bar): the conjugate amplitude from sample
+        x (tuple, optional): the fitted params. Defaults to (0,0,0,0,0,0,0,0,0,0,0,0,0,0).
+
+    Returns:
+        float64: the amplitude squared
+    """
 
     phase = DeltadeltaD(amp, ampbar)
     absA = tf.cast(tf.abs(amp), tf.float64)
@@ -210,6 +273,21 @@ def prob_totalAmplitudeSquared_DPi_XY( Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,
 
 
 def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], eff2=[]):
+    """
+    Function to calculate the amplitude squared for the combinatorial background in the B2DK and B2Dpi decays
+
+    Args:
+        amp (Amplitude): the amplitude from sample
+        ampbar (Amplitude Bar): the conjugate amplitude from sample
+        normA (float, optional): the normalisation of the amplitude squared for the decay. Defaults to 1.2.
+        normAbar (float, optional): the normalisation of the amplitude squared for the decay. Defaults to 1.2.
+        fracDD (float, optional): the fraction of the combinatorial background. Defaults to 0.82.
+        eff1 (float, optional): the efficiency value for the B2DK decay. Defaults to [].
+        eff2 (float, optional): the efficiency value for the B2Dpi decay. Defaults to [].
+
+    Returns:
+        float64: the amplitude squared
+    """
 
     absA = tf.cast(tf.abs(amp), tf.float64)
     absAbar = tf.cast(tf.abs(ampbar), tf.float64)
@@ -226,9 +304,14 @@ def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], 
 
 #Probabily just for validation stage, should be more general for the Normalisation class
 class Normalisation_Charm:
-    '''
-    This class calculates the normalisation of the amplitude squared for the decay.
-    '''
+    """
+    Normalisation class, contains the formula we need with charm dataset
+    Args:
+        amp_MC: dict, dictionary of the amplitude for the MC
+        ampbar_MC: dict, dictionary of the conjugate amplitude for the MC
+        name: str, decay name, e.g. b2dk
+
+    """
     def __init__(self, amp_MC, ampbar_MC, name='b2dk'):
 
         self._name = name
@@ -265,9 +348,15 @@ class Normalisation_Charm:
         self._DEBUG = False
         self._phaseCorrection = None
         self._phaseCorrection_tag = None
-        self.tagged_i = None#(tf.range(self.AAbar.shape[0]) + self.AAbar.shape[0] // 2) % self.AAbar.shape[0]
+        self.tagged_i = None
 
     def add_pc(self, pc,**kwargs):
+        """
+        Function to add the phase correction to the phase
+
+        Args:
+            pc (float): the phase correction
+        """
         if kwargs.get('pc_tag') is not None:
             self._phaseCorrection_tag = kwargs.get('pc_tag')
 
@@ -277,6 +366,9 @@ class Normalisation_Charm:
         self._DEBUG = True
         
     def initialise(self):
+        """
+        Function to initialise the normalisation terms
+        """
 
         print('Initialising normalisation for decay:', self._name)
         self.normA()
@@ -287,6 +379,9 @@ class Normalisation_Charm:
             print('Normalisation terms:\n |A|^2:', self._normA, '\n |Abar|^2:', self._normAbar, '\n |A||Abar|cos(phase):', self._crossTerms[0], '\n |A||Abar| sin(phase):', self._crossTerms[1])
 
     def initialise_misid(self):     
+        """
+        Function to initialise the normalisation terms for the misid decay
+        """
 
         print('Initialising misid normalisation for decay:', self._name_misid)
         if self.amp_MC.get(self._name_misid) is None:
@@ -304,13 +399,22 @@ class Normalisation_Charm:
         self._params = x
 
     def phase(self):
-        '''
-        This function calculates the phase between the amplitude and the conjugate amplitude.
-        deltaD
-        '''
+        """
+        This function calculates the phase related terms, including:
+        .. math::
+
+           \begin{aligned}
+           \delta_D &= \\
+           |A||\bar{A}| \cos(\delta_D) &= \\
+           |A||\bar{A}| \sin(\delta_D) &= \\
+           |A_{sig}|^2 |\bar{A}_{tag}|^2 + |\bar{A}_{sig}|^2 |A_{tag}|^2 - 2 |A||\bar{A}| |\bar{A}_{sig}||A_{tag}| \cos(\delta_D - \delta_{D_{tag}})
+           \end{aligned} 
+
+        Returns:
+        float64: phase between the amplitude and the conjugate amplitude
+        """
         if self._phase is None:
             self._phase = DeltadeltaD(self.amp_MC[self._name], self.ampbar_MC[self._name])
-            #self._phase_tag = DeltadeltaD(self._A_tag, self._Abar_tag)
             self._crossTerms[0] = tf.math.reduce_mean(self._AAbar*tf.cos(self._phase))
             self._crossTerms[1] = tf.math.reduce_mean(self._AAbar*tf.sin(self._phase))
             self._phase_tag = tf.gather(self._phase, self.tagged_i) #+ phase_correction.eval_tf(tf.gather(events, tagged_i))
@@ -323,10 +427,14 @@ class Normalisation_Charm:
         return self._phase
 
     def normA(self):
-        '''
+        """
         This function calculates the normalisation of the amplitude squared for the decay.
-        |A|^2
-        '''  
+
+        Returns:
+        float64: 
+        
+        .. math: |A|^2
+        """
         if self._normA is None:
             self._normA = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name])**2)
             self._BacTerms[0] = self._normA
@@ -340,10 +448,15 @@ class Normalisation_Charm:
         return self._normA
     
     def normAbar(self):
-        '''
+        """
         This function calculates the normalisation of the amplitude squared for the decay.
-        |Abar|^2
-        '''
+
+        Returns:
+        float64: 
+        
+        .. math: |Abar|^2
+
+        """
         if self._normAbar is None:
             self._normAbar = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name])**2)
             self._BacTerms[1] = self._normAbar
@@ -355,10 +468,16 @@ class Normalisation_Charm:
         return self._normAbar
 
     def AAbar(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|
-        '''
+        """
+        This function calculates the product of the amplitude and the conjugate amplitude for the decay.
+
+        Returns:
+            
+        float64:
+
+        .. math:: |A| |\bar{A}| 
+
+        """
 
         if self._AAbar is None:
             self._AAbar = tf.abs(self.amp_MC[self._name]) * tf.abs(self.ampbar_MC[self._name])
@@ -370,11 +489,15 @@ class Normalisation_Charm:
         return self._AAbar, self._AAbar_tag
 
     def Update_crossTerms(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|cos(deltaD+deltaD_corr)
-        |A||Abar|sin(deltaD+deltaD_corr)
-        '''
+        """
+        This function calculates the cross terms between the amplitude and the conjugate amplitude.
+        if there is a phase correction, it will be added to the phase
+
+        Returns:
+        float64: 
+
+        .. math:: |A| |\bar{A}| \cos(\delta_D), |A| |\bar{A}| \sin(\delta_D)
+        """
         if self._crossTerms[0] is not None and self._crossTerms[1] is not None and self._phaseCorrection is not None:
 
             self._crossTerms[0] = tf.math.reduce_mean(self._AAbar*tf.cos(self._phase+self._phaseCorrection))
@@ -389,11 +512,17 @@ class Normalisation_Charm:
         return self._crossTerms
 
     def Integrated_BacTerms(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A|
-        |Abar|
-        '''
+        """
+        This function calculates the Bachelor terms for the decay 
+
+        .. math:: |A|^2, |Abar|^2
+
+        Returns:
+        float64: 
+
+        .. math:: |A|^2, |Abar|^2
+
+        """
         if self._BacTerms[0] is None or self._BacTerms[1] is None:
             self._BacTerms[0] = tf.math.reduce_mean(tf.abs(self.amp_MC))
             self._BacTerms[1] = tf.math.reduce_mean(tf.abs(self.ampbar_MC))
@@ -401,11 +530,18 @@ class Normalisation_Charm:
         return self._BacTerms
     
     def Integrated_4p(self, Bsign=1):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
+        """
+
+        .. math:: A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
     
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
+        .. math:: A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
+
+        Args:
+        Bsign: int, 1 for B+ and -1 for B-
+
+        Returns:
+        float64: Integrated amplitude squared, the normalisation is taking from the misid decay
+        """
         if self._normA is None or self._normAbar is None or self._crossTerms is None:
             raise ValueError('Please calculate the normalisation and cross terms first')
         
@@ -430,11 +566,21 @@ class Normalisation_Charm:
             return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus *crossTerm[0] + yMinus * crossTerm[1]), tf.float64)    
 
     def Integrated_4p_sig(self, Bsign=1):
-        '''
+        """
+
+        .. math:: 
+
         A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
     
         A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
+
+        Args:
+        Bsign: int, 1 for B+ and -1 for B-
+
+        Returns:
+        float64: Integrated amplitude squared, the normalisation is taking from the signal decay
+
+        """
         if self._normA is None or self._normAbar is None or self._crossTerms is None:
             raise ValueError('Please calculate the normalisation and cross terms first')
         
@@ -460,9 +606,23 @@ class Normalisation_Charm:
 
 
     def Integrated_CP_tag(self, CPsign=1):
-        '''
-        A^2 + Abar^2  cpsign 2*|A||Abar| * cos(deltaD)
-        '''
+        """
+
+        .. math:: 
+
+        \begin{aligned}
+        A^2 * rb^2 + \bar{A}^2 + DDsign*CPsign* 2*|A||Abar| * rb * cos(\delta_B + \gamma + \delta_D)
+        \end{aligned}
+
+        - With Psi(3770), DDsign = -1
+
+
+        Args:
+            CPsign (int, optional): the CP sign for the decay. Defaults to +.
+
+        Returns:
+            float64: Integrated amplitude squared, the normalisation is taking from the signal decay
+        """
         if self._normA is None or self._normAbar is None or self._crossTerms is None:
             raise ValueError('Please calculate the normalisation and cross terms first')
         
@@ -475,11 +635,18 @@ class Normalisation_Charm:
 
 
     def Integrated_4p_a(self, Bsign=1, x=(0,0,0,0)):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
+        """
+        .. math::  A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
+
+
+        Args:
+            Bsign (int, optional): the charge of B meson. Defaults to 1.
+            x (tuple, optional): the fitted params. Defaults to (0,0,0,0).
+
+        Returns:
+            float64: Integrated amplitude squared, the normalisation is taking from the signal decay
+            
+        """
         if self._normA is None or self._normAbar is None or self._crossTerms is None:
             raise ValueError('Please calculate the normalisation and cross terms first')
         
@@ -504,12 +671,20 @@ class Normalisation_Charm:
 
 
     def Integrated_fullchain(self, Bsign=1):
-    
-        '''
+        """
+
+        .. math:: 
+
+        \begin{aligned}
         A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
+        \end{aligned}
+
+        Args:
+            Bsign (int, optional): the charge of B meson. Defaults to 1.
+
+        Returns:
+            float64: Integrated amplitude squared, the normalisation is taking from the signal decay
+        """
         x = self._params
         absA = self.amp_MC
         absAbar = self.ampbar_MC
@@ -533,10 +708,12 @@ class Normalisation_Charm:
             return tf.math.reduce_mean(Gm)
         
     def phase_misid(self):
-        '''
-        This function calculates the phase between the amplitude and the conjugate amplitude.
-        deltaD
-        '''
+        """
+        This function calculates the phase between the amplitude and the conjugate amplitude for the misid decay.
+
+        Returns:
+        float64: phase between the amplitude and the conjugate amplitude for the misid decay
+        """
 
         if self._phase_misid is None:
             self._phase_misid = DeltadeltaD(self.amp_MC[self._name_misid], self.ampbar_MC[self._name_misid])
@@ -547,10 +724,14 @@ class Normalisation_Charm:
     
 
     def normA_misid(self):
-        '''
+        """
         This function calculates the normalisation of the amplitude squared for the decay.
-        |A|^2
-        '''  
+
+        Returns:
+        float64: 
+        
+        .. math:: |A|^2
+        """
         if self._normA_misid is None:
             self._normA_misid = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name_misid])**2)
             self._BacTerms_misid[0] = self._normA_misid
@@ -560,10 +741,16 @@ class Normalisation_Charm:
         return self._normA_misid
     
     def normAbar_misid(self):
-        '''
+        """
         This function calculates the normalisation of the amplitude squared for the decay.
-        |Abar|^2
-        '''
+
+        Returns:
+
+        float64: 
+
+        .. math:: |\bar{A}|^2
+
+        """
         if self._normAbar_misid is None:
             self._normAbar_misid = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name_misid])**2)
             self._BacTerms_misid[1] = self._normAbar_misid
@@ -573,10 +760,16 @@ class Normalisation_Charm:
         return self._normAbar_misid
 
     def AAbar_misid(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|
-        '''
+        """
+        This function calculates the product of the amplitude and the conjugate amplitude for the decay.
+
+        Returns:
+
+        float64:    
+
+        .. math:: |A||\bar{A}|
+
+        """
 
         if self._AAbar_misid is None:
             self._AAbar_misid = tf.abs(self.amp_MC[self._name_misid]) * tf.abs(self.ampbar_MC[self._name_misid])
@@ -584,11 +777,22 @@ class Normalisation_Charm:
         return self._AAbar_misid
 
     def Integrated_crossTerms_misid(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|cos(deltaD)
-        |A||Abar|sin(deltaD)
-        '''
+        """
+        This function calculates the cross terms between the amplitude and the conjugate amplitude for the misid decay.
+
+        Returns:
+        
+        float64: 
+
+        .. math:: 
+
+        \begin{aligned}
+        | A || \bar{A}| cos(\delta_D)
+        | A || \bar{A}| sin(\delta_D)
+        \end{aligned}
+
+        """
+
         if self._crossTerms_misid[0] is None or self._crossTerms[1] is None:
 
             self._crossTerms_misid[0] = tf.math.reduce_mean(self._AAbar_misid*tf.cos(self._phase_misid))
@@ -597,11 +801,18 @@ class Normalisation_Charm:
         return self._crossTerms_misid
 
     def Integrated_BacTerms_misid(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A|
-        |Abar|
-        '''
+        """
+        This function calculates the Bachelor terms for the misid decay 
+        
+        .. math:: |A|^2, |Abar|^2
+
+        Returns:
+        float64: 
+
+        .. math:: |A|^2, |Abar|^2
+
+        """
+
         if self._BacTerms_misid[0] is None or self._BacTerms_misid[1] is None:
             self._BacTerms_misid[0] = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name_misid]))
             self._BacTerms_misid[1] = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name_misid]))
@@ -610,11 +821,25 @@ class Normalisation_Charm:
     
         
     def Integrated_6p(self, Bsign=1):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
+        """
+        .. math::
+        
+        \begin{aligned}
+        \Gamma_+ =  A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
     
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
+        \Gamma_- =  A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
+
+        \end{aligned}
+
+        Args:
+        Bsign: int, 1 for B+ and -1 for B-
+
+        Returns:
+
+        float64: Integrated amplitude squared, the normalisation is taking from the misid decay
+
+
+        """
         x = self._params
         if len(x) <6:
             raise ValueError('x should have 6 elements')
@@ -645,468 +870,19 @@ class Normalisation_Charm:
             return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus_DPi *crossTerm[0] + yMinus_DPi * crossTerm[1]), tf.float64)
 
     def Integrated_6p_sig(self, Bsign=1):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
+        """
+        .. math:: A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
     
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
-        x = self._params
-        if len(x) <6:
-            raise ValueError('x should have 6 elements')
-        
-        xXi = tf.cast(x[4], tf.float64)
-        yXi = tf.cast(x[5], tf.float64)
-        normA = self._normA
-        normAbar = self._normAbar
-        crossTerm = self._crossTerms
+        .. math:: A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
 
-        if Bsign == 1:
-            xPlus = tf.cast(x[0], tf.float64)
-            yPlus = tf.cast(x[1], tf.float64)
-            xPlus_DPi = tf.cast(xPlus * xXi - yPlus * yXi, tf.float64)
-            yPlus_DPi = tf.cast(yPlus * xXi + xPlus * yXi, tf.float64)
-    
-            rB2 = tf.cast(xPlus_DPi**2 + yPlus_DPi**2, tf.float64)
-            return tf.cast(normA * rB2 + normAbar + 2.0 *(xPlus_DPi *crossTerm[0] - yPlus_DPi * crossTerm[1]), tf.float64)
-        
-        else:
-            xMinus = tf.cast(x[2], tf.float64)
-            yMinus = tf.cast(x[3], tf.float64)
-            xMinus_DPi = tf.cast(xMinus * xXi - yMinus * yXi, tf.float64)
-            yMinus_DPi = tf.cast(yMinus * xXi + xMinus * yXi, tf.float64)
-    
-            rB2 = tf.cast(xMinus_DPi**2 + yMinus_DPi**2, tf.float64)
-    
-            return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus_DPi *crossTerm[0] + yMinus_DPi * crossTerm[1]), tf.float64)
+        Args:
+        Bsign: int, 1 for B+ and -1 for B-
+
+        Returns:
+        float64: Integrated amplitude squared, the normalisation is taking from the signal decay
 
 
-
-
-
-class Normalisation:
-    '''
-    This class calculates the normalisation of the amplitude squared for the decay.
-    '''
-    def __init__(self, amp_MC, ampbar_MC, name='b2dk'):
-
-        self._name = name
-        if self._name[3] == 'k':
-            self._name_misid = self._name.replace('k', 'pi')
-        else:
-            self._name_misid = self._name.replace('pi', 'k')
-        self.amp_MC = amp_MC
-        self.ampbar_MC = ampbar_MC
-        self._normA = None
-        self._normAbar = None
-        self._normA_misid = None
-        self._normAbar_misid = None
-        self._phase = None
-        self._phase_misid = None
-        self._crossTerms = [None, None]
-        self._crossTerms_misid = [None, None]
-        self._crossTerms_complex = None
-        #self._crossTerms_sin = None
-        #self._crossTerms_cos = None
-        self._BacTerms = [None, None]
-        self._BacTerms_misid = [None, None]
-        self._BacTerms_bkg = [None, None]
-        self._AAbar = None
-        self._AAbar_tag = None
-        self._AAbar_misid = None
-        self._params = None
-        self._DEBUG = False
-        self._phaseCorrection = None
-
-    def add_pc(self, pc):
-        self._phaseCorrection = pc
-
-    def debug(self):
-        self._DEBUG = True
-        
-    def initialise(self):
-
-        print('Initialising normalisation for decay:', self._name)
-        self.normA()
-        self.normAbar()
-        self.AAbar()
-        self.phase()
-        if self._DEBUG:
-            print('Normalisation terms:\n |A|^2:', self._normA, '\n |Abar|^2:', self._normAbar, '\n |A||Abar|cos(phase):', self._crossTerms[0], '\n |A||Abar| sin(phase):', self._crossTerms[1])
-        #self.initialise_misid()
-
-    def initialise_misid(self):     
-
-        print('Initialising misid normalisation for decay:', self._name_misid)
-        if self.amp_MC.get(self._name_misid) is None:
-            raise ValueError('Misid amplitude not found')
-        
-        self.normA_misid()
-        self.normAbar_misid()
-        self.AAbar_misid()
-        self.phase_misid()
-        if self._DEBUG:
-            print('Normalisation terms:\n |A|^2:', self._normA_misid, '\n |Abar|^2:', self._normAbar_misid, '\n |A||Abar| cos(phase):', self._crossTerms_misid[0], '\n |A||Abar| sin(phase):', self._crossTerms_misid[1])
-
-
-    def setParams(self, x):
-        self._params = x
-
-    def phase(self):
-        '''
-        This function calculates the phase between the amplitude and the conjugate amplitude.
-        deltaD
-        '''
-        if self._phase is None:
-            self._phase = DeltadeltaD(self.amp_MC[self._name], self.ampbar_MC[self._name])
-            self._crossTerms[0] = tf.math.reduce_mean(self._AAbar*tf.cos(self._phase))
-            self._crossTerms[1] = tf.math.reduce_mean(self._AAbar*tf.sin(self._phase))
-
-#            tagged_i = (tf.range(self.AAbar.shape[0]) + self.AAbar.shape[0] // 2) % self.AAbar.shape[0]
-#            tagged_total_phase = tf.gather(amplitudes["deltaD"], tagged_i) #+ phase_correction.eval_tf(tf.gather(events, tagged_i))
-#            tagged_total_a = tf.gather(amplitudes["A"], tagged_i) * tf.gather(amplitudes["Abar"], tagged_i)
-#
-#            cos_term = tf.reduce_sum(total_a * tf.cos(total_phase))
-#            sin_term = tf.reduce_sum(total_a * tf.sin(total_phase))
-#
-#            complicated_term = tf.reduce_sum(
-#                (tf.gather(amplitudes["A"], tf.range(len(events))) * tf.gather(amplitudes["Abar"], tagged_i)) ** 2
-#                + (tf.gather(amplitudes["Abar"], tf.range(len(events))) * tf.gather(amplitudes["A"], tagged_i)) ** 2
-#                - 2 * total_a * tagged_total_a * tf.cos(total_phase - tagged_total_phase)
-#            )
-
-        return self._phase
-
-    def crossTerms_cp_mix(self):
-        '''
-        This function calculates the complex terms for the CP mixing
-        deltaD
-        '''
-        if self._phase is None:
-            self._phase = DeltadeltaD(self.amp_MC[self._name], self.ampbar_MC[self._name])
-            self._crossTerms[0] = tf.math.reduce_mean(self._AAbar*tf.cos(self._phase))
-            self._crossTerms[1] = tf.math.reduce_mean(self._AAbar*tf.sin(self._phase))
-            tagged_i = (tf.range(self.AAbar.shape[0]) + self.AAbar.shape[0] // 2) % self.AAbar.shape[0]
-            tagged_total_phase = tf.gather(self._phase, tagged_i) #+ phase_correction.eval_tf(tf.gather(events, tagged_i))
-            tagged_total_a = tf.gather(self._normA, tagged_i) * tf.gather(amplitudes["Abar"], tagged_i)
-#
-#            cos_term = tf.reduce_sum(total_a * tf.cos(total_phase))
-#            sin_term = tf.reduce_sum(total_a * tf.sin(total_phase))
-#
-#            complicated_term = tf.reduce_sum(
-#                (tf.gather(amplitudes["A"], tf.range(len(events))) * tf.gather(amplitudes["Abar"], tagged_i)) ** 2
-#                + (tf.gather(amplitudes["Abar"], tf.range(len(events))) * tf.gather(amplitudes["A"], tagged_i)) ** 2
-#                - 2 * total_a * tagged_total_a * tf.cos(total_phase - tagged_total_phase)
-#            )
-
-        return self._phase
-    
-
-    def normA(self):
-        '''
-        This function calculates the normalisation of the amplitude squared for the decay.
-        |A|^2
-        '''  
-        if self._normA is None:
-            self._normA = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name])**2)
-            self._BacTerms[0] = self._normA
-            #if self._name[3] == 'p' and self._name[-1] == 'm':
-            #    self._BacTerms_bkg[0] = self._normA
-
-        return self._normA
-    
-    def normAbar(self):
-        '''
-        This function calculates the normalisation of the amplitude squared for the decay.
-        |Abar|^2
-        '''
-        if self._normAbar is None:
-            self._normAbar = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name])**2)
-            self._BacTerms[1] = self._normAbar
-            #if self._name[3] == 'p' and self._name[-1] == 'p':
-            #    self._BacTerms_bkg[1] = self._normAbar
-
-        return self._normAbar
-
-    def AAbar(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|
-        '''
-
-        if self._AAbar is None:
-            self._AAbar = tf.abs(self.amp_MC[self._name]) * tf.abs(self.ampbar_MC[self._name])
-            #tagged_i = (tf.range(self.AAbar.shape[0]) + self.AAbar.shape[0] // 2) % self.AAbar.shape[0]
-            #self._AAbar_tag = tf.abs(tf.gather(self.amp_MC[self._name],tagged_i)) * tf.abs(tf.gather(self.ampbar_MC[self._name],tagged_i))
-
-        return self._AAbar#, self._AAbar_tag
-
-    def Update_crossTerms(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|cos(deltaD+deltaD_corr)
-        |A||Abar|sin(deltaD+deltaD_corr)
-        '''
-        if self._crossTerms[0] is not None and self._crossTerms[1] is not None and self._phaseCorrection is not None:
-
-            self._crossTerms[0] = tf.math.reduce_mean(self._AAbar*tf.cos(self._phase+self._phaseCorrection))
-            self._crossTerms[1] = tf.math.reduce_mean(self._AAbar*tf.sin(self._phase+self._phaseCorrection))
-    
-        return self._crossTerms
-
-    def Integrated_BacTerms(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A|
-        |Abar|
-        '''
-        if self._BacTerms[0] is None or self._BacTerms[1] is None:
-            self._BacTerms[0] = tf.math.reduce_mean(tf.abs(self.amp_MC))
-            self._BacTerms[1] = tf.math.reduce_mean(tf.abs(self.ampbar_MC))
-
-        return self._BacTerms
-    
-    def Integrated_4p(self, Bsign=1):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
-        if self._normA is None or self._normAbar is None or self._crossTerms is None:
-            raise ValueError('Please calculate the normalisation and cross terms first')
-        
-        normA = self._normA_misid
-        normAbar = self._normAbar_misid
-        crossTerm = self._crossTerms_misid
-        x = self._params
-
-
-        if Bsign == 1:
-            xPlus = tf.cast(x[0], tf.float64)
-            yPlus = tf.cast(x[1], tf.float64)
-            rB2 = tf.cast(xPlus**2 + yPlus**2, tf.float64)
-    
-            return tf.cast(normA * rB2 + normAbar + 2.0 *(xPlus *crossTerm[0] - yPlus * crossTerm[1]), tf.float64)
-        
-        else:
-            xMinus = tf.cast(x[2], tf.float64)
-            yMinus = tf.cast(x[3], tf.float64)
-            rB2 = tf.cast(xMinus**2 + yMinus**2, tf.float64)
-    
-            return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus *crossTerm[0] + yMinus * crossTerm[1]), tf.float64)    
-
-    def Integrated_4p_sig(self, Bsign=1):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
-        if self._normA is None or self._normAbar is None or self._crossTerms is None:
-            raise ValueError('Please calculate the normalisation and cross terms first')
-        
-        normA = self._normA
-        normAbar = self._normAbar
-        crossTerm = self._crossTerms
-        x = self._params
-
-
-        if Bsign == 1:
-            xPlus = tf.cast(x[0], tf.float64)
-            yPlus = tf.cast(x[1], tf.float64)
-            rB2 = tf.cast(xPlus**2 + yPlus**2, tf.float64)
-    
-            return tf.cast(normA * rB2 + normAbar + 2.0 *(xPlus *crossTerm[0] - yPlus * crossTerm[1]), tf.float64)
-        
-        else:
-            xMinus = tf.cast(x[2], tf.float64)
-            yMinus = tf.cast(x[3], tf.float64)
-            rB2 = tf.cast(xMinus**2 + yMinus**2, tf.float64)
-    
-            return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus *crossTerm[0] + yMinus * crossTerm[1]), tf.float64)    
-
-
-    def Integrated_CP_mix(self):
-
-
-
-        return 0.0
-
-
-    def Integrated_4p_a(self, Bsign=1, x=(0,0,0,0)):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
-        if self._normA is None or self._normAbar is None or self._crossTerms is None:
-            raise ValueError('Please calculate the normalisation and cross terms first')
-        
-        normA = self._normA
-        normAbar = self._normAbar
-        crossTerm = self._crossTerms
-
-
-        if Bsign == 1:
-            xPlus = tf.cast(x[0], tf.float64)
-            yPlus = tf.cast(x[1], tf.float64)
-            rB2 = tf.cast(xPlus**2 + yPlus**2, tf.float64)
-    
-            return tf.cast(normA * rB2 + normAbar + 2.0 *(xPlus *crossTerm[0] - yPlus * crossTerm[1]), tf.float64)
-        
-        else:
-            xMinus = tf.cast(x[2], tf.float64)
-            yMinus = tf.cast(x[3], tf.float64)
-            rB2 = tf.cast(xMinus**2 + yMinus**2, tf.float64)
-    
-            return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus *crossTerm[0] + yMinus * crossTerm[1]), tf.float64) 
-
-
-    def Integrated_fullchain(self, Bsign=1):
-    
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
-        x = self._params
-        absA = self.amp_MC
-        absAbar = self.ampbar_MC
-        phase = DeltadeltaD(absA, absAbar)
-        
-        if Bsign == 1:
-            xPlus = tf.cast(x[0], tf.float64)
-            yPlus = tf.cast(x[1], tf.float64)
-            rB2 = tf.cast(xPlus**2 + yPlus**2, tf.float64)
-    
-            Gp = tf.cast(absA**2 * rB2 + absAbar**2 + 2.0 * (absA * absAbar) *(xPlus * tf.cos(phase) - yPlus * tf.sin(phase)), tf.float64)
-    
-            return tf.math.reduce_mean(Gp)
-        
-        else:
-            xMinus = tf.cast(x[2], tf.float64)
-            yMinus = tf.cast(x[3], tf.float64)
-            rB2 = tf.cast(xMinus**2 + yMinus**2, tf.float64)
-            Gm = tf.cast(absA**2 + absAbar**2  * rB2 + 2.0 * (absA * absAbar) *(xMinus * tf.cos(phase) + yMinus * tf.sin(phase)), tf.float64)
-    
-            return tf.math.reduce_mean(Gm)
-        
-    def phase_misid(self):
-        '''
-        This function calculates the phase between the amplitude and the conjugate amplitude.
-        deltaD
-        '''
-
-        if self._phase_misid is None:
-            self._phase_misid = DeltadeltaD(self.amp_MC[self._name_misid], self.ampbar_MC[self._name_misid])
-            self._crossTerms_misid[0] = tf.math.reduce_mean(self._AAbar_misid*tf.cos(self._phase_misid))
-            self._crossTerms_misid[1] = tf.math.reduce_mean(self._AAbar_misid*tf.sin(self._phase_misid))
-
-        return self._phase_misid
-    
-
-    def normA_misid(self):
-        '''
-        This function calculates the normalisation of the amplitude squared for the decay.
-        |A|^2
-        '''  
-        if self._normA_misid is None:
-            self._normA_misid = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name_misid])**2)
-            self._BacTerms_misid[0] = self._normA_misid
-            #if self._name[3] == 'k' and self._name[-1] == 'm':
-            #    self._BacTerms_bkg[0] = self._normA_misid
-
-        return self._normA_misid
-    
-    def normAbar_misid(self):
-        '''
-        This function calculates the normalisation of the amplitude squared for the decay.
-        |Abar|^2
-        '''
-        if self._normAbar_misid is None:
-            self._normAbar_misid = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name_misid])**2)
-            self._BacTerms_misid[1] = self._normAbar_misid
-            #if self._name[3] == 'k' and self._name[-1] == 'p':
-            #    self._BacTerms_bkg[1] = self._normAbar_misid
-
-        return self._normAbar_misid
-
-    def AAbar_misid(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|
-        '''
-
-        if self._AAbar_misid is None:
-            self._AAbar_misid = tf.abs(self.amp_MC[self._name_misid]) * tf.abs(self.ampbar_MC[self._name_misid])
-    
-        return self._AAbar_misid
-
-    def Integrated_crossTerms_misid(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A||Abar|cos(deltaD)
-        |A||Abar|sin(deltaD)
-        '''
-        if self._crossTerms_misid[0] is None or self._crossTerms[1] is None:
-
-            self._crossTerms_misid[0] = tf.math.reduce_mean(self._AAbar_misid*tf.cos(self._phase_misid))
-            self._crossTerms_misid[1] = tf.math.reduce_mean(self._AAbar_misid*tf.sin(self._phase_misid))
-    
-        return self._crossTerms_misid
-
-    def Integrated_BacTerms_misid(self):
-        '''
-        This function calculates the total amplitude squared for the integrated decay, v0.1 only for MD fitted, no correction yet
-        |A|
-        |Abar|
-        '''
-        if self._BacTerms_misid[0] is None or self._BacTerms_misid[1] is None:
-            self._BacTerms_misid[0] = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name_misid]))
-            self._BacTerms_misid[1] = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name_misid]))
-
-        return self._BacTerms_misid
-    
-        
-    def Integrated_6p(self, Bsign=1):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
-        x = self._params
-        if len(x) <6:
-            raise ValueError('x should have 6 elements')
-        
-        xXi = tf.cast(x[4], tf.float64)
-        yXi = tf.cast(x[5], tf.float64)
-        normA = self._normA_misid
-        normAbar = self._normAbar_misid
-        crossTerm = self._crossTerms_misid
-
-        if Bsign == 1:
-            xPlus = tf.cast(x[0], tf.float64)
-            yPlus = tf.cast(x[1], tf.float64)
-            xPlus_DPi = tf.cast(xPlus * xXi - yPlus * yXi, tf.float64)
-            yPlus_DPi = tf.cast(yPlus * xXi + xPlus * yXi, tf.float64)
-    
-            rB2 = tf.cast(xPlus_DPi**2 + yPlus_DPi**2, tf.float64)
-            return tf.cast(normA * rB2 + normAbar + 2.0 *(xPlus_DPi *crossTerm[0] - yPlus_DPi * crossTerm[1]), tf.float64)
-        
-        else:
-            xMinus = tf.cast(x[2], tf.float64)
-            yMinus = tf.cast(x[3], tf.float64)
-            xMinus_DPi = tf.cast(xMinus * xXi - yMinus * yXi, tf.float64)
-            yMinus_DPi = tf.cast(yMinus * xXi + xMinus * yXi, tf.float64)
-    
-            rB2 = tf.cast(xMinus_DPi**2 + yMinus_DPi**2, tf.float64)
-    
-            return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus_DPi *crossTerm[0] + yMinus_DPi * crossTerm[1]), tf.float64)
-
-    def Integrated_6p_sig(self, Bsign=1):
-        '''
-        A^2 * rb^2 + Abar^2 + 2*|A||Abar| * rb * cos(deltaB + gamma + deltaD)
-    
-        A^2 + Abar^2 * rb^2 + 2*|A||Abar| * rb * cos(deltaB + gamma - deltaD)
-        '''
+        """
         x = self._params
         if len(x) <6:
             raise ValueError('x should have 6 elements')
@@ -1190,12 +966,12 @@ class DecayNLLCalculator:
             decay = self._name + '_' + charge
             decay_p = self._name + '_p'
             decay_m = self._name + '_m'
+            #Making sure it is always the DPi events as normalisation
             if self._name[3] == 'k':
-
                 self.normalisations[decay]._BacTerms_bkg[0], self.normalisations[decay]._BacTerms_bkg[1] = (
                     self.normalisations[decay_m]._BacTerms_misid[0], self.normalisations[decay_p]._BacTerms_misid[1]
                 )
-            else:
+            elif self._name[3] == 'p':#For Dpi, prepare for the upgrated version
                 self.normalisations[decay]._BacTerms_bkg[0], self.normalisations[decay]._BacTerms_bkg[1] = (
                     self.normalisations[decay_m]._BacTerms[0], self.normalisations[decay_p]._BacTerms[1]
                 )
@@ -1230,12 +1006,12 @@ class DecayNLLCalculator:
                 )
                 if charge == 'p':
                     self._normalisations[decay]['low'] = self.normalisations[decay]._BacTerms_bkg[1]
-                    if self._name[3] == 'k':
+                    if self._name[3] == 'k':#Only for DK mode
                         self._normalisations[decay]['low_misID'] = self.normalisations[decay]._BacTerms_bkg[1]
                         self._normalisations[decay]['low_Bs2DKPi'] = self.normalisations[decay]._BacTerms_bkg[0]
                 else:
                     self._normalisations[decay]['low'] = self.normalisations[decay]._BacTerms_bkg[0]
-                    if self._name[3] == 'k':
+                    if self._name[3] == 'k':#Only for DK mode
                         self._normalisations[decay]['low_misID'] = self.normalisations[decay]._BacTerms_bkg[0]
                         self._normalisations[decay]['low_Bs2DKPi'] = self.normalisations[decay]._BacTerms_bkg[1]
 
@@ -1252,7 +1028,7 @@ class DecayNLLCalculator:
             self._prob[decay] = {} if self._prob.get(decay) is None else self._prob[decay]
             self._prob[decay]['sig'] = self.eff_arr[decay]['sig'] * self.totalAmplitudeSquared_XY(charge_flag) / self._normalisations[decay]['sig']
             self._prob[decay]['comb'] = self.totalAmplitudeSquared_comb(charge_flag)
-            self._prob[decay]['low'] = self.eff_arr[decay]['low'] * self.totalAmplitudeSquared_low(charge_flag)
+            self._prob[decay]['low'] = self.eff_arr[decay]['low'] * self.totalAmplitudeSquared_low(charge_flag) / self._normalisations[decay]['low']
             self._prob[decay]['misid'] = self.eff_arr[decay]['misid'] * self.totalAmplitudeSquared_DPi_XY(charge_flag)/self._normalisations[decay]['misid']
 
             if len(self.params) > 4:
@@ -1264,11 +1040,11 @@ class DecayNLLCalculator:
                     self._prob[decay]['misid'] = self.eff_arr[decay]['misid'] * self.totalAmplitudeSquared_XY(charge_flag)/self._normalisations[decay]['misid']
                     
             if self._name[3] == 'k':
-                self._prob[decay]['low_misID'] = self.eff_arr[decay]['low'] * self.totalAmplitudeSquared_low(charge_flag)
+                self._prob[decay]['low_misID'] = self.eff_arr[decay]['low'] * self.totalAmplitudeSquared_low(charge_flag) / self._normalisations[decay]['low_misID']
                 if charge == 'p':
-                    self._prob[decay]['low_Bs2DKPi'] = self.eff_arr[decay]['comb_a'] * self.totalAmplitudeSquared_low(-charge_flag)
+                    self._prob[decay]['low_Bs2DKPi'] = self.eff_arr[decay]['comb_a'] * self.totalAmplitudeSquared_low_Bs2DKPi(charge_flag) / self._normalisations[decay]['low_Bs2DKPi']
                 else:
-                    self._prob[decay]['low_Bs2DKPi'] = self.eff_arr[decay]['comb_abar'] * self.totalAmplitudeSquared_low(-charge_flag)
+                    self._prob[decay]['low_Bs2DKPi'] = self.eff_arr[decay]['comb_abar'] * self.totalAmplitudeSquared_low_Bs2DKPi(charge_flag) / self._normalisations[decay]['low_Bs2DKPi']
 
 
     def make_prod_prob(self):
@@ -1312,16 +1088,45 @@ class DecayNLLCalculator:
     
             return (absA**2  + absAbar **2 * rB2 + 2.0 * (absA * absAbar) * (xMinus * tf.cos(phase) + yMinus * tf.sin(phase)))
     
-    def totalAmplitudeSquared_low(self,Bsign=1, norm=1.2):
+    def totalAmplitudeSquared_low(self, Bsign=1):
+        """
+        Calculate the amplitude squared for the low mass contribution.
+
+        Args:
+        Bsign: int: 1 or -1
+        norm: float: normalisation factor for the amplitude squared
+
+        Returns:
+        float: probability for the low mass contribution
+        """
+        name = self._name+'_p' if Bsign == 1 else self._name+'_m'#If Bsign is -1, then for the low_Bs2DKPi, it will take the amplitude from opposite charge B, which is wrong
+        absA, absAbar = tf.cast(tf.abs(self._absA[name]), tf.float64), tf.cast(tf.abs(self._absAbar[name]), tf.float64)
+
+    
+        if Bsign ==1:
+            return absAbar**2
+        elif Bsign == -1:
+            return absA**2
+
+    def totalAmplitudeSquared_low_Bs2DKPi(self, Bsign=1):
+        """
+        Calculate the amplitude squared for the low mass contribution.
+
+        Args:
+        Bsign: int: 1 or -1
+        norm: float: normalisation factor for the amplitude squared
+
+        Returns:
+        float: probability for the low mass contribution
+        """
         name = self._name+'_p' if Bsign == 1 else self._name+'_m'
         absA, absAbar = tf.cast(tf.abs(self._absA[name]), tf.float64), tf.cast(tf.abs(self._absAbar[name]), tf.float64)
 
     
         if Bsign ==1:
-            return absAbar**2/norm
+            return absA**2
         elif Bsign == -1:
-            return absA**2/norm
-
+            return absAbar**2
 
     def totalAmplitudeSquared_DPi_XY(self, Bsign=1):
 

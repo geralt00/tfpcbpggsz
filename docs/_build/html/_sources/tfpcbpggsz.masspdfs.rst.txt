@@ -1,7 +1,0 @@
-tfpcbpggsz.masspdfs module
-==========================
-
-.. automodule:: tfpcbpggsz.masspdfs
-   :members:
-   :undoc-members:
-   :show-inheritance:

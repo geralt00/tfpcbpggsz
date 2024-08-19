@@ -47,8 +47,12 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -91,7 +95,7 @@
     <span class="n">tf_version</span> <span class="o">=</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="set_gpu_mem_growth">
-<a class="viewcode-back" href="../../tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.set_gpu_mem_growth">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.set_gpu_mem_growth">[docs]</a>
 <span class="k">def</span> <span class="nf">set_gpu_mem_growth</span><span class="p">():</span>
     <span class="n">gpus</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">(</span><span class="s2">&quot;GPU&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">gpus</span><span class="p">:</span>
@@ -117,7 +121,7 @@
 
 
 <div class="viewcode-block" id="Module">
-<a class="viewcode-back" href="../../tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.Module">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.Module">[docs]</a>
 <span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
@@ -127,7 +131,7 @@
 
 
 <div class="viewcode-block" id="regist_function">
-<a class="viewcode-back" href="../../tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.regist_function">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.regist_function">[docs]</a>
 <span class="k">def</span> <span class="nf">regist_function</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">base_mod</span><span class="o">=</span><span class="n">tensorflow_wrapper</span><span class="p">):</span>
     <span class="n">mod</span> <span class="o">=</span> <span class="n">base_mod</span>
     <span class="n">names</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
@@ -151,7 +155,7 @@
 
 <span class="c1"># @regist_function(&quot;cross&quot;, base_mod=tf)</span>
 <div class="viewcode-block" id="numpy_cross">
-<a class="viewcode-back" href="../../tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.numpy_cross">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.tensorflow_wrapper.html#tfpcbpggsz.tensorflow_wrapper.numpy_cross">[docs]</a>
 <span class="k">def</span> <span class="nf">numpy_cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>

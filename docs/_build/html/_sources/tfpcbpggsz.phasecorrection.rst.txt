@@ -1,7 +1,0 @@
-tfpcbpggsz.phasecorrection module
-=================================
-
-.. automodule:: tfpcbpggsz.phasecorrection
-   :members:
-   :undoc-members:
-   :show-inheritance:

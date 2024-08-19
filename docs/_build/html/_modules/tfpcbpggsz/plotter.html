@@ -47,8 +47,12 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -87,7 +91,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 
 <div class="viewcode-block" id="plotter">
-<a class="viewcode-back" href="../../tfpcbpggsz.plotter.html#tfpcbpggsz.plotter.plotter">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.plotter.html#tfpcbpggsz.plotter.plotter">[docs]</a>
 <span class="k">class</span> <span class="nc">plotter</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -103,7 +107,7 @@
 
     
 <div class="viewcode-block" id="plotter.plot_and_save">
-<a class="viewcode-back" href="../../tfpcbpggsz.plotter.html#tfpcbpggsz.plotter.plotter.plot_and_save">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.plotter.html#tfpcbpggsz.plotter.plotter.plot_and_save">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_and_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         
         <span class="c1">#if no key mc_noeff in the dictionary self._config._amp, load the data</span>
@@ -138,7 +142,7 @@
 
         
 <div class="viewcode-block" id="plotter.plot_decays">
-<a class="viewcode-back" href="../../tfpcbpggsz.plotter.html#tfpcbpggsz.plotter.plotter.plot_decays">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.plotter.html#tfpcbpggsz.plotter.plotter.plot_decays">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_decays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="s1">&#39;b2dk_LL_p&#39;</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="n">histos</span><span class="o">=</span><span class="p">{}</span>
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span>

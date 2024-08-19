@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
 import iminuit
-from core import DecayNLLCalculator
+from tfpcbpggsz.core import DecayNLLCalculator
 
 class fit:
 

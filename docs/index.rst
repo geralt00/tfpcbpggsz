@@ -9,9 +9,6 @@ TFPCBPGGSZ is a Python package for for the Phase-Corrected(PC) BPGGSZ analysis.
 It is developed using the TensorFlow library and boosting the performance of the BPGGSZ analysis, when running on a GPU.
 
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
 
 
 .. toctree::

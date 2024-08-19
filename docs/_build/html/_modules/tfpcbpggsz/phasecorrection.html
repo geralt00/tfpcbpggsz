@@ -47,8 +47,12 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -82,7 +86,7 @@
 
 
 <div class="viewcode-block" id="PhaseCorrection">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection">[docs]</a>
 <span class="k">class</span> <span class="nc">PhaseCorrection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for phase correction</span>
@@ -105,7 +109,7 @@
 
 
 <div class="viewcode-block" id="PhaseCorrection.do_bias">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.do_bias">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.do_bias">[docs]</a>
     <span class="k">def</span> <span class="nf">do_bias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if the phase correction is for adding bias, set defult parameter first</span>
@@ -142,7 +146,7 @@
 
 
 <div class="viewcode-block" id="PhaseCorrection.PhaseCorrection">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.PhaseCorrection">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.PhaseCorrection">[docs]</a>
     <span class="k">def</span> <span class="nf">PhaseCorrection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The phase correction for the given coordinates</span>
@@ -162,7 +166,7 @@
 
 
 <div class="viewcode-block" id="PhaseCorrection.set_coefficients">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.set_coefficients">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.set_coefficients">[docs]</a>
     <span class="k">def</span> <span class="nf">set_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the coefficients for the phase correction</span>
@@ -183,7 +187,7 @@
                          
 
 <div class="viewcode-block" id="PhaseCorrection.polynomial">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.polynomial">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.polynomial">[docs]</a>
     <span class="k">def</span> <span class="nf">polynomial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Returns the nth order polynomial of coordinate x, where the coordinate is based on the SRD coordinates</span>
@@ -197,7 +201,7 @@
 
 
 <div class="viewcode-block" id="PhaseCorrection.legendre">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.legendre">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.legendre">[docs]</a>
     <span class="k">def</span> <span class="nf">legendre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the nth order Legendre polynomial of the given coordinate</span>
@@ -212,7 +216,7 @@
         
 
 <div class="viewcode-block" id="PhaseCorrection.gaussianExponential">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.gaussianExponential">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.gaussianExponential">[docs]</a>
     <span class="k">def</span> <span class="nf">gaussianExponential</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the exponential term of the Gaussian model for the given coordinates</span>
@@ -224,7 +228,7 @@
     
 
 <div class="viewcode-block" id="PhaseCorrection.bias">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.bias">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.bias">[docs]</a>
     <span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the bias value at the given coordinates using a Gaussian model.&quot;&quot;&quot;</span>
 
@@ -253,7 +257,7 @@
 
     
 <div class="viewcode-block" id="PhaseCorrection.eval_bias">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.eval_bias">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.eval_bias">[docs]</a>
     <span class="k">def</span> <span class="nf">eval_bias</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the bias for the given coordinates</span>
@@ -265,7 +269,7 @@
 
 
 <div class="viewcode-block" id="PhaseCorrection.eval_corr_norm">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.eval_corr_norm">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.eval_corr_norm">[docs]</a>
     <span class="k">def</span> <span class="nf">eval_corr_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the phase correction for the given coordinates</span>
@@ -279,13 +283,13 @@
 
 
 <div class="viewcode-block" id="PhaseCorrection.eval_corr">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.eval_corr">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.eval_corr">[docs]</a>
     <span class="k">def</span> <span class="nf">eval_corr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_corr_norm</span><span class="p">)(</span><span class="n">coords</span><span class="p">)</span>  </div>
 
     
 <div class="viewcode-block" id="PhaseCorrection.term_to_string">
-<a class="viewcode-back" href="../../tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.term_to_string">[docs]</a>
+<a class="viewcode-back" href="../../api/tfpcbpggsz.phasecorrection.html#tfpcbpggsz.phasecorrection.PhaseCorrection.term_to_string">[docs]</a>
     <span class="k">def</span> <span class="nf">term_to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the string representation of the term</span>

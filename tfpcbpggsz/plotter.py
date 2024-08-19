@@ -6,7 +6,7 @@ from matplotlib.colors import ListedColormap
 from plothist import get_color_palette
 from plothist import make_hist, plot_error_hist
 from plothist import plot_hist, add_text
-from core import DecayNLLCalculator
+from tfpcbpggsz.core import DecayNLLCalculator
 import os 
 import time
 
