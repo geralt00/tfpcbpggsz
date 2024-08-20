@@ -8,9 +8,9 @@ from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
 
 class pcbpggsz_generator:
-    """
-    Class for PCBPGGSZ generator
-    """
+    #"""
+    #Class for PCBPGGSZ generator
+    #"""
 
     def __init__(self, **kwargs):
         self.type = type
@@ -27,7 +27,7 @@ class pcbpggsz_generator:
         self.apply_eff = False
 
     def add_bias(self, correctionType="singleBias"):
-        """Adding the bias in different type"""
+        #"""Adding the bias in different type"""
 
         self.pc = PhaseCorrection()
         self.pc.DEBUG = self.DEBUG
@@ -35,7 +35,7 @@ class pcbpggsz_generator:
         self.pc.PhaseCorrection()
 
     def add_eff(self, charge, decay):
-        """Calling the efficiency map for decay"""
+        #"""Calling the efficiency map for decay"""
 
         self.charge = charge
         self.decay = decay
@@ -43,26 +43,26 @@ class pcbpggsz_generator:
         print(f'Efficiency applied with: {decay}_{charge}')
 
     def eval_bias(self, data):
-        """Getting the bias value for given 4 momentum"""
+        #"""Getting the bias value for given 4 momentum"""
         return self.pc.eval_bias(p4_to_phsp(data))
     
     def eval_eff(self, data):
-        """Getting the efficiency value for given 4 momentum"""
+        #"""Getting the efficiency value for given 4 momentum"""
         return eff_fun(p4_to_srd(data), self.charge, self.decay)
     
     def make_eff_fun(self):
         return self.eval_eff 
 
     def make_fun(self):
-        """Making prod function for decay rate and efficiency"""
+        #"""Making prod function for decay rate and efficiency"""
         return  lambda data:   self.make_eff_fun()(data) * self.formula()(data) 
 
     def generate(self, N=1000, type="b2dh", **kwargs):
-        """
-        PCBPGGSZ generator
-        Usage:
-        gen = pcbpggsz_generator()
-        """
+        #"""
+        #PCBPGGSZ generator
+        #Usage:
+        #gen = pcbpggsz_generator()
+        #"""
 
         phsp = PhaseSpaceGenerator().generate
 
@@ -105,7 +105,7 @@ class pcbpggsz_generator:
 
 
     def amp(self, data):
-        """Calculate the amplitude of the decay from momenta."""    
+        #"""Calculate the amplitude of the decay from momenta."""    
 
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
@@ -115,7 +115,7 @@ class pcbpggsz_generator:
         return amp_i
     
     def ampbar(self, data):
-        """Calculate the amplitude of the decay from momenta."""
+        #"""Calculate the amplitude of the decay from momenta."""
 
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
@@ -126,7 +126,7 @@ class pcbpggsz_generator:
         return ampbar_i
 
     def formula(self):
-        """Decay rate formula"""
+        #"""Decay rate formula"""
 
         if self.type[:4] == 'flav':
             return  self.flavour
@@ -143,7 +143,7 @@ class pcbpggsz_generator:
 
     
     def flavour(self, data):
-        """Decay rate for flav tags"""
+        #"""Decay rate for flav tags"""
 
         if self.type == 'flav':
             absAmp = tf.abs(self.ampbar(data))**2
@@ -158,7 +158,7 @@ class pcbpggsz_generator:
         return Gamma
 
     def cp_tag(self, data):
-        """Decay rate for CP tags"""
+        #"""Decay rate for CP tags"""
 
         DD_sign=-1
         phase = DeltadeltaD(self.amp(data), self.ampbar(data))
@@ -173,7 +173,7 @@ class pcbpggsz_generator:
 
 
     def cp_mixed(self, data_sig, data_tag):
-        """Decay rate for CP mixed tags"""
+        #"""Decay rate for CP mixed tags"""
 
         phase_sig = DeltadeltaD(self.amp(data_sig), self.ampbar(data_sig))
         phase_correction_sig = tf.zeros_like(phase_sig) if self.pc is None else self.eval_bias(data_sig)
@@ -193,7 +193,7 @@ class pcbpggsz_generator:
         return Gamma
 
     def b2dh(self, data):
-        """Decay rate for B2Dh decay"""
+        #"""Decay rate for B2Dh decay"""
 
         rb, deltaB, gamma = self.rb, deg_to_rad(self.deltaB), deg_to_rad(self.gamma)
         absAmp = tf.abs(self.amp(data))
@@ -213,7 +213,7 @@ class pcbpggsz_generator:
         return Gamma
     
     def phsp_fun(self, data):
-        """Phase space decay rate, uniform distribution"""
+        #"""Phase space decay rate, uniform distribution"""
 
         Gamma = tf.ones_like(data[0][:,0], dtype=tf.float64)
         return Gamma
