@@ -1,7 +1,7 @@
 from tfpcbpggsz.tensorflow_wrapper import *
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
 from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd
-from tfpcbpggsz.amp_up import *
+from tfpcbpggsz.amp_up import D0ToKSpipi2018
 from tfpcbpggsz.generator.generator import multi_sampling, multi_sampling2
 from tfpcbpggsz.core import DeltadeltaD
 from tfpcbpggsz.phasecorrection import PhaseCorrection
@@ -17,7 +17,7 @@ class pcbpggsz_generator:
 
         self.Gamma=[]
         self.phsp = PhaseSpaceGenerator()
-        self.Kspipi = PyD0ToKSpipi2018()
+        self.Kspipi = D0ToKSpipi2018()
         self.Kspipi.init()
         self.charge = 1
         self.fun = None
