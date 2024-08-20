@@ -11,9 +11,12 @@ from tfpcbpggsz.core import eff_fun
 
 class pcbpggsz_generator:
     """
-    A generator for the decay D0 -> Ks0 pi+ pi-.
-    type: str
-        The type of the generator. Can be flav, flavbar, cp_even, cp_odd, cp_mixed, d2dh
+        A generator for the decay process D0 -> KS0 pi+ pi-.
+
+    Parameters:
+        type: str
+            The type of the generator. 
+            Options: [flav, flavbar, cp even, cp odd, cp mixed, btodh]
     """
     def __init__(self, **kwargs):
         self.type = type

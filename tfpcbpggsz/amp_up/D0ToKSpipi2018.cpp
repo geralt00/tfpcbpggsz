@@ -4,13 +4,16 @@
 {
     "distutils": {
         "depends": [
-            "D0ToKSpipi2018.cxx",
-            "D0ToKSpipi2018.h"
+            "/software/pc24403/tfpcbpggsz/tfpcbpggsz/amp_up/D0ToKSpipi2018.cxx",
+            "/software/pc24403/tfpcbpggsz/tfpcbpggsz/amp_up/D0ToKSpipi2018.h"
+        ],
+        "include_dirs": [
+            "/software/pc24403/tfpcbpggsz/tfpcbpggsz/amp_up"
         ],
         "language": "c++",
         "name": "D0ToKSpipi2018",
         "sources": [
-            "D0ToKSpipi2018.pyx"
+            "/software/pc24403/tfpcbpggsz/tfpcbpggsz/amp_up/D0ToKSpipi2018.pyx"
         ]
     },
     "module_name": "D0ToKSpipi2018"
@@ -1702,8 +1705,8 @@ struct __pyx_memoryviewslice_obj;
  *         c_complex[double] D0_rho_770_0_pip_pim__K0S0__wParams(double[:] x1);
  * 
  * cdef class PyD0ToKSpipi2018:             # <<<<<<<<<<<<<<
- *     cdef D0ToKSpipi2018* thisptr  # Pointer to the C++ class instance
- * 
+ *     """
+ *     Python wrapper for the D0ToKSpipi2018 class (upgraded version----tensorized version)
  */
 struct __pyx_obj_14D0ToKSpipi2018_PyD0ToKSpipi2018 {
   PyObject_HEAD
@@ -3059,7 +3062,6 @@ static const char __pyx_k_pyx_PickleError[] = "__pyx_PickleError";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
 static const char __pyx_k_PyD0ToKSpipi2018[] = "PyD0ToKSpipi2018";
 static const char __pyx_k_pyx_unpickle_Enum[] = "__pyx_unpickle_Enum";
-static const char __pyx_k_D0ToKSpipi2018_pyx[] = "D0ToKSpipi2018.pyx";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_strided_and_direct[] = "<strided and direct>";
@@ -3079,6 +3081,7 @@ static const char __pyx_k_Step_may_not_be_zero_axis_d[] = "Step may not be zero 
 static const char __pyx_k_itemsize_0_for_cython_array[] = "itemsize <= 0 for cython.array";
 static const char __pyx_k_unable_to_allocate_array_data[] = "unable to allocate array data.";
 static const char __pyx_k_strided_and_direct_or_indirect[] = "<strided and direct or indirect>";
+static const char __pyx_k_software_pc24403_tfpcbpggsz_tfp[] = "/software/pc24403/tfpcbpggsz/tfpcbpggsz/amp_up/D0ToKSpipi2018.pyx";
 static const char __pyx_k_All_dimensions_preceding_dimensi[] = "All dimensions preceding dimension %d must be indexed and not sliced";
 static const char __pyx_k_Buffer_view_does_not_expose_stri[] = "Buffer view does not expose strides";
 static const char __pyx_k_Can_only_create_a_buffer_that_is[] = "Can only create a buffer that is contiguous in memory.";
@@ -3209,7 +3212,6 @@ typedef struct {
   PyObject *__pyx_kp_u_Cannot_index_with_type;
   PyObject *__pyx_kp_s_Cannot_transpose_memoryview_with;
   PyObject *__pyx_n_s_D0ToKSpipi2018;
-  PyObject *__pyx_kp_s_D0ToKSpipi2018_pyx;
   PyObject *__pyx_kp_s_Dimension_d_is_not_direct;
   PyObject *__pyx_n_s_Ellipsis;
   PyObject *__pyx_kp_s_Empty_shape_tuple_for_cython_arr;
@@ -3324,6 +3326,7 @@ typedef struct {
   PyObject *__pyx_n_s_setstate_cython;
   PyObject *__pyx_n_s_shape;
   PyObject *__pyx_n_s_size;
+  PyObject *__pyx_kp_s_software_pc24403_tfpcbpggsz_tfp;
   PyObject *__pyx_n_s_spec;
   PyObject *__pyx_n_s_start;
   PyObject *__pyx_n_s_step;
@@ -3434,7 +3437,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_kp_u_Cannot_index_with_type);
   Py_CLEAR(clear_module_state->__pyx_kp_s_Cannot_transpose_memoryview_with);
   Py_CLEAR(clear_module_state->__pyx_n_s_D0ToKSpipi2018);
-  Py_CLEAR(clear_module_state->__pyx_kp_s_D0ToKSpipi2018_pyx);
   Py_CLEAR(clear_module_state->__pyx_kp_s_Dimension_d_is_not_direct);
   Py_CLEAR(clear_module_state->__pyx_n_s_Ellipsis);
   Py_CLEAR(clear_module_state->__pyx_kp_s_Empty_shape_tuple_for_cython_arr);
@@ -3549,6 +3551,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_setstate_cython);
   Py_CLEAR(clear_module_state->__pyx_n_s_shape);
   Py_CLEAR(clear_module_state->__pyx_n_s_size);
+  Py_CLEAR(clear_module_state->__pyx_kp_s_software_pc24403_tfpcbpggsz_tfp);
   Py_CLEAR(clear_module_state->__pyx_n_s_spec);
   Py_CLEAR(clear_module_state->__pyx_n_s_start);
   Py_CLEAR(clear_module_state->__pyx_n_s_step);
@@ -3637,7 +3640,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_kp_u_Cannot_index_with_type);
   Py_VISIT(traverse_module_state->__pyx_kp_s_Cannot_transpose_memoryview_with);
   Py_VISIT(traverse_module_state->__pyx_n_s_D0ToKSpipi2018);
-  Py_VISIT(traverse_module_state->__pyx_kp_s_D0ToKSpipi2018_pyx);
   Py_VISIT(traverse_module_state->__pyx_kp_s_Dimension_d_is_not_direct);
   Py_VISIT(traverse_module_state->__pyx_n_s_Ellipsis);
   Py_VISIT(traverse_module_state->__pyx_kp_s_Empty_shape_tuple_for_cython_arr);
@@ -3752,6 +3754,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_setstate_cython);
   Py_VISIT(traverse_module_state->__pyx_n_s_shape);
   Py_VISIT(traverse_module_state->__pyx_n_s_size);
+  Py_VISIT(traverse_module_state->__pyx_kp_s_software_pc24403_tfpcbpggsz_tfp);
   Py_VISIT(traverse_module_state->__pyx_n_s_spec);
   Py_VISIT(traverse_module_state->__pyx_n_s_start);
   Py_VISIT(traverse_module_state->__pyx_n_s_step);
@@ -3858,7 +3861,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_kp_u_Cannot_index_with_type __pyx_mstate_global->__pyx_kp_u_Cannot_index_with_type
 #define __pyx_kp_s_Cannot_transpose_memoryview_with __pyx_mstate_global->__pyx_kp_s_Cannot_transpose_memoryview_with
 #define __pyx_n_s_D0ToKSpipi2018 __pyx_mstate_global->__pyx_n_s_D0ToKSpipi2018
-#define __pyx_kp_s_D0ToKSpipi2018_pyx __pyx_mstate_global->__pyx_kp_s_D0ToKSpipi2018_pyx
 #define __pyx_kp_s_Dimension_d_is_not_direct __pyx_mstate_global->__pyx_kp_s_Dimension_d_is_not_direct
 #define __pyx_n_s_Ellipsis __pyx_mstate_global->__pyx_n_s_Ellipsis
 #define __pyx_kp_s_Empty_shape_tuple_for_cython_arr __pyx_mstate_global->__pyx_kp_s_Empty_shape_tuple_for_cython_arr
@@ -3973,6 +3975,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_setstate_cython __pyx_mstate_global->__pyx_n_s_setstate_cython
 #define __pyx_n_s_shape __pyx_mstate_global->__pyx_n_s_shape
 #define __pyx_n_s_size __pyx_mstate_global->__pyx_n_s_size
+#define __pyx_kp_s_software_pc24403_tfpcbpggsz_tfp __pyx_mstate_global->__pyx_kp_s_software_pc24403_tfpcbpggsz_tfp
 #define __pyx_n_s_spec __pyx_mstate_global->__pyx_n_s_spec
 #define __pyx_n_s_start __pyx_mstate_global->__pyx_n_s_start
 #define __pyx_n_s_step __pyx_mstate_global->__pyx_n_s_step
@@ -18061,7 +18064,7 @@ static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *__
   return __pyx_r;
 }
 
-/* "D0ToKSpipi2018.pyx":66
+/* "D0ToKSpipi2018.pyx":69
  *     cdef D0ToKSpipi2018* thisptr  # Pointer to the C++ class instance
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -18096,7 +18099,7 @@ static int __pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_1__cinit__(PyObject *__p
 static int __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018___cinit__(struct __pyx_obj_14D0ToKSpipi2018_PyD0ToKSpipi2018 *__pyx_v_self) {
   int __pyx_r;
 
-  /* "D0ToKSpipi2018.pyx":67
+  /* "D0ToKSpipi2018.pyx":70
  * 
  *     def __cinit__(self):
  *         self.thisptr = new D0ToKSpipi2018()             # <<<<<<<<<<<<<<
@@ -18105,7 +18108,7 @@ static int __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018___cinit__(struct __pyx_o
  */
   __pyx_v_self->thisptr = new D0ToKSpipi2018();
 
-  /* "D0ToKSpipi2018.pyx":66
+  /* "D0ToKSpipi2018.pyx":69
  *     cdef D0ToKSpipi2018* thisptr  # Pointer to the C++ class instance
  * 
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -18118,7 +18121,7 @@ static int __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018___cinit__(struct __pyx_o
   return __pyx_r;
 }
 
-/* "D0ToKSpipi2018.pyx":69
+/* "D0ToKSpipi2018.pyx":72
  *         self.thisptr = new D0ToKSpipi2018()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -18141,7 +18144,7 @@ static void __pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_3__dealloc__(PyObject *
 
 static void __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_2__dealloc__(struct __pyx_obj_14D0ToKSpipi2018_PyD0ToKSpipi2018 *__pyx_v_self) {
 
-  /* "D0ToKSpipi2018.pyx":70
+  /* "D0ToKSpipi2018.pyx":73
  * 
  *     def __dealloc__(self):
  *         del self.thisptr             # <<<<<<<<<<<<<<
@@ -18150,7 +18153,7 @@ static void __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_2__dealloc__(struct __p
  */
   delete __pyx_v_self->thisptr;
 
-  /* "D0ToKSpipi2018.pyx":69
+  /* "D0ToKSpipi2018.pyx":72
  *         self.thisptr = new D0ToKSpipi2018()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -18161,12 +18164,12 @@ static void __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_2__dealloc__(struct __p
   /* function exit code */
 }
 
-/* "D0ToKSpipi2018.pyx":72
+/* "D0ToKSpipi2018.pyx":75
  *         del self.thisptr
  * 
  *     def init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.init()
- * 
+ *         """
+ *         Initialize the D0ToKSpipi2018 class.
  */
 
 /* Python wrapper */
@@ -18177,7 +18180,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init = {"init", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+PyDoc_STRVAR(__pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_4init, "\n        Initialize the D0ToKSpipi2018 class.\n        ");
+static PyMethodDef __pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init = {"init", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_4init};
 static PyObject *__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
@@ -18215,21 +18219,21 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_4init(struct __pyx
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("init", 1);
 
-  /* "D0ToKSpipi2018.pyx":73
- * 
- *     def init(self):
+  /* "D0ToKSpipi2018.pyx":79
+ *         Initialize the D0ToKSpipi2018 class.
+ *         """
  *         self.thisptr.init()             # <<<<<<<<<<<<<<
  * 
  *     def get_amp(self, list k0, list pip, list pim):
  */
   __pyx_v_self->thisptr->init();
 
-  /* "D0ToKSpipi2018.pyx":72
+  /* "D0ToKSpipi2018.pyx":75
  *         del self.thisptr
  * 
  *     def init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.init()
- * 
+ *         """
+ *         Initialize the D0ToKSpipi2018 class.
  */
 
   /* function exit code */
@@ -18239,12 +18243,12 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_4init(struct __pyx
   return __pyx_r;
 }
 
-/* "D0ToKSpipi2018.pyx":75
+/* "D0ToKSpipi2018.pyx":81
  *         self.thisptr.init()
  * 
  *     def get_amp(self, list k0, list pip, list pim):             # <<<<<<<<<<<<<<
- *         cdef vector[double] ck0 = k0
- *         cdef vector[double] cpip = pip
+ *         """
+ *         Get the amplitude for a given set of kinematic variables., tensorized version
  */
 
 /* Python wrapper */
@@ -18255,7 +18259,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp = {"get_amp", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+PyDoc_STRVAR(__pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_6get_amp, "\n        Get the amplitude for a given set of kinematic variables., tensorized version\n        ");
+static PyMethodDef __pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp = {"get_amp", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_6get_amp};
 static PyObject *__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
@@ -18306,7 +18311,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -18314,9 +18319,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("get_amp", 1, 3, 3, 1); __PYX_ERR(0, 75, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_amp", 1, 3, 3, 1); __PYX_ERR(0, 81, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -18324,14 +18329,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("get_amp", 1, 3, 3, 2); __PYX_ERR(0, 75, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_amp", 1, 3, 3, 2); __PYX_ERR(0, 81, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "get_amp") < 0)) __PYX_ERR(0, 75, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "get_amp") < 0)) __PYX_ERR(0, 81, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -18346,7 +18351,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get_amp", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 75, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("get_amp", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 81, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -18360,9 +18365,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_k0), (&PyList_Type), 1, "k0", 1))) __PYX_ERR(0, 75, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pip), (&PyList_Type), 1, "pip", 1))) __PYX_ERR(0, 75, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pim), (&PyList_Type), 1, "pim", 1))) __PYX_ERR(0, 75, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_k0), (&PyList_Type), 1, "k0", 1))) __PYX_ERR(0, 81, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pip), (&PyList_Type), 1, "pip", 1))) __PYX_ERR(0, 81, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pim), (&PyList_Type), 1, "pim", 1))) __PYX_ERR(0, 81, __pyx_L1_error)
   __pyx_r = __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_6get_amp(((struct __pyx_obj_14D0ToKSpipi2018_PyD0ToKSpipi2018 *)__pyx_v_self), __pyx_v_k0, __pyx_v_pip, __pyx_v_pim);
 
   /* function exit code */
@@ -18393,37 +18398,37 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_6get_amp(struct __
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_amp", 1);
 
-  /* "D0ToKSpipi2018.pyx":76
- * 
- *     def get_amp(self, list k0, list pip, list pim):
+  /* "D0ToKSpipi2018.pyx":85
+ *         Get the amplitude for a given set of kinematic variables., tensorized version
+ *         """
  *         cdef vector[double] ck0 = k0             # <<<<<<<<<<<<<<
  *         cdef vector[double] cpip = pip
  *         cdef vector[double] cpim = pim
  */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_k0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 76, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_k0); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 85, __pyx_L1_error)
   __pyx_v_ck0 = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "D0ToKSpipi2018.pyx":77
- *     def get_amp(self, list k0, list pip, list pim):
+  /* "D0ToKSpipi2018.pyx":86
+ *         """
  *         cdef vector[double] ck0 = k0
  *         cdef vector[double] cpip = pip             # <<<<<<<<<<<<<<
  *         cdef vector[double] cpim = pim
  * 
  */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_pip); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_pip); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L1_error)
   __pyx_v_cpip = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "D0ToKSpipi2018.pyx":78
+  /* "D0ToKSpipi2018.pyx":87
  *         cdef vector[double] ck0 = k0
  *         cdef vector[double] cpip = pip
  *         cdef vector[double] cpim = pim             # <<<<<<<<<<<<<<
  * 
  *         return self.thisptr.get_amp(ck0, cpip, cpim)
  */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_pim); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_pim); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
   __pyx_v_cpim = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_1);
 
-  /* "D0ToKSpipi2018.pyx":80
+  /* "D0ToKSpipi2018.pyx":89
  *         cdef vector[double] cpim = pim
  * 
  *         return self.thisptr.get_amp(ck0, cpip, cpim)             # <<<<<<<<<<<<<<
@@ -18431,18 +18436,18 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_6get_amp(struct __
  *     def AMP(self, list[list[double]] ks, list[list[double]] pi1, list[list[double]] pi2):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_convert_complex_to_py_double(__pyx_v_self->thisptr->get_amp(__pyx_v_ck0, __pyx_v_cpip, __pyx_v_cpim)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_complex_to_py_double(__pyx_v_self->thisptr->get_amp(__pyx_v_ck0, __pyx_v_cpip, __pyx_v_cpim)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "D0ToKSpipi2018.pyx":75
+  /* "D0ToKSpipi2018.pyx":81
  *         self.thisptr.init()
  * 
  *     def get_amp(self, list k0, list pip, list pim):             # <<<<<<<<<<<<<<
- *         cdef vector[double] ck0 = k0
- *         cdef vector[double] cpip = pip
+ *         """
+ *         Get the amplitude for a given set of kinematic variables., tensorized version
  */
 
   /* function exit code */
@@ -18456,12 +18461,12 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_6get_amp(struct __
   return __pyx_r;
 }
 
-/* "D0ToKSpipi2018.pyx":82
+/* "D0ToKSpipi2018.pyx":91
  *         return self.thisptr.get_amp(ck0, cpip, cpim)
  * 
  *     def AMP(self, list[list[double]] ks, list[list[double]] pi1, list[list[double]] pi2):             # <<<<<<<<<<<<<<
- *         cdef vector[vector[double]] cks
- *         cdef vector[vector[double]] cpi1
+ *         """
+ *         Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay., old version, not tensorized
  */
 
 /* Python wrapper */
@@ -18472,7 +18477,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP = {"AMP", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+PyDoc_STRVAR(__pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP, "\n        Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay., old version, not tensorized\n        ");
+static PyMethodDef __pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP = {"AMP", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP};
 static PyObject *__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
@@ -18523,7 +18529,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -18531,9 +18537,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("AMP", 1, 3, 3, 1); __PYX_ERR(0, 82, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("AMP", 1, 3, 3, 1); __PYX_ERR(0, 91, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -18541,14 +18547,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("AMP", 1, 3, 3, 2); __PYX_ERR(0, 82, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("AMP", 1, 3, 3, 2); __PYX_ERR(0, 91, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "AMP") < 0)) __PYX_ERR(0, 82, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "AMP") < 0)) __PYX_ERR(0, 91, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -18563,7 +18569,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("AMP", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 82, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("AMP", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 91, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -18577,9 +18583,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_ks), (&PyList_Type), 1, "ks", 1))) __PYX_ERR(0, 82, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pi1), (&PyList_Type), 1, "pi1", 1))) __PYX_ERR(0, 82, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pi2), (&PyList_Type), 1, "pi2", 1))) __PYX_ERR(0, 82, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_ks), (&PyList_Type), 1, "ks", 1))) __PYX_ERR(0, 91, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pi1), (&PyList_Type), 1, "pi1", 1))) __PYX_ERR(0, 91, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pi2), (&PyList_Type), 1, "pi2", 1))) __PYX_ERR(0, 91, __pyx_L1_error)
   __pyx_r = __pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP(((struct __pyx_obj_14D0ToKSpipi2018_PyD0ToKSpipi2018 *)__pyx_v_self), __pyx_v_ks, __pyx_v_pi1, __pyx_v_pi2);
 
   /* function exit code */
@@ -18618,7 +18624,7 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP(struct __pyx_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("AMP", 1);
 
-  /* "D0ToKSpipi2018.pyx":88
+  /* "D0ToKSpipi2018.pyx":100
  *         cdef vector[c_complex[double]] result
  * 
  *         for i in range(len(ks)):             # <<<<<<<<<<<<<<
@@ -18627,39 +18633,39 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP(struct __pyx_
  */
   if (unlikely(__pyx_v_ks == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-    __PYX_ERR(0, 88, __pyx_L1_error)
+    __PYX_ERR(0, 100, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_PyList_GET_SIZE(__pyx_v_ks); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyList_GET_SIZE(__pyx_v_ks); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 100, __pyx_L1_error)
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "D0ToKSpipi2018.pyx":89
+    /* "D0ToKSpipi2018.pyx":101
  * 
  *         for i in range(len(ks)):
  *             result.push_back(self.get_amp(ks[i], pi1[i], pi2[i]))             # <<<<<<<<<<<<<<
  * 
  *         return result
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_get_amp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 89, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_get_amp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     if (unlikely(__pyx_v_ks == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 89, __pyx_L1_error)
+      __PYX_ERR(0, 101, __pyx_L1_error)
     }
-    __pyx_t_6 = __Pyx_GetItemInt_List(__pyx_v_ks, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 1, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 89, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_GetItemInt_List(__pyx_v_ks, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 1, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     if (unlikely(__pyx_v_pi1 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 89, __pyx_L1_error)
+      __PYX_ERR(0, 101, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_GetItemInt_List(__pyx_v_pi1, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 89, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_GetItemInt_List(__pyx_v_pi1, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     if (unlikely(__pyx_v_pi2 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 89, __pyx_L1_error)
+      __PYX_ERR(0, 101, __pyx_L1_error)
     }
-    __pyx_t_8 = __Pyx_GetItemInt_List(__pyx_v_pi2, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 89, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_GetItemInt_List(__pyx_v_pi2, __pyx_v_i, Py_ssize_t, 1, PyInt_FromSsize_t, 1, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_9 = NULL;
     __pyx_t_10 = 0;
@@ -18682,21 +18688,21 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP(struct __pyx_
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 101, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
-    __pyx_t_11 = __pyx_convert_complex_from_py_double(__pyx_t_4); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 89, __pyx_L1_error)
+    __pyx_t_11 = __pyx_convert_complex_from_py_double(__pyx_t_4); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     try {
       __pyx_v_result.push_back(__pyx_t_11);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 89, __pyx_L1_error)
+      __PYX_ERR(0, 101, __pyx_L1_error)
     }
   }
 
-  /* "D0ToKSpipi2018.pyx":91
+  /* "D0ToKSpipi2018.pyx":103
  *             result.push_back(self.get_amp(ks[i], pi1[i], pi2[i]))
  * 
  *         return result             # <<<<<<<<<<<<<<
@@ -18704,18 +18710,18 @@ static PyObject *__pyx_pf_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP(struct __pyx_
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_complex_3c_double_3e___(__pyx_v_result); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_complex_3c_double_3e___(__pyx_v_result); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "D0ToKSpipi2018.pyx":82
+  /* "D0ToKSpipi2018.pyx":91
  *         return self.thisptr.get_amp(ck0, cpip, cpim)
  * 
  *     def AMP(self, list[list[double]] ks, list[list[double]] pi1, list[list[double]] pi2):             # <<<<<<<<<<<<<<
- *         cdef vector[vector[double]] cks
- *         cdef vector[vector[double]] cpi1
+ *         """
+ *         Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay., old version, not tensorized
  */
 
   /* function exit code */
@@ -18995,9 +19001,9 @@ static void __pyx_tp_dealloc_14D0ToKSpipi2018_PyD0ToKSpipi2018(PyObject *o) {
 }
 
 static PyMethodDef __pyx_methods_14D0ToKSpipi2018_PyD0ToKSpipi2018[] = {
-  {"init", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"get_amp", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"AMP", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"init", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_4init},
+  {"get_amp", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_6get_amp},
+  {"AMP", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_14D0ToKSpipi2018_16PyD0ToKSpipi2018_8AMP},
   {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_11__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_14D0ToKSpipi2018_16PyD0ToKSpipi2018_13__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
@@ -19005,6 +19011,7 @@ static PyMethodDef __pyx_methods_14D0ToKSpipi2018_PyD0ToKSpipi2018[] = {
 #if CYTHON_USE_TYPE_SPECS
 static PyType_Slot __pyx_type_14D0ToKSpipi2018_PyD0ToKSpipi2018_slots[] = {
   {Py_tp_dealloc, (void *)__pyx_tp_dealloc_14D0ToKSpipi2018_PyD0ToKSpipi2018},
+  {Py_tp_doc, (void *)PyDoc_STR("\n    Python wrapper for the D0ToKSpipi2018 class (upgraded version----tensorized version)    \n    ")},
   {Py_tp_methods, (void *)__pyx_methods_14D0ToKSpipi2018_PyD0ToKSpipi2018},
   {Py_tp_new, (void *)__pyx_tp_new_14D0ToKSpipi2018_PyD0ToKSpipi2018},
   {0, 0},
@@ -19049,7 +19056,7 @@ static PyTypeObject __pyx_type_14D0ToKSpipi2018_PyD0ToKSpipi2018 = {
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  0, /*tp_doc*/
+  PyDoc_STR("\n    Python wrapper for the D0ToKSpipi2018 class (upgraded version----tensorized version)    \n    "), /*tp_doc*/
   0, /*tp_traverse*/
   0, /*tp_clear*/
   0, /*tp_richcompare*/
@@ -20076,7 +20083,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_kp_u_Cannot_index_with_type, __pyx_k_Cannot_index_with_type, sizeof(__pyx_k_Cannot_index_with_type), 0, 1, 0, 0},
     {&__pyx_kp_s_Cannot_transpose_memoryview_with, __pyx_k_Cannot_transpose_memoryview_with, sizeof(__pyx_k_Cannot_transpose_memoryview_with), 0, 0, 1, 0},
     {&__pyx_n_s_D0ToKSpipi2018, __pyx_k_D0ToKSpipi2018, sizeof(__pyx_k_D0ToKSpipi2018), 0, 0, 1, 1},
-    {&__pyx_kp_s_D0ToKSpipi2018_pyx, __pyx_k_D0ToKSpipi2018_pyx, sizeof(__pyx_k_D0ToKSpipi2018_pyx), 0, 0, 1, 0},
     {&__pyx_kp_s_Dimension_d_is_not_direct, __pyx_k_Dimension_d_is_not_direct, sizeof(__pyx_k_Dimension_d_is_not_direct), 0, 0, 1, 0},
     {&__pyx_n_s_Ellipsis, __pyx_k_Ellipsis, sizeof(__pyx_k_Ellipsis), 0, 0, 1, 1},
     {&__pyx_kp_s_Empty_shape_tuple_for_cython_arr, __pyx_k_Empty_shape_tuple_for_cython_arr, sizeof(__pyx_k_Empty_shape_tuple_for_cython_arr), 0, 0, 1, 0},
@@ -20191,6 +20197,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
     {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
     {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
+    {&__pyx_kp_s_software_pc24403_tfpcbpggsz_tfp, __pyx_k_software_pc24403_tfpcbpggsz_tfp, sizeof(__pyx_k_software_pc24403_tfpcbpggsz_tfp), 0, 0, 1, 0},
     {&__pyx_n_s_spec, __pyx_k_spec, sizeof(__pyx_k_spec), 0, 0, 1, 1},
     {&__pyx_n_s_start, __pyx_k_start, sizeof(__pyx_k_start), 0, 0, 1, 1},
     {&__pyx_n_s_step, __pyx_k_step, sizeof(__pyx_k_step), 0, 0, 1, 1},
@@ -20213,7 +20220,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 100, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 68, __pyx_L1_error)
   __pyx_builtin___import__ = __Pyx_GetBuiltinName(__pyx_n_s_import); if (!__pyx_builtin___import__) __PYX_ERR(1, 100, __pyx_L1_error)
@@ -20370,41 +20377,41 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__18);
   __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(1, 1, __pyx_L1_error)
 
-  /* "D0ToKSpipi2018.pyx":72
+  /* "D0ToKSpipi2018.pyx":75
  *         del self.thisptr
  * 
  *     def init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.init()
- * 
+ *         """
+ *         Initialize the D0ToKSpipi2018 class.
  */
-  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_tuple__20 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 75, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
-  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D0ToKSpipi2018_pyx, __pyx_n_s_init, 72, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_software_pc24403_tfpcbpggsz_tfp, __pyx_n_s_init, 75, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(0, 75, __pyx_L1_error)
 
-  /* "D0ToKSpipi2018.pyx":75
+  /* "D0ToKSpipi2018.pyx":81
  *         self.thisptr.init()
  * 
  *     def get_amp(self, list k0, list pip, list pim):             # <<<<<<<<<<<<<<
- *         cdef vector[double] ck0 = k0
- *         cdef vector[double] cpip = pip
+ *         """
+ *         Get the amplitude for a given set of kinematic variables., tensorized version
  */
-  __pyx_tuple__22 = PyTuple_Pack(7, __pyx_n_s_self, __pyx_n_s_k0, __pyx_n_s_pip, __pyx_n_s_pim, __pyx_n_s_ck0, __pyx_n_s_cpip, __pyx_n_s_cpim); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_tuple__22 = PyTuple_Pack(7, __pyx_n_s_self, __pyx_n_s_k0, __pyx_n_s_pip, __pyx_n_s_pim, __pyx_n_s_ck0, __pyx_n_s_cpip, __pyx_n_s_cpim); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
-  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D0ToKSpipi2018_pyx, __pyx_n_s_get_amp, 75, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_software_pc24403_tfpcbpggsz_tfp, __pyx_n_s_get_amp, 81, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 81, __pyx_L1_error)
 
-  /* "D0ToKSpipi2018.pyx":82
+  /* "D0ToKSpipi2018.pyx":91
  *         return self.thisptr.get_amp(ck0, cpip, cpim)
  * 
  *     def AMP(self, list[list[double]] ks, list[list[double]] pi1, list[list[double]] pi2):             # <<<<<<<<<<<<<<
- *         cdef vector[vector[double]] cks
- *         cdef vector[vector[double]] cpi1
+ *         """
+ *         Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay., old version, not tensorized
  */
-  __pyx_tuple__24 = PyTuple_Pack(9, __pyx_n_s_self, __pyx_n_s_ks, __pyx_n_s_pi1, __pyx_n_s_pi2, __pyx_n_s_cks, __pyx_n_s_cpi1, __pyx_n_s_cpi2, __pyx_n_s_result, __pyx_n_s_i); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_tuple__24 = PyTuple_Pack(9, __pyx_n_s_self, __pyx_n_s_ks, __pyx_n_s_pi1, __pyx_n_s_pi2, __pyx_n_s_cks, __pyx_n_s_cpi1, __pyx_n_s_cpi2, __pyx_n_s_result, __pyx_n_s_i); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__24);
   __Pyx_GIVEREF(__pyx_tuple__24);
-  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D0ToKSpipi2018_pyx, __pyx_n_s_AMP, 82, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_software_pc24403_tfpcbpggsz_tfp, __pyx_n_s_AMP, 91, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 91, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -21496,42 +21503,42 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_7) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "D0ToKSpipi2018.pyx":72
+  /* "D0ToKSpipi2018.pyx":75
  *         del self.thisptr
  * 
  *     def init(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.init()
- * 
+ *         """
+ *         Initialize the D0ToKSpipi2018 class.
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_PyD0ToKSpipi2018_init, NULL, __pyx_n_s_D0ToKSpipi2018, __pyx_d, ((PyObject *)__pyx_codeobj__21)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_5init, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_PyD0ToKSpipi2018_init, NULL, __pyx_n_s_D0ToKSpipi2018, __pyx_d, ((PyObject *)__pyx_codeobj__21)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 75, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018, __pyx_n_s_init, __pyx_t_7) < 0) __PYX_ERR(0, 72, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018, __pyx_n_s_init, __pyx_t_7) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   PyType_Modified(__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018);
 
-  /* "D0ToKSpipi2018.pyx":75
+  /* "D0ToKSpipi2018.pyx":81
  *         self.thisptr.init()
  * 
  *     def get_amp(self, list k0, list pip, list pim):             # <<<<<<<<<<<<<<
- *         cdef vector[double] ck0 = k0
- *         cdef vector[double] cpip = pip
+ *         """
+ *         Get the amplitude for a given set of kinematic variables., tensorized version
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_PyD0ToKSpipi2018_get_amp, NULL, __pyx_n_s_D0ToKSpipi2018, __pyx_d, ((PyObject *)__pyx_codeobj__23)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_7get_amp, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_PyD0ToKSpipi2018_get_amp, NULL, __pyx_n_s_D0ToKSpipi2018, __pyx_d, ((PyObject *)__pyx_codeobj__23)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018, __pyx_n_s_get_amp, __pyx_t_7) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018, __pyx_n_s_get_amp, __pyx_t_7) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   PyType_Modified(__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018);
 
-  /* "D0ToKSpipi2018.pyx":82
+  /* "D0ToKSpipi2018.pyx":91
  *         return self.thisptr.get_amp(ck0, cpip, cpim)
  * 
  *     def AMP(self, list[list[double]] ks, list[list[double]] pi1, list[list[double]] pi2):             # <<<<<<<<<<<<<<
- *         cdef vector[vector[double]] cks
- *         cdef vector[vector[double]] cpi1
+ *         """
+ *         Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay., old version, not tensorized
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_PyD0ToKSpipi2018_AMP, NULL, __pyx_n_s_D0ToKSpipi2018, __pyx_d, ((PyObject *)__pyx_codeobj__25)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_14D0ToKSpipi2018_16PyD0ToKSpipi2018_9AMP, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_PyD0ToKSpipi2018_AMP, NULL, __pyx_n_s_D0ToKSpipi2018, __pyx_d, ((PyObject *)__pyx_codeobj__25)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018, __pyx_n_s_AMP, __pyx_t_7) < 0) __PYX_ERR(0, 82, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018, __pyx_n_s_AMP, __pyx_t_7) < 0) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   PyType_Modified(__pyx_ptype_14D0ToKSpipi2018_PyD0ToKSpipi2018);
 
