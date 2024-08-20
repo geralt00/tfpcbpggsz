@@ -10,15 +10,19 @@ from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
 
 class pcbpggsz_generator:
-    """
+    r"""
         A generator for the
-        .. math:: D^0 \rightarrow K_S^0 \pi^+ \pi^-
+
+        .. math::
+          D^0 \rightarrow K_S^0 \pi^+ \pi^-
+          
         related decays.
 
     Parameters:
         type: str
             The type of the generator. 
             Options: [flav, flavbar, cp even, cp odd, cp mixed, btodh]
+
     """
     def __init__(self, **kwargs):
         self.type = type
@@ -238,9 +242,12 @@ class pcbpggsz_generator:
         return Gamma
 
     def b2dh(self, data):
-        """
+        r"""
         Decay rate for 
-        .. math:: B^{\pm} \rightarrow D^0 h^{\mp}
+
+        .. math::
+          B^{\pm} \rightarrow D^0 h^{\mp}
+
         """
         rb, deltaB, gamma = self.rb, deg_to_rad(self.deltaB), deg_to_rad(self.gamma)
         absAmp = tf.abs(self.amp(data))
