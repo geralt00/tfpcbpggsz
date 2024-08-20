@@ -104,7 +104,7 @@ class pcbpggsz_generator:
 
     def amp(self, data):
         """
-        Calculate the amplitude (Kspipi model) of the decay from momenta.
+        Calculate the amplitude of the decay from momenta.
         """    
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
@@ -115,7 +115,7 @@ class pcbpggsz_generator:
     
     def ampbar(self, data):
         """
-        Calculate the amplitude (Kspipi model) of the decay from momenta.
+        Calculate the amplitude of the decay from momenta.
         """
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
@@ -142,7 +142,7 @@ class pcbpggsz_generator:
     @tf.function
     def ampbar_ag(self, data):
         """
-        Calculate the amplitude (Kspipi model) of the decay from momenta.
+        Calculate the amplitude of the decay from momenta.
         """
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
