@@ -40,6 +40,7 @@ exclude_patterns = [
     "_build",
     "*ipynb",
     "*setup.py",
+    "benchmark",
 
 ]
 source_suffix = [
@@ -63,7 +64,8 @@ autodoc_mock_imports = [
     "tensorflow_probability",
     "plothist",
     "yaml",
-    "importlib"
+    "importlib",
+    "contextlib",
 ]
 
 # Cross-referencing configuration
@@ -86,11 +88,9 @@ subprocess.call(
             "--templatedir _templates",
             "--separate",
             "../tfpcbpggsz",
-            "../tfpcbpggsz/generator",
             # exclude_patterns
             "../tfpcbpggsz/amp_test",
             "../tfpcbpggsz/version.py",
-
         ]
     ),
     shell=True,
