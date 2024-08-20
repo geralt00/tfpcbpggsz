@@ -1,3 +1,4 @@
+import tensorflow as tf
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
 from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd
 from tfpcbpggsz.amp_up import D0ToKSpipi2018
