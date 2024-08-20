@@ -11,7 +11,9 @@ from tfpcbpggsz.core import eff_fun
 
 class pcbpggsz_generator:
     """
-        A generator for the decay process D0 -> KS0 pi+ pi-.
+        A generator for the
+        .. math:: D^0 \rightarrow K_S^0 \pi^+ \pi^-
+        related decays.
 
     Parameters:
         type: str
@@ -47,11 +49,11 @@ class pcbpggsz_generator:
         print(f'Efficiency applied with: {decay}_{charge}')
 
     def eval_bias(self, data):
-        """Getting the bias value for given 4-momentum"""
+        """Getting the bias value for given 4 momentum"""
         return self.pc.eval_bias(p4_to_phsp(data))
     
     def eval_eff(self, data):
-        """Getting the efficiency value for given 4-momentum"""
+        """Getting the efficiency value for given 4 momentum"""
         return eff_fun(p4_to_srd(data), self.charge, self.decay)
     
     def make_eff_fun(self):
@@ -237,7 +239,8 @@ class pcbpggsz_generator:
 
     def b2dh(self, data):
         """
-        Decay rate for B -> D h
+        Decay rate for 
+        .. math:: B^{\pm} \rightarrow D^0 h^{\mp}
         """
         rb, deltaB, gamma = self.rb, deg_to_rad(self.deltaB), deg_to_rad(self.gamma)
         absAmp = tf.abs(self.amp(data))
