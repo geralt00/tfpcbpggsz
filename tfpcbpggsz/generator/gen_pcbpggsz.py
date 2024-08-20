@@ -1,4 +1,3 @@
-from tfpcbpggsz.tensorflow_wrapper import *
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
 from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd
 from tfpcbpggsz.amp_up import D0ToKSpipi2018
@@ -11,6 +10,7 @@ class pcbpggsz_generator:
     """
     Class for PCBPGGSZ generator
     """
+
     def __init__(self, **kwargs):
         self.type = type
         self.gen = None
@@ -27,6 +27,7 @@ class pcbpggsz_generator:
 
     def add_bias(self, correctionType="singleBias"):
         """Adding the bias in different type"""
+
         self.pc = PhaseCorrection()
         self.pc.DEBUG = self.DEBUG
         self.pc.correctionType=correctionType
@@ -34,6 +35,7 @@ class pcbpggsz_generator:
 
     def add_eff(self, charge, decay):
         """Calling the efficiency map for decay"""
+
         self.charge = charge
         self.decay = decay
 
@@ -60,6 +62,7 @@ class pcbpggsz_generator:
         Usage:
         gen = pcbpggsz_generator()
         """
+
         phsp = PhaseSpaceGenerator().generate
 
         self.type = type
@@ -101,9 +104,8 @@ class pcbpggsz_generator:
 
 
     def amp(self, data):
-        """
-        Calculate the amplitude of the decay from momenta.
-        """    
+        """Calculate the amplitude of the decay from momenta."""    
+
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
         p1,p2,p3 = data
@@ -112,9 +114,8 @@ class pcbpggsz_generator:
         return amp_i
     
     def ampbar(self, data):
-        """
-        Calculate the amplitude of the decay from momenta.
-        """
+        """Calculate the amplitude of the decay from momenta."""
+
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
         p1,p2,p3 = data
@@ -123,36 +124,9 @@ class pcbpggsz_generator:
         ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
         return ampbar_i
 
-    @tf.function
-    def amp_ag(self, data):
-        """
-        Calculate the amplitude (Kspipi model) of the decay from momenta.
-        """    
-        Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        # Convert TensorFlow tensors to DLPack capsules
-        tf.print(p1.shape )
-        # wrap with tf.py_function
-        amp_i = Kspipi.AMP(p1, p2, p3)
-        return amp_i
-    
-    @tf.function
-    def ampbar_ag(self, data):
-        """
-        Calculate the amplitude of the decay from momenta.
-        """
-        Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-        p1bar, p2bar, p3bar = tf.stack([tf.unstack(p1bar, axis=1)]), tf.stack([tf.unstack(p2bar, axis=1)]), tf.stack([tf.unstack(p3bar, axis=1)])
-        amp_i_bar = Kspipi.AMP(p1bar, p3bar, p2bar)  # Pass tensors directly
-        #amp_i_bar = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-        amp_i_bar = tf.cast(tf.negative(amp_i_bar), tf.complex128)
-        return amp_i_bar 
-    
     def formula(self):
+        """Decay rate formula"""
+
         if self.type[:4] == 'flav':
             return  self.flavour
         elif self.type == 'cp_even' or self.type == 'cp_odd':
@@ -183,9 +157,7 @@ class pcbpggsz_generator:
         return Gamma
 
     def cp_tag(self, data):
-        """
-        Decay rate for CP tag
-        """
+        """Decay rate for CP tags"""
 
         DD_sign=-1
         phase = DeltadeltaD(self.amp(data), self.ampbar(data))
@@ -200,16 +172,7 @@ class pcbpggsz_generator:
 
 
     def cp_mixed(self, data_sig, data_tag):
-        """
-        Decay rate for CP mixed tag
-        """
-#        phase_sig = DeltadeltaD(self.amp_ag(data_sig), self.ampbar_ag(data_sig))
-#        absAmp_sig = tf.abs(self.amp_ag(data_sig))
-#        absAmpbar_sig = tf.abs(self.ampbar_ag(data_sig))
-#        phase_tag = DeltadeltaD(self.amp_ag(data_tag), self.ampbar_ag(data_tag))
-#        absAmp_tag = tf.abs(self.amp_ag(data_tag))
-#        absAmpbar_tag = tf.abs(self.ampbar_ag(data_tag))
-
+        """Decay rate for CP mixed tags"""
 
         phase_sig = DeltadeltaD(self.amp(data_sig), self.ampbar(data_sig))
         phase_correction_sig = tf.zeros_like(phase_sig) if self.pc is None else self.eval_bias(data_sig)
@@ -229,9 +192,8 @@ class pcbpggsz_generator:
         return Gamma
 
     def b2dh(self, data):
-        """
-        Decay rate for B2Dh
-        """
+        """Decay rate for B2Dh decay"""
+
         rb, deltaB, gamma = self.rb, deg_to_rad(self.deltaB), deg_to_rad(self.gamma)
         absAmp = tf.abs(self.amp(data))
         absAmpbar = tf.abs(self.ampbar(data))
@@ -250,9 +212,7 @@ class pcbpggsz_generator:
         return Gamma
     
     def phsp_fun(self, data):
-        """
-        Phase space decay rate
-        """
+        """Phase space decay rate, uniform distribution"""
 
         Gamma = tf.ones_like(data[0][:,0], dtype=tf.float64)
         return Gamma
