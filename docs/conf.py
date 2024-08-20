@@ -86,6 +86,7 @@ subprocess.call(
             "--templatedir _templates",
             "--separate",
             "../tfpcbpggsz",
+            "../tfpcbpggsz/generator",
             # exclude_patterns
             "../tfpcbpggsz/amp_test",
             "../tfpcbpggsz/version.py",
