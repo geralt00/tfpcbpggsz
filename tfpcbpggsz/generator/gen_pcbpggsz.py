@@ -1,7 +1,7 @@
 from tfpcbpggsz.tensorflow_wrapper import *
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
 from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd
-from tfpcbpggsz.amp_up import PyD0ToKSpipi2018
+from tfpcbpggsz.amp_up import *
 from tfpcbpggsz.generator.generator import multi_sampling, multi_sampling2
 from tfpcbpggsz.core import DeltadeltaD
 from tfpcbpggsz.phasecorrection import PhaseCorrection
