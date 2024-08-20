@@ -41,6 +41,7 @@ exclude_patterns = [
     "*ipynb",
     "*setup.py",
     "benchmark",
+    "*test*"
 
 ]
 source_suffix = [
