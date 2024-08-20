@@ -11,18 +11,7 @@ from tfpcbpggsz.core import eff_fun
 
 class pcbpggsz_generator:
     r"""
-        A generator for the
-
-        .. math::
-          D^0 \rightarrow K_S^0 \pi^+ \pi^-
-          
-        related decays.
-
-    Parameters:
-        type: str
-            The type of the generator. 
-            Options: [flav, flavbar, cp even, cp odd, cp mixed, btodh]
-
+    PCBPGGSZ generator
     """
     def __init__(self, **kwargs):
         self.type = type
@@ -246,6 +235,7 @@ class pcbpggsz_generator:
         Decay rate for 
 
         .. math::
+
           B^{\pm} \rightarrow D^0 h^{\mp}
 
         """
