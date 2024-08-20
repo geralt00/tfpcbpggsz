@@ -8,8 +8,8 @@ from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
 
 class pcbpggsz_generator:
-    r"""
-    PCBPGGSZ generator
+    """
+    Class for PCBPGGSZ generator
     """
     def __init__(self, **kwargs):
         self.type = type
@@ -229,13 +229,8 @@ class pcbpggsz_generator:
         return Gamma
 
     def b2dh(self, data):
-        r"""
-        Decay rate for 
-
-        .. math::
-
-          B^{\pm} \rightarrow D^0 h^{\mp}
-
+        """
+        Decay rate for B2Dh
         """
         rb, deltaB, gamma = self.rb, deg_to_rad(self.deltaB), deg_to_rad(self.gamma)
         absAmp = tf.abs(self.amp(data))
