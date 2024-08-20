@@ -5,10 +5,10 @@ from tfpcbpggsz.generator.generator import GenTest, BaseGenerator, ARGenerator
 from tfpcbpggsz.generator.data import data_mask, data_merge, data_shape
 from tfpcbpggsz.amp_up import *
 from tfpcbpggsz.generator.generator import single_sampling2, multi_sampling, multi_sampling2
-from tfpcbpggsz.amp_up import PyD0ToKSpipi2018
 from tfpcbpggsz.core import DeltadeltaD
 from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
+
 class pcbpggsz_generator:
     """
     A generator for the decay D0 -> Ks0 pi+ pi-.
