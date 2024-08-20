@@ -11,6 +11,7 @@ m_Ks = 0.497614
 m_pi = 0.13957018
 
 def get_p(M, ma, mb):
+    """Get the momentun in the res rest frame"""
     m2 = M * M
     m_p = (ma + mb) ** 2
     m_m = (ma - mb) ** 2

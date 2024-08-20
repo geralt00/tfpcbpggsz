@@ -30,27 +30,32 @@ class pcbpggsz_generator:
         self.apply_eff = False
 
     def add_bias(self, correctionType="singleBias"):
+        """Adding the bias in different type"""
         self.pc = PhaseCorrection()
         self.pc.DEBUG = self.DEBUG
         self.pc.correctionType=correctionType
         self.pc.PhaseCorrection()
 
     def add_eff(self, charge, decay):
+        """Calling the efficiency map for decay"""
         self.charge = charge
         self.decay = decay
 
         print(f'Efficiency applied with: {decay}_{charge}')
 
     def eval_bias(self, data):
+        """Getting the bias value for given 4-momentum"""
         return self.pc.eval_bias(p4_to_phsp(data))
     
     def eval_eff(self, data):
+        """Getting the efficiency value for given 4-momentum"""
         return eff_fun(p4_to_srd(data), self.charge, self.decay)
     
     def make_eff_fun(self):
         return self.eval_eff 
 
     def make_fun(self):
+        """Making prod function for decay rate and efficiency"""
         return  lambda data:   self.make_eff_fun()(data) * self.formula()(data) 
 
     def generate(self, N=1000, type="b2dh", **kwargs):
@@ -167,7 +172,7 @@ class pcbpggsz_generator:
 
     
     def flavour(self, data):
- 
+        """Decay rate for flav tags"""
 
         if self.type == 'flav':
             absAmp = tf.abs(self.ampbar(data))**2

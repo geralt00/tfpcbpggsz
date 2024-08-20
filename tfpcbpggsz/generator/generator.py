@@ -172,7 +172,7 @@ def multi_sampling2(
 
 def double_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     """
-    Double sampling based on correlation between two data
+    Double sampling based on correlation between two decays
     """
     import tensorflow as tf
 
