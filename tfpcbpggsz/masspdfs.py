@@ -371,3 +371,52 @@ def preparePdf_data(varDict, mode='b2dk_LL'):
 
     print('--- INFO: Writing to file...')
     return pdfList
+
+
+
+
+class MassPDF():
+    def __init__(self, name):
+        self.name = name
+        # self.function = self.get_function()
+
+    def get_pdf(self,variables):
+        ## could be prettier if we change the functions to deal
+        # with different variables "internally" so that they only take
+        # Bu_M and variables as arguments
+        if (self.name == "Exponential"):
+            pdf = lambda Bu_M: variables["yield"]*Exponential(Bu_M, variables["c"])
+        elif (self.name == "HORNSdini"):
+            pdf = lambda Bu_M: variables["yield"]*HORNSdini(Bu_M, variables['a'], variables['b'], variables['csi'], variables['shift'], variables['sigma'], variables['ratio_sigma'], variables['fraction_sigma'])
+        elif (self.name == "HORNSdini+Gaussian"):
+            pdf = lambda Bu_M: variables["yield"]*(variables["frac_HORNSdini"]*HORNSdini(Bu_M, variables['a'], variables['b'], variables['csi'], variables['shift'], variables['sigma'], variables['ratio_sigma'], variables['fraction_sigma']) + (1-varaibles["frac_HORNSdini"])*Gaussian(Bu_M, variables['mean'], variables['sigma']) )
+        elif (self.name == "HORNSdini_misID"):
+            pdf = lambda Bu_M: variables["yield"]*HORNSdini_misID(Bu_M, variables['a'], variables['b'], variables['csi'], variables['m1'], variables['s1'], variables['m2'], variables['s2'], variables['m3'], variables['s3'], variables['m4'], variables['s4'], variables['f1'], variables['f2'], variables['f3'])
+            a,b,csi,m1,s1,m2,s2,m3,s3,m4,s4,f1,f2,f3
+        elif (self.name == "HILLdini"):
+            pdf = lambda Bu_M: variables["yield"]*HILLdini(Bu_M, variables['a'],  variables['b'],  variables['csi'], variables['shift'], variables['sigma'], variables['ratio_sigma'], variables['fraction_sigma'])
+        elif (self.name == "HILLdini_misID"):
+            pdf = lambda Bu_M: variables["yield"]*HILLdini_misID(Bu_M, variables['a'], variables['b'], variables['csi'], variables['m1'], variables['s1'], variables['m2'], variables['s2'], variables['m3'], variables['s3'], variables['m4'], variables['s4'], variables['f1'], variables['f2'], variables['f3'])
+        elif (self.name == "CBShape"):
+            pdf = lambda Bu_M: variables["yield"]*CBShape(Bu_M, variables['m0'], variables['sigma'], variables['alpha'], variables['n'])
+        elif (self.name == "SumCBShape"):
+            pdf = lambda Bu_M: variables["yield"]*(variables["frac1"]*CBShape(Bu_M, variables['mean1'], variables['sigma1'], variables['alpha1'], variables['n1']) + variables["frac2"]*CBShape(Bu_M, variables['mean2'], variables['sigma2'], variables['alpha2'], variables['n2']))
+        elif (self.name == "CruijffExtended"):
+            pdf = lambda Bu_M: variables["yield"]*CruijffExtended(Bu_M, variables['m0'], variables['sigmaL'], variables['sigmaR'], variables['alphaL'], variables['alphaR'], variables['beta'])
+        elif (self.name == "Gaussian"):
+            pdf = lambda Bu_M: variables["yield"]*Gaussian(Bu_M, variables['mean'], variables['sigma'])
+        elif (self.name == "Cruijff+Gaussian"):
+            pdf = lambda Bu_M: variables["yield"]*( variables["cruij_frac"]*CruijffExtended(Bu_M, variables['cruij_m0'], variables['cruij_sigmaL'], variables['cruij_sigmaR'], variables['cruij_alphaL'], variables['cruij_alphaR'], variables['cruij_beta']) + (1-variables["cruij_frac"])*Gaussian(Bu_M, variables['gauss_mean'], variables['gauss_sigma']) )
+        else:
+            print("ERROR ---------- in MassPDF constructor")
+            print("       PDF with self.name ",self.self.name," does not exist")
+            print("            ---------------------  EXIT ")
+            print("  ")
+            exit()
+        return pdf
+    
+
+    def get_norm_pdf(self,variables):
+        self.pdf = self.get_pdf(variables)
+        return lambda Bu_M: norm_pdf(Bu_M, self.pdf)        
+        
