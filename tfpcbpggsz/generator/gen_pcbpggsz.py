@@ -110,7 +110,10 @@ class pcbpggsz_generator:
         Kspipi = self.Kspipi
         #time_cal_amp_start = time.time()
         p1,p2,p3 = data
-        amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
+        if not isinstance(p1, tf.Tensor):
+            amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())     
+        else:
+            amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
         amp_i = tf.cast(amp_i, tf.complex128)
         return amp_i
     
@@ -125,6 +128,7 @@ class pcbpggsz_generator:
         ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
         return ampbar_i
 
+    
     def formula(self):
         #"""Decay rate formula"""
 

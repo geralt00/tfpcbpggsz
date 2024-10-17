@@ -414,7 +414,7 @@ class Normalisation:
             self._phase = DeltadeltaD(self.amp_MC[self._name], self.ampbar_MC[self._name])
             self._crossTerms[0] = tf.math.reduce_mean(self._AAbar*tf.cos(self._phase))
             self._crossTerms[1] = tf.math.reduce_mean(self._AAbar*tf.sin(self._phase))
-            self._phase_tag = tf.gather(self._phase, self.tagged_i) #+ phase_correction.eval_tf(tf.gather(events, tagged_i))
+            self._phase_tag =  DeltadeltaD(self.amp_MC[self._name.replace('_sig', '_tag')], self.ampbar_MC[self._name.replace('_sig', '_tag')]) #tf.gather(self._phase, self.tagged_i) #+ phase_correction.eval_tf(tf.gather(events, tagged_i))
             self._crossTerms_complex =  tf.math.reduce_mean(
                 (tf.abs(self._A) * tf.abs(self._Abar_tag)) ** 2
                 + (tf.abs(self._Abar) * tf.abs(self._A_tag)) ** 2
@@ -436,8 +436,11 @@ class Normalisation:
             self._normA = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name])**2)
             self._BacTerms[0] = self._normA
             self._A = self.amp_MC[self._name]
-            self.tagged_i = (tf.range(self._A.shape[0]) + self._A.shape[0] // 2) % self._A.shape[0]
-            self._A_tag = tf.gather(self._A, self.tagged_i)
+            #Old way to tag the events
+            #self.tagged_i = (tf.range(self._A.shape[0]) + self._A.shape[0] // 2) % self._A.shape[0]
+            #self._A_tag = tf.gather(self._A, self.tagged_i)
+            self._A_tag = self.amp_MC[self._name.replace('_sig', '_tag')]
+
 
             #if self._name[3] == 'p' and self._name[-1] == 'm':
             #    self._BacTerms_bkg[0] = self._normA
@@ -458,7 +461,8 @@ class Normalisation:
             self._normAbar = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name])**2)
             self._BacTerms[1] = self._normAbar
             self._Abar = self.ampbar_MC[self._name]
-            self._Abar_tag = tf.gather(self._Abar, self.tagged_i)
+            self._Abar_tag = self.ampbar_MC[self._name.replace('_sig', '_tag')]
+            #self._Abar_tag = tf.gather(self._Abar, self.tagged_i)
             #if self._name[3] == 'p' and self._name[-1] == 'p':
             #    self._BacTerms_bkg[1] = self._normAbar
 
