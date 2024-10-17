@@ -63,3 +63,4 @@ def clip_log(x, _epsilon=1e-6):
        np.log(_epsilon) + delta_x / _epsilon - (delta_x / _epsilon) ** 2 / 2.0
     )
     return tf.where(x > _epsilon, b_t, b_f)
+

@@ -46,7 +46,17 @@ COMPONENTS = {
     {
         "CB2DK_D2KSPIPI_DD": [ 
             ["DK_Kspipi", "Cruijff+Gaussian"],
-            ["Dpi_Kspipi_misID", "SumCBShape"]
+            ["Dpi_Kspipi_misID", "SumCBShape"],
+            # ["Dst0K_D0pi0_Kspipi", "HORNSdini"],
+            # ["DstpK_D0pip_Kspipi", "HORNSdini"],
+            # ["Dst0pi_D0pi0_Kspipi_misID_PartReco", "HORNSdini_misID"],
+            # ["Dstppi_D0pip_Kspipi_misID_PartReco", "HORNSdini_misID"],
+            # ["Dst0K_D0gamma_Kspipi", "HILLdini"],
+            # ["Dst0pi_D0gamma_Kspipi_misID_PartReco", "HILLdini_misID"],
+            # ["DKpi_Kspipi", "HORNSdini+Gaussian"],
+            # ["Dpipi_Kspipi_misID_PartReco", "HORNSdini_misID"],
+            # ["Bs2DKpi_Kspipi_PartReco", "HORNSdini"],
+            # ["Combinatorial", "Exponential"],
         ],
         "CB2DPI_D2KSPIPI_DD": [ 
             ["Dpi_Kspipi", "Cruijff+Gaussian"],
@@ -76,4 +86,13 @@ COMPONENTS = {
 VARIABLE_TO_FIT = {
     "CB2DK_D2KSPIPI_DD" : "Bu_constD0KSPV_M",
     "CB2DPI_D2KSPIPI_DD": "Bu_constD0KSPV_swapBachToPi_M",
+}
+
+INDEX_SOURCE_TO_VARDICT = {
+    "SDATA" : 0,
+}
+
+INDEX_CHANNEL_TO_VARDICT = {
+    "CB2DK_D2KSPIPI_DD" : 0,
+    "CB2DPI_D2KSPIPI_DD": 1,
 }

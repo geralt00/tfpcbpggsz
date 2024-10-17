@@ -1270,3 +1270,16 @@ class DecayNLL_Charm:
 
 
 
+
+# class MassNLL:
+#     def __init__(self, list_channels, shared_parameters, constrained_parameters, fit_params):
+#         self.list_channels     = list_channels
+#         self.shared_parameters = shared_parameters
+#         self.constrained_parameters = constrained_parameters
+#         self.fit_params = fit_params
+#         pass
+
+    
+
+    
+            

@@ -2,6 +2,7 @@ from tfpcbpggsz.Includes.selections import *
 from tfpcbpggsz.Includes.ntuples import *
 from tfpcbpggsz.Includes.variables import *
 from tfpcbpggsz.Includes.common_constants import *
+from tfpcbpggsz.Includes.functions import *
 from tfpcbpggsz.Includes.VARDICT import VARDICT
 import json
 import os
@@ -10,8 +11,12 @@ import pandas as pd
 import numpy as np
 import uproot
 import tensorflow as tf
+import sys
+import tensorflow_probability as tfp
 
-from tfpcbpggsz.masspdfs import MassPDF
+
+from tfpcbpggsz.masspdfs import MassPDF, norm_pdf, norm_distribution
+
 
 class MagPol:
     def __init__(self, name, list_magpol=None):
@@ -304,12 +309,16 @@ class Ntuple:
         self.BDT_training_paths = get_ntuple(self.source, self.channel, self.year, self.magpol, selec = "BDT_training")
         self.With_BDT_paths = get_ntuple(self.source, self.channel, self.year, self.magpol, selec = "With_BDT")
         self.truth_matching_cuts = self.get_truth_matching_cuts()
-
-        ##### invariant mass fit objects
-        self.components = COMPONENTS[self.source.name][self.channel.name]
-        self.define_mass_pdfs()
-        self.variable_to_fit = VARIABLE_TO_FIT[self.channel.name]        
+        #### for mass fit
+        self.i_c = INDEX_CHANNEL_TO_VARDICT[self.channel.name]
         pass
+
+    def initialise_mass_fit(self,components):
+        ##### invariant mass fit objects
+        self.components = components[self.source.name][self.channel.name]
+        self.variable_to_fit = VARIABLE_TO_FIT[self.channel.name]
+        pass
+
     
     def __str__(self):
         pattern = '''
@@ -338,36 +347,10 @@ class Ntuple:
                         res[year_item.name][magpol_item.name] = json.load(f)
                 except FileNotFoundError:
                     print("Preliminary cuts efficiency not computed for this ntuple")
-                    res[year_item.name][magpol_item.name] = None
+                    # res[year_item.name][magpol_item.name] = None
                     pass
                 pass
             pass
-        return res
-
-    def get_merged_preliminary_cuts_eff(self):
-        ### this should be ran only when we have
-        # ran the preliminary selections for all samples
-        res = self.preliminary_cuts_eff
-        num_lumi   = 0
-        denom_lumi = 0
-        for year_item in self.year.list_years:
-            try:
-                ### necessary since some MC don't have samples for
-                # certain years
-                test = res[year_item.name]
-            except KeyError:
-                continue
-            num_magpol   = 0
-            denom_magpol = 0
-            for magpol_item in self.magpol.list_magpol:
-                ### weighted average on magpol
-                num_magpol += res[year_item.name][magpol_item.name]["input_events"] * res[year_item.name][magpol_item.name]["efficiency"]
-                denom_magpol += res[year_item.name][magpol_item.name]["input_events"]
-                pass
-            num_lumi   += year_item.luminosity * num_magpol / denom_magpol
-            denom_lumi += year_item.luminosity
-            pass
-        res[self.year.name][self.magpol.name] = num_lumi / denom_lumi
         return res
     
     def get_final_cuts_eff(self):
@@ -383,33 +366,48 @@ class Ntuple:
                         res[year_item.name][magpol_item.name] = json.load(f)
                 except FileNotFoundError:
                         print("Final cuts efficiency not computed for this ntuple")
-                        res[year_item.name][magpol_item.name] = None
+                        # res[year_item.name][magpol_item.name] = None
         return res
 
-    def get_merged_final_cuts_eff(self):
+    def get_merged_cuts_eff(self,level):
         ### this should be ran only when we have
-        # ran the final selections for all samples
-        res = self.final_cuts_eff
+        # ran the preliminary selections for all samples
+        if (level == "preliminary"):
+            tmp_eff = self.preliminary_cuts_eff
+        elif (level == "final"):
+            tmp_eff = self.final_cuts_eff
+        else:
+            print("ERROR --------- in get_merged_cuts_eff, wrong level for cuts")
+            exit()
         num_lumi   = 0
         denom_lumi = 0
+        res = {} # self.preliminary_cuts_eff
+        res[self.year.name] = {}
+        res[self.year.name][self.magpol.name] = {}
+        total_input_events = 0
+        total_selected_events = 0
         for year_item in self.year.list_years:
             try:
                 ### necessary since some MC don't have samples for
                 # certain years
-                test = res[year_item.name]
+                test = tmp_eff[year_item.name]["MagUp"]
             except KeyError:
                 continue
-            num_magpol   = 0
-            denom_magpol = 0
+            selected_events   = 0
+            input_events      = 0
             for magpol_item in self.magpol.list_magpol:
-                ### weighted average on magpol
-                num_magpol += res[year_item.name][magpol_item.name]["input_events"] * res[year_item.name][magpol_item.name]["efficiency"]
-                denom_magpol += res[year_item.name][magpol_item.name]["input_events"]
+                ### weighted average on magpol"
+                selected_events += tmp_eff[year_item.name][magpol_item.name]["selected_events"]
+                input_events    += tmp_eff[year_item.name][magpol_item.name]["input_events"]
                 pass
-            num_lumi   += year_item.luminosity * num_magpol / denom_magpol
+            num_lumi   += year_item.luminosity * selected_events / input_events
             denom_lumi += year_item.luminosity
+            total_input_events    += input_events    
+            total_selected_events += selected_events 
             pass
-        res[self.year.name][self.magpol.name] = num_lumi / denom_lumi
+        res[self.year.name][self.magpol.name]["efficiency"]      = num_lumi / denom_lumi
+        res[self.year.name][self.magpol.name]["input_events"]    = total_input_events
+        res[self.year.name][self.magpol.name]["selected_events"] = total_selected_events
         return res
 
     
@@ -419,82 +417,175 @@ class Ntuple:
         print("MAP_TRUTH_MATCHING[self.source.name]", MAP_TRUTH_MATCHING[self.source.name])
         return MAP_TRUTH_MATCHING[self.source.name]
 
-
     def define_mass_pdfs(self):
-        self.mass_pdfs = {}
+        self.mass_pdfs = []
         for comp in self.components:
-            self.mass_pdfs[comp[0]] = MassPDF(comp[1])
+            self.mass_pdfs.append(MassPDF(comp[1], comp[0]))
             pass
         return
-
+    
     # @tf.function
-    def get_mass_pdf_functions(self,variables_to_fit):
-        self.mass_pdf_functions = {}
-        for comp_name in self.mass_pdfs.keys():
-            self.mass_pdf_functions[comp_name] = self.mass_pdfs[comp_name].get_pdf(variables_to_fit[comp_name])
+    def get_mass_pdf_functions(self, variables, params=None, shared_parameters=None, constrained_parameters=None):
+        print("in get_mass_pdf_functions")
+        if (params==None):
+            for i_comp in range(len(self.mass_pdfs)):
+                # tf.print("i_comp: ",i_comp)
+                self.mass_pdfs[i_comp].get_pdf(variables[i_comp])
+                pass
+            return
+        ##### self.list_variables will contain all variables
+        #  (all channels etc, similarly to list_vardict)
+        # self.list_variables = np.zeros(2*12*16).reshape((2,12,16))
+        list_variables = [[[0 for col in range(16)] for col in range(12)] for row in range(3)]
+        # print(self.mass_pdfs)
+        for i_channel in range(3):
+            for i_comp in range(12):
+                for i_var in range(16):
+                    for i_par in range(len(shared_parameters)):
+                        # tf.print(" start loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
+                        if ([i_channel, i_comp, i_var] in shared_parameters[i_par]):
+                            # print(i_channel)
+                            # print(list_variables)
+                            list_variables[i_channel][i_comp][i_var] = params[i_par]
+                            # tf.print("params[",i_par,"]                           :", params[i_par])
+                            # tf.print("list_variables[",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[i_channel][i_comp][i_var])
+                            break
+                        else:
+                            list_variables[i_channel][i_comp][i_var] = variables[i_channel][i_comp][i_var]
+                            pass
+                        # tf.print(" end loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
+                        pass
+                    pass
+                pass
             pass
-        return
-
-    # def get_all_fit_variables(self,variables_to_fit):
-    #     all_fit_variables = variables_to_fit
-    #     self.vardict = VARDICT[self.source.name][self.channel.name] # [self.year.name][self.magpol.name]
-    #     for comp in self.components:
-    #         for var in VARIABLES_COMPONENTS[comp[0]]:
-    #             if (var not in variables_to_fit[comp[0]].keys()):
-    #                 all_fit_variables[comp[0]][var] = [comp[0]][var]
-    #                 pass
-    #             pass
-    #         pass
-    #     return all_fit_variables
+        # tf.print(" BEFORE CONSTRAINED")
+        # tf.print("CB2DK Kspipi mean      ",list_variables[0][0][1])
+        ### now we look if one of the shared_param is also used for constraining
+        for i_const in constrained_parameters:
+            i_chan = i_const[0][0]
+            i_comp = i_const[0][1]
+            i_var  = i_const[0][2]
+            if (type(i_const[1])==float):
+                list_variables[i_chan][i_comp][i_var] = i_const[1]
+                continue
+            for i_par in range(len(shared_parameters)):
+                if (i_const[1][:-1] in shared_parameters[i_par]):
+                    const_i_chan = i_const[1][0]
+                    const_i_comp = i_const[1][1]
+                    const_i_var  = i_const[1][2]
+                    # list_variables[i_chan][i_comp][i_var] = tf.cast(params[i_par]*i_const[1][-1],tf.float64)
+                    factor = list_variables[const_i_chan][const_i_comp][const_i_var]
+                    new_const = i_const[1][3]
+                    while (type(new_const) == list):
+                        print(factor, " = factor should be equal to Dpi yield " , list_variables[1][0][0])
+                        const_i_chan = new_const[0] # contains the indices of the next parameter to multiply
+                        const_i_comp = new_const[1] # contains the indices of the next parameter to multiply
+                        const_i_var  = new_const[2] # contains the indices of the next parameter to multiply
+                        print(list_variables[const_i_chan][const_i_comp][const_i_var], " should be equal to BR_ratio ", list_variables[-1][0][0])
+                        factor *= list_variables[const_i_chan][const_i_comp][const_i_var]
+                        new_const = new_const[3]
+                        print(new_const, " should be equal to efficiency ratio 0.78")
+                        pass
+                    list_variables[i_chan][i_comp][i_var] = new_const*factor
+                    pass
+                pass
+            pass
+        # tf.print(" AFTER CONSTRAINED")
+        # tf.print("CB2DK Kspipi mean      ",list_variables[0][0][1])
+        return list_variables
+        ####
+        
 
     def store_events(self, paths, list_var, cuts, aliases = None):
-        self.uproot_data = DataFrame.from_dict(
+        self.uproot_data = pd.DataFrame.from_dict(
             uproot.concatenate(paths,
                                list_var,
                                cuts,
                                aliases = aliases,
                                library='np'))
+        self.Bu_M = np.asarray(self.uproot_data[self.variable_to_fit])
 
     # @tf.function
     def total_mass_pdf(self,Bu_M):
         total_mass_pdf_values = np.zeros(np.shape(Bu_M))
-        for comp_name in self.mass_pdfs.keys():
-            total_mass_pdf_values += self.mass_pdf_functions[comp_name](Bu_M)
+        for comp_pdf in self.mass_pdfs:
+            total_mass_pdf_values += comp_pdf.pdf(Bu_M)
             pass
         return total_mass_pdf_values
         
     # @tf.function
-    def get_nll(self,variables):
-        if (self.uproot_data == None):
+    def get_nll(self, params, variables, shared_parameters, constrained_parameters, components, gaussian_constraints=[]):
+        try:
+            total_yield = len(self.Bu_M)
+            tf_total_yield = tf.cast(total_yield, tf.float64)
+        except ValueError:
             print("ERROR -------------- in get_nll for ntuple")
             print(self)
             print("  -- For this to work you need to first store the data in ntuple.uproot_data")
             print("        by running ntuple.store_events()")
             print(" EXIT ")
             print("  ")
-            exit()
+            return 0
         #### variables_to_fit has to be organised following:
         # variables_to_fit[components] = dict(variables, value)
         # all the variables present in this list will
         # be fitted, and all others will be fixed from the VARDICT dictionary
         # all_fit_variables = self.get_all_fit_variables()
         #### constraint on the number of events
-        self.get_mass_pdf_functions(variables)
-        sum_yields = sum([variables[comp[0]]["yield"] for comp in self.components])
-        total_yield = len(self.uproot_data[self.variable_to_fit])
-        log_poisson_constraint = poisson.logpmf(total_yield, sum_yields)
-        ## pdf values
-        total_pdf_value = self.total_mass_pdf(self.uproot_data[self.variable_to_fit],variables)
-        int_pdf_value = norm_pdf(self.uproot_data[self.variable_to_fit], self.total_mass_pdf)
-        nll = tf.reduce_sum(-2 * clip_log(total_pdf_value / int_pdf_value)) - 2*log_poisson_constraint
+        self.define_mass_pdfs()
+        # self.initialise_mass_fit(components)
+        Bu_M = tf.cast(self.Bu_M, tf.float64)
+        nevents = tf.cast(len(self.Bu_M), tf.float64)
+        list_variables = self.get_mass_pdf_functions(variables, params=params, shared_parameters=shared_parameters, constrained_parameters=constrained_parameters)
+        for i_comp in range(len(self.mass_pdfs)):
+            # print("i_comp: ",i_comp)
+            self.mass_pdfs[i_comp].get_pdf(list_variables[self.i_c][i_comp])
+            pass
+        sum_yields    = sum([comp[0] for comp in list_variables[self.i_c]])
+        tf_sum_yields = tf.cast(sum_yields,tf.float64)
+        poisson = tfp.distributions.Poisson(rate=sum_yields)
+        log_poisson_constraint = tf.cast(poisson.log_prob(total_yield),tf.float64)
+        total_pdf_value = self.total_mass_pdf(Bu_M)
+        # tf.print("total_pdf_value        ", total_pdf_value)
+        term1 = tf.reduce_sum(-2 * clip_log(total_pdf_value))
+        term2 = - 2*log_poisson_constraint
+        term3 = 2*nevents*clip_log(tf_sum_yields)
+        term4 = self.get_gaussian_constraints(gaussian_constraints, list_variables)
+        nll   = term1 + term2 + term3 + term4
+        tf.print("CB2DK Kspipi mean      ",list_variables[0][0][1])
+        tf.print("params                 ",params)
+        tf.print("sum_yields             ", sum_yields)
+        tf.print("total_yield           ", total_yield)
+        tf.print("log_poisson_constraint ", log_poisson_constraint)
+        tf.print("                          sum_events ", term1)
+        tf.print(" -          2*log_poisson_constraint ", term2)
+        tf.print(" + 2*nevents*clip_log(tf_sum_yields) ", term3)
+        tf.print(" +              gaussian_constraints ", term4)
+        tf.print(" =  nll :                  ", nll)
+        tf.print(" ")
         return nll
 
+    def get_gaussian_constraints(self, gaussian_constraints, list_variables):
+        res = 0
+        for i_const in gaussian_constraints:
+            delta_x = list_variables[i_const[0][0]][i_const[0][1]][i_const[0][2]]-list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]]*i_const[1][3]
+            sigma   = list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]]*i_const[1][4]
+            res    += delta_x*delta_x / (sigma*sigma)
+        return res
+        
+    
     def pdf_values_draw(self, np_input, variables):
         pdf_values = {}
-        self.get_mass_pdf_functions(variables)
-        for comp_name in self.mass_pdfs.keys():
-            pdf_values[comp_name] = self.mass_pdf_functions[comp_name](np_input)
-        pdf_values["total_mass_pdf"] = self.total_mass_pdf(np_input)
+        mass_pdfs = []
+        for i_comp in range(len(self.components)):
+            comp = self.components[i_comp]
+            mass_pdfs.append(MassPDF(comp[1], comp[0]))
+            mass_pdfs[i_comp].get_pdf(variables[i_comp])
+            pass
+        pdf_values["total_mass_pdf"] = np.zeros(np.shape(np_input))
+        for comp_pdf in mass_pdfs:
+            pdf_values[comp_pdf.component] = comp_pdf.pdf(np_input)
+            pdf_values["total_mass_pdf"]  += comp_pdf.pdf(np_input)
         return pdf_values
 
 
@@ -510,16 +601,9 @@ class Variables:
         self.range_value = range_value
 
 DICT_VARIABLES_TEX = {
-    'Bu_constD0KSPV_M':          Variables('Bu_constD0KSPV_M'      , '$m(B^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const', 'linear',  [4500,7000]),
-    'Bu_constD0PV_M':            Variables('Bu_constD0PV_M'        , '$m(B^\pm)$ [MeV/$c^2$] DTF D0-PV const'  , 'linear',   [4500,7000]),
-    'Bu_constKSPV_M':            Variables('Bu_constKSPV_M'        , '$m(B^\pm)$ [MeV/$c^2$] DTF KS-PV const'  , 'linear',   [4500,7000]),
-    'DK_M':          Variables('DK_M'      , '$m(DK^\pm)$ [MeV/$c^2$]', 'linear', [4500,7000]),
-    'DK_constD0KSPV_M':          Variables('DK_constD0KSPV_M'      , '$m(DK^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const', 'linear', [4500,7000]),
-    'DK_constD0PV_M':            Variables('DK_constD0PV_M'        , '$m(DK^\pm)$ [MeV/$c^2$] DTF D0-PV const'  , 'linear', [4500,7000]),
-    'DK_constKSPV_M':            Variables('DK_constKSPV_M'        , '$m(DK^\pm)$ [MeV/$c^2$] DTF KS-PV const'  , 'linear', [4500,7000]),
-    'Dpi_constD0KSPV_M':          Variables('Dpi_constD0KSPV_M'      , '$m(D\pi^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const', 'linear', [4500,7000]),
-    'Dpi_constD0PV_M':            Variables('Dpi_constD0PV_M'        , '$m(D\pi^\pm)$ [MeV/$c^2$] DTF D0-PV const'  , 'linear', [4500,7000]),
-    'Dpi_constKSPV_M':            Variables('Dpi_constKSPV_M'        , '$m(D\pi^\pm)$ [MeV/$c^2$] DTF KS-PV const'  , 'linear', [4500,7000]),
+    'Bu_constD0KSPV_M':          Variables('Bu_constD0KSPV_M'      , '$m(DK^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const', 'linear',  [4500,7000]),
+    'Bu_constD0PV_M':            Variables('Bu_constD0PV_M'        , '$m(DK^\pm)$ [MeV/$c^2$] DTF D0-PV const'  , 'linear',   [4500,7000]),
+    'Bu_constKSPV_M':            Variables('Bu_constKSPV_M'        , '$m(DK^\pm)$ [MeV/$c^2$] DTF KS-PV const'  , 'linear',   [4500,7000]),
     'Bu_constD0KSPV_status':     Variables('Bu_constD0KSPV_status' , 'Status DTF D0KSPV', 'linear', [0,1]),
     'Bu_constD0PV_status':       Variables('Bu_constD0PV_status'   , 'Status DTF D0PV'  , 'linear', [0,1]),
     'Bu_constKSPV_status':       Variables('Bu_constKSPV_status'   , 'Status DTF KSPV'  , 'linear', [0,1]),
@@ -582,14 +666,10 @@ DICT_VARIABLES_TEX = {
     "log10_1_minus_D0_DIRA_BPV"  :    Variables("log10_1_minus_D0_DIRA_BPV"   , "log10_1_minus_D0_DIRA_BPV"  , 'linear', None),
     "log10_1_minus_Ks_DIRA_BPV"  :    Variables("log10_1_minus_Ks_DIRA_BPV"   , "log10_1_minus_Ks_DIRA_BPV"  , 'linear', None),
     "log_Bu_constD0KSPV_CHI2NDOF":    Variables("log_Bu_constD0KSPV_CHI2NDOF" , "log_Bu_constD0KSPV_CHI2NDOF", 'linear', None),    
-    'Bu_constD0KSPV_swapBachToPi_M':          Variables('Bu_constD0KSPV_swapBachToPi_M'      , r'$m(B^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const ($K \rightarrow \pi$ hyp.)', 'linear',  [5050,5800]),
-    'DK_constD0KSPV_swapBachToPi_M':          Variables('DK_constD0KSPV_swapBachToPi_M'      , r'$m(DK^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const ($K \rightarrow \pi$ hyp.)', 'linear', [5050,5800]),
-    'Dpi_constD0KSPV_swapBachToPi_M':          Variables('Dpi_constD0KSPV_swapBachToPi_M'      , r'$m(D\pi^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const ($K \rightarrow \pi$ hyp.)', 'linear', [5050,5800]),
-    'Bu_constD0KSPV_swapBachToPi_status':     Variables('Bu_constD0KSPV_swapBachToPi_status' , r'Status DTF D0KSPV ($K \rightarrow \pi$ hyp.)', 'linear', [0,1]),
-    'Bu_constD0KSPV_swapBachToK_M':          Variables('Bu_constD0KSPV_swapBachToK_M'      , r'$m(B^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const ($K \rightarrow K$ hyp.)', 'linear',  [5050,5800]),
-    'DK_constD0KSPV_swapBachToK_M':          Variables('DK_constD0KSPV_swapBachToK_M'      , r'$m(DK^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const ($K \rightarrow K$ hyp.)', 'linear', [5050,5800]),
-    'Dpi_constD0KSPV_swapBachToK_M':          Variables('Dpi_constD0KSPV_swapBachToK_M'      , r'$m(D\pi^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const ($K \rightarrow K$ hyp.)', 'linear', [5050,5800]),
-    'Bu_constD0KSPV_swapBachToK_status':     Variables('Bu_constD0KSPV_swapBachToK_status' , r'Status DTF D0KSPV ($K \rightarrow K$ hyp.)', 'linear', [0,1]),
+    'Bu_constD0KSPV_swapBachToPi_M':          Variables('Bu_constD0KSPV_swapBachToPi_M'      , r'$m(D\pi^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const', 'linear',  [5050,5800]),
+    'Bu_constD0KSPV_swapBachToPi_status':     Variables('Bu_constD0KSPV_swapBachToPi_status' , r'Status DTF D0KSPV ($D\pi$ hyp.)', 'linear', [0,1]),
+    'Bu_constD0KSPV_swapBachToK_M':          Variables('Bu_constD0KSPV_swapBachToK_M'        , r'$m(DK^\pm)$ [MeV/$c^2$] DTF D0-KS-PV const', 'linear',  [5050,5800]),
+    'Bu_constD0KSPV_swapBachToK_status':     Variables('Bu_constD0KSPV_swapBachToK_status'   , r'Status DTF D0KSPV ($DK$ hyp.)', 'linear', [0,1]),
     'Ks_FDCHI2_ORIVX'            :    Variables("Ks_FDCHI2_ORIVX"             , r"$K_S$ $\chi^{2}_{FD}$"     , 'linear', None) ,
     'h1_hasRich'                 :    Variables("h1_hasRich"                  , r"$h^1_D$ has RICH signal"   , 'linear', [0,1]),
     'h2_hasRich'                 :    Variables("h2_hasRich"                  , r"$h^2_D$ has RICH signal"   , 'linear', [0,1]),

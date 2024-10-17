@@ -1,0 +1,17 @@
+{
+    "ratio_BR_DK_to_Dpi": 0.045486863524512436,
+    "signal_mean_DK": 5279.60119733225,
+    "signal_mean_Dpi": 5278.383600116058,
+    "signal_width_DK_DD": 15.048750707756348,
+    "signal_width_Dpi_DD": 15.705609529163608,
+    "Dst0K_D0pi0_Kspipi_yield_DD": 1575.386181683497,
+    "DstpK_D0pip_Kspipi_yield_DD": 1467.409751753817,
+    "Dstppi_D0pip_Kspipi_misID_PartReco_yield_DD": 1500.8671917920715,
+    "Dst0K_D0gamma_Kspipi_yield_DD": 4426.118792761888,
+    "Combinatorial_yield_DK_DD": 10888.148263082396,
+    "Dpi_Kspipi_yield_DD": 147435.9528861507,
+    "Dst0pi_D0pi0_Kspipi_yield_DD": 68017.82026607564,
+    "Dst0pi_D0gamma_Kspipi_yield_DD": 34455.225151967614,
+    "Combinatorial_yield_DPI_DD": 25528.457325353822,
+    "Combinatorial_c_DK_DD": -0.004323319138767343
+}
