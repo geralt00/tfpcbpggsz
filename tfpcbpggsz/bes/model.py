@@ -1,0 +1,87 @@
+from tfpcbpggsz.tensorflow_wrapper import tf
+import tfpcbpggsz.core as core
+from tfpcbpggsz.phasecorrection import PhaseCorrection as pc
+from tfpcbpggsz.core import Normalisation as normalisation
+
+
+
+class BaseModel(object):
+    def __init__(self, config):
+        self.norm = {}
+        self.config_loader = config
+        self.pc = pc(vm=self.config_loader.vm)
+        self.vm = self.pc.vm
+        self.tags = self.config_loader.idx
+        self.load_norm()
+
+
+    def load_norm(self):
+        
+        for tag in self.tags:
+            self.norm[tag] = normalisation({tag: self.config_loader.get_phsp_amp(tag)}, {tag: self.config_loader.get_phsp_ampbar(tag)}, tag)
+            self.norm[tag].initialise()
+
+
+
+    def NLL_Kspipi(self, tag):
+
+        params = self.pc.coefficients.values()
+        phase_correction_sig = self.pc.eval_corr(self.config_loader.get_data_srd(tag,'sig'))
+        phase_correction_tag = self.pc.eval_corr(self.config_loader.get_data_srd(tag,'tag'))
+        self.norm[tag].setParams(params)
+        phase_correction_MC_sig = self.pc.eval_corr(self.config_loader.get_phsp_srd(tag,'sig'))
+        phase_correction_MC_tag = self.pc.eval_corr(self.config_loader.get_phsp_srd(tag,'tag'))
+        self.norm[tag].add_pc(phase_correction_MC_sig, pc_tag=phase_correction_MC_tag)
+        self.norm[tag].Update_crossTerms()
+
+        #need to be flexible with the function name
+        prob = core.prob_totalAmplitudeSquared_CP_mix(self.config_loader.get_data_amp(tag,'sig'), self.config_loader.get_data_ampbar(tag,'sig'), self.config_loader.get_data_amp(tag,'tag'), self.config_loader.get_data_amp(tag,'tag'), phase_correction_sig, phase_correction_tag)
+        norm = self.norm[tag]._crossTerms_complex
+        prob_bkg = self.config_loader.get_data_bkg(tag)
+        frac_bkg = self.config_loader.get_frac_bkg(tag)
+
+        nll = tf.reduce_sum(-2*tf.math.log( (prob/norm)*(1-frac_bkg) + (prob_bkg)*frac_bkg))
+
+        return nll
+    
+    def NLL_CP(self, tag, Dsign):
+
+        params = self.pc.coefficients.values()
+        phase_correction = self.pc.eval_corr(self.config_loader.get_data_srd(tag))
+        self.norm[tag].setParams(params)
+        phase_correction_MC = self.pc.eval_corr(self.config_loader.get_phsp_srd(tag))
+        self.norm[tag].add_pc(phase_correction_MC)
+        self.norm[tag].Update_crossTerms()
+
+        prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), phase_correction)
+        norm = self.norm[tag].Integrated_CP_tag(Dsign)
+        prob_bkg = self.config_loader.get_data_bkg(tag)
+        frac_bkg = self.config_loader.get_bkg_frac(tag)
+
+        #test_term = frac_bkg*tf.ones_like(prob)
+        #print(test_term.shape)
+
+
+        nll = tf.reduce_sum(-2*tf.math.log( (prob/norm)*(1-tf.reduce_sum(frac_bkg)) + tf.reduce_sum((prob_bkg)*frac_bkg)))
+
+        return nll
+    
+    def NLL_selector(self, tag):
+        if tag in ["full", "misspi", "misspi0"]:
+            return self.NLL_Kspipi(tag)
+        elif tag in ["kspi0", "kseta_gamgam", "ksetap_pipieta", "kseta_3pi", "ksetap_gamrho", "ksomega", "klpi0pi0"]:
+            return self.NLL_CP(tag, 1)
+        elif tag in ["kk", "pipi", "pipipi0", "kspi0pi0", "klpi0"]:
+            return self.NLL_CP(tag, -1)
+
+    def fun(self, x):
+        self.set_params(x)
+        #nll = []
+        ret = 0
+        for tag in self.tags:
+            nll = self.NLL_selector(tag)
+            ret += nll
+        return nll
+        
+    def set_params(self, x={}):
+        self.pc.set_coefficients(coefficients=x)

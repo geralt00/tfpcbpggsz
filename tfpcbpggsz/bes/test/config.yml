@@ -1,0 +1,20 @@
+data:
+  tag_list: ['ksetap_pipieta']
+  tree: 'nt'
+  data: ['ksetap_pipieta/data_pipieta.root']
+  phsp: ['ksetap_pipieta/phsp_pipieta.root']
+
+  pdf:
+    dpdm: ['ksetap_pipieta/pdf_dpdm_roundall.npy']
+    qcmc: ['ksetap_pipieta/pdf_qcmc_roundall.npy']
+    qqbar: ['ksetap_pipieta/pdf_qqbar_roundall.npy']
+    qcmc_oth:
+      k3pi: ['pdf_qcmc_k3pi_roundall.npy']
+      kpipi0: ['pdf_qcmc_kpipi0_roundall.npy']
+    sig_um:
+      misspi0: ['pdf_sig_um_misspi0_roundall.npy']
+      klpi0: ['pdf_sig_um_klpi0_roundall.npy']
+
+  mass_fit_results: '/software/pc24403/tfpcbpggsz/tfpcbpggsz/bes/test/yields.json'
+
+$include: 'yields.json'

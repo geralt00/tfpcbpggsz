@@ -1,5 +1,6 @@
-import tensorflow as tf
 import numpy as np
+
+from tfpcbpggsz.tensorflow_wrapper import tf
 from tfpcbpggsz.ulti import get_mass, phsp_to_srd
 
 
@@ -11,7 +12,7 @@ class PhaseCorrection:
     """
 
 
-    def __init__(self):
+    def __init__(self, vm=None):
         self.order = 0
         self.correctionType = "singleBias"
         self.DEBUG = False
@@ -24,6 +25,7 @@ class PhaseCorrection:
         self.doBias_ = False
         self.nTerms_ = 0
         self.iTerms_ = []
+        self.vm = vm
 
 
     def do_bias(self):
@@ -73,11 +75,15 @@ class PhaseCorrection:
         elif self.correctionType == "antiSym_legendre":
             for order_i in range(self.order):
                 for order_j in range(1, self.order - order_i + 1, 2):
-                    self.coefficients[f'C_{order_i}_{order_j}'] = tf.Variable(np.random.rand(1), dtype=tf.float64)
+                    self.coefficients[f'C_{order_i}_{order_j}'] = tf.Variable(tf.random.normal(shape=(1,), dtype=tf.float64))
                     self.iTerms_.append(f'C_{order_i}_{order_j}')
                     self.nTerms_+=1
+            self.vm.variables = self.coefficients
+            self.vm.trainable_vars = self.coefficients
+            self.vm.set_all(self.coefficients, val_in_fit=True)
+        
 
-    def set_coefficients(self, coefficients):
+    def set_coefficients(self, **kwargs):
         """
         Sets the coefficients for the phase correction
 
@@ -85,6 +91,11 @@ class PhaseCorrection:
             The coefficients for the phase correction
 
         """
+        #if self.vm is not None:
+        #    self.coefficients = self.vm.get_all_dic(trainable_only=True)
+
+        #else:
+        coefficients = kwargs.get('coefficients', None)
         if isinstance(coefficients, dict):
             self.coefficients = coefficients
         elif isinstance(coefficients, list) or isinstance(coefficients, np.ndarray) or isinstance(coefficients, tf.Tensor):
@@ -174,7 +185,7 @@ class PhaseCorrection:
         return corr
 
     def eval_corr(self, coords):
-        return tf.function(self.eval_corr_norm)(coords)  
+        return self.eval_corr_norm(coords) #tf.function(self.eval_corr_norm)(coords)  
     
     def term_to_string(self, i):
         """
