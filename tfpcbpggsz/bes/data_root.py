@@ -26,9 +26,9 @@ class root_data:
             list: list with the data
         """
         #Double Kspipi
-        data_kspipi = up.open(f"{self.data_path}:{self.tree_name}")
+        #data_kspipi = up.open(f"{self.data_path}:{self.tree_name}")
         branches = self.branches
-        data_arr_old = data_kspipi.arrays(branches, cut=self.cut) if self.cut else data_kspipi.arrays(branches)
+        data_arr_old = self.load_arr()#data_kspipi.arrays(branches, cut=self.cut) if self.cut else data_kspipi.arrays(branches)
         data_arr = {}
         #Since the BESIII data was stored in order of (px,py,pz, E), we need to reorder it to (px,py,pz,E)
         for key in branches:
@@ -49,3 +49,29 @@ class root_data:
     
     def read_momentum(self, data, idx):
         return data[idx]
+
+    def load_arr(self):
+        """Load the data as an array
+
+        Returns:
+            np.array: array with the data
+        """
+        import glob
+        if '*' in self.data_path:
+            files = glob.glob(self.data_path)
+            data_arr = {}
+            for file in files:
+                data_kspipi = up.open(f"{file}:{self.tree_name}")
+                branches = self.branches
+                data_arr_old = data_kspipi.arrays(branches, cut=self.cut) if self.cut else data_kspipi.arrays(branches)
+                for key in branches:
+                    if key in data_arr:
+                        data_arr[key] = np.concatenate((data_arr[key],data_arr_old[key]))
+                    else:
+                        data_arr[key] = data_arr_old[key]
+            return data_arr
+        else:
+            data_kspipi = up.open(f"{self.data_path}:{self.tree_name}")
+            branches = self.branches
+            data_arr = data_kspipi.arrays(branches, cut=self.cut) if self.cut else data_kspipi.arrays(branches)
+            return data_arr

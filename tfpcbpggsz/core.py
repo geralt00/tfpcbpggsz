@@ -1,7 +1,7 @@
-import tensorflow as tf
+from tfpcbpggsz.tensorflow_wrapper import tf
 import numpy as np
 from tfpcbpggsz.masspdfs import *
-from tfpcbpggsz.phasecorrection import * #PhaseCorrection
+from tfpcbpggsz.phasecorrection import * 
 
 
 #Common functions
@@ -298,6 +298,7 @@ def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], 
 
 
     return (prob1 * frac1 + prob2 * frac1 + prob3 * frac2)
+
 
 #Probabily just for validation stage, should be more general for the Normalisation class
 class Normalisation:
@@ -1166,5 +1167,72 @@ class DecayNLLCalculator:
         prob3 = tf.ones_like(absA)    
     
         return (prob1 * frac1 + prob2 * frac1 + prob3 * frac2)
+
+#Isolate the BESIII code first
+class DecayNLL_Charm:
+    """
+    Class to calculate negative log-likelihood for BESIII decay types.
+    """
+    def __init__(self, **kwargs):
+        self._nll = {}
+        self.type = kwargs.get('type')
+        self.sig_model = None
+        self.model = self.formula()
+
+
+    def formula(self):
+        #"""Decay rate formula"""
+
+        if self.type[:4] == 'flav':
+            print('flavour')
+            return  self.flavour
+        elif self.type == 'cp_even' or self.type == 'cp_odd':
+            print('cp_even')
+            return  self.cp_tag
+        elif self.type == 'cp_mixed':
+            print('cp_mixed')
+            return  self.cp_mixed
+        else:
+            print('Invalid type')
+
+    def sig_model(self):
+        """
+        Signal model for the decay.
+        """
+        _params = model.trainable_variables
+
+
+        return self.sig_model
+    
+    def nll_cfit(self):
+        """
+        Calculate the negative log-likelihood with the cfit method.
+
+        .. math:: 
+            P_{i} = (1 - f_{bkg}) * P_{sig} + f_{bkg}(q_{i}) * P_{bkg}(q_{i})
+
+        .. math::
+            P_{sig} = \\frac{\epsilon |A|^{2}(q_{i})}{\\sum \epsilon |A|^{2}(q_{i})dq_{i}}
+            
+        .. math::
+            -2 \ln L = -2 \sum_{i} \ln P_{i}
+            
+    
+        """
+
+        #Load from config_loader
+        prob_bkg = []
+        w_bkg = []
+
+
+        ln_data = tf.math.log(
+            (1 - w_bkg) * self.sig_model + w_bkg * prob_bkg
+        )
+
+        nll = -2 * tf.reduce_sum(ln_data)
+
+        return nll
+
+
 
 

@@ -13,6 +13,7 @@ class BaseModel(object):
         self.vm = self.pc.vm
         self.tags = self.config_loader.idx
         self.load_norm()
+        self._nll = {}
 
 
     def load_norm(self):
@@ -39,8 +40,11 @@ class BaseModel(object):
         norm = self.norm[tag]._crossTerms_complex
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_frac_bkg(tag)
+        prob_bkg = (prob_bkg)*frac_bkg
+        bkg_part = tf.reduce_sum(prob_bkg, axis=0)
+        sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
 
-        nll = tf.reduce_sum(-2*tf.math.log( (prob/norm)*(1-frac_bkg) + (prob_bkg)*frac_bkg))
+        nll = tf.reduce_sum(-2*tf.math.log( sig_part + bkg_part))
 
         return nll
     
@@ -57,12 +61,14 @@ class BaseModel(object):
         norm = self.norm[tag].Integrated_CP_tag(Dsign)
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
+        prob_bkg = (prob_bkg)*frac_bkg
+        bkg_part = tf.reduce_sum(prob_bkg, axis=0)
+        sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
 
         #test_term = frac_bkg*tf.ones_like(prob)
         #print(test_term.shape)
 
-
-        nll = tf.reduce_sum(-2*tf.math.log( (prob/norm)*(1-tf.reduce_sum(frac_bkg)) + tf.reduce_sum((prob_bkg)*frac_bkg)))
+        nll = tf.reduce_sum(-2*tf.math.log( sig_part + bkg_part))
 
         return nll
     
@@ -70,18 +76,18 @@ class BaseModel(object):
         if tag in ["full", "misspi", "misspi0"]:
             return self.NLL_Kspipi(tag)
         elif tag in ["kspi0", "kseta_gamgam", "ksetap_pipieta", "kseta_3pi", "ksetap_gamrho", "ksomega", "klpi0pi0"]:
-            return self.NLL_CP(tag, 1)
-        elif tag in ["kk", "pipi", "pipipi0", "kspi0pi0", "klpi0"]:
             return self.NLL_CP(tag, -1)
+        elif tag in ["kk", "pipi", "pipipi0", "kspi0pi0", "klpi0"]:
+            return self.NLL_CP(tag, 1)
 
     def fun(self, x):
         self.set_params(x)
         #nll = []
         ret = 0
         for tag in self.tags:
-            nll = self.NLL_selector(tag)
-            ret += nll
-        return nll
+            self._nll[tag] = self.NLL_selector(tag)
+            ret += self._nll[tag]
+        return ret
         
     def set_params(self, x={}):
         self.pc.set_coefficients(coefficients=x)

@@ -23,7 +23,7 @@ index = args.index
 time1 = time.time()
 #Generating the B2DK signal 
 pcgen = pcbpggsz_generator()
-pcgen.add_bias()
+#pcgen.add_bias()
 #B2DK
 n_b2dk = 2*6267
 n_possion_b2dk = np.random.poisson(n_b2dk)
@@ -43,7 +43,7 @@ srd_m = phsp_to_srd(m12_m,m13_m)
 #srd_p = [srd_p[:,0],srd_p[:,1]]
 #srd_m = [srd_m[:,0],srd_m[:,1]]
 #Double Kspipi
-ret_sig, ret_tag = pcgen.generate(5000, type="cp_mixed")
+ret_sig, ret_tag = pcgen.generate(10923, type="cp_mixed")
 p1_sig,p2_sig,p3_sig = ret_sig
 p1_tag,p2_tag,p3_tag = ret_tag
 
@@ -56,14 +56,14 @@ srd_sig = phsp_to_srd(m12_sig,m13_sig)
 srd_tag = phsp_to_srd(m12_tag,m13_tag)
 
 #CP odd 
-ret_cp_odd = pcgen.generate(50000, type="cp_odd")
+ret_cp_odd = pcgen.generate(8444, type="cp_odd")
 p1_cp_odd,p2_cp_odd,p3_cp_odd = ret_cp_odd
 m12_cp_odd = get_mass(p1_cp_odd,p2_cp_odd)
 m13_cp_odd = get_mass(p1_cp_odd,p3_cp_odd)
 srd_cp_odd = phsp_to_srd(m12_cp_odd,m13_cp_odd)
 
 #CP even
-ret_cp_even = pcgen.generate(50000, type="cp_even")
+ret_cp_even = pcgen.generate(14646, type="cp_even")
 p1_cp_even,p2_cp_even,p3_cp_even = ret_cp_even
 m12_cp_even = get_mass(p1_cp_even,p2_cp_even)
 m13_cp_even = get_mass(p1_cp_even,p3_cp_even)
@@ -116,7 +116,7 @@ amp_cp_even, ampbar_cp_even = pcgen.amp(ret_cp_even), pcgen.ampbar(ret_cp_even)
 
 #PHSP
 phsp = PhaseSpaceGenerator().generate
-phsp_p, phsp_m = phsp(2000000), phsp(2000000)
+phsp_p, phsp_m = phsp(500000), phsp(500000)
 p1_phsp_p,p2_phsp_p,p3_phsp_p = phsp_p
 p1_phsp_m,p2_phsp_m,p3_phsp_m = phsp_m
 m12_phsp_p = get_mass(p1_phsp_p,p2_phsp_p)
@@ -133,14 +133,14 @@ print("B2DK amplitudes generated")
 
 import tfpcbpggsz.core as core
 
-ampMC={'b2dk_p':amp_phsp_p,'b2dk_m':amp_phsp_m,'charm_p':amp_phsp_p,'charm_m':amp_phsp_m}
-ampbarMC={'b2dk_p':ampbar_phsp_p,'b2dk_m':ampbar_phsp_m,'charm_p':ampbar_phsp_p,'charm_m':ampbar_phsp_m}
+ampMC={'b2dk_p':amp_phsp_p,'b2dk_m':amp_phsp_m,'charm_p':amp_phsp_p,'charm_m':amp_phsp_m, 'charm_sig':amp_phsp_p,'charm_tag':amp_phsp_m}
+ampbarMC={'b2dk_p':ampbar_phsp_p,'b2dk_m':ampbar_phsp_m,'charm_p':ampbar_phsp_p,'charm_m':ampbar_phsp_m, 'charm_sig':ampbar_phsp_p,'charm_tag':ampbar_phsp_m}
 
 Norm_p = core.Normalisation(ampMC, ampbarMC, 'b2dk_p')
 Norm_m = core.Normalisation(ampMC, ampbarMC, 'b2dk_m')
-Norm_kspipi = core.Normalisation(ampMC, ampbarMC, 'charm_p')
 Norm_cp_odd = core.Normalisation(ampMC, ampbarMC,'charm_p')
 Norm_cp_even = core.Normalisation(ampMC, ampbarMC,'charm_p')
+Norm_kspipi = core.Normalisation(ampMC, ampbarMC, 'charm_sig')
 
 Norm_p.initialise()
 Norm_m.initialise()
@@ -148,7 +148,6 @@ Norm_kspipi.initialise()
 Norm_cp_odd.initialise()
 Norm_cp_even.initialise()
 
-srd_phsp_p_tag = (tf.gather(srd_phsp_p[0], Norm_p.tagged_i), tf.gather(srd_phsp_p[1], Norm_p.tagged_i))
 
 from tfpcbpggsz.phasecorrection import PhaseCorrection
 pc = PhaseCorrection()
@@ -189,18 +188,19 @@ def NLL_LHCb(x):
 def NLL_kspipi(x):
 
     params = x
-    pc.set_coefficients(params[4:])
+    pc.set_coefficients(params)
 
     phase_correction_sig = pc.eval_corr(srd_sig)
     phase_correction_tag = pc.eval_corr(srd_tag)
-    Norm_kspipi.setParams(params)
+    Norm_p.setParams(params)
     phase_correction_MC_sig = pc.eval_corr(srd_phsp_p)
-    phase_correction_MC_tag = pc.eval_corr(srd_phsp_p_tag)
-    Norm_kspipi.add_pc(phase_correction_MC_sig, pc_tag=phase_correction_MC_tag)
-    Norm_kspipi.Update_crossTerms()
+    phase_correction_MC_tag = pc.eval_corr(srd_phsp_m)
+
+    Norm_p.add_pc(phase_correction_MC_sig, pc_tag=phase_correction_MC_tag)
+    Norm_p.Update_crossTerms()
 
     prob = core.prob_totalAmplitudeSquared_CP_mix(amp_sig, ampbar_sig,amp_tag, ampbar_tag, phase_correction_sig, phase_correction_tag)
-    norm = Norm_kspipi._crossTerms_complex
+    norm = Norm_p._crossTerms_complex
 
     nll = tf.reduce_sum(-2*tf.math.log(prob/norm))
 
@@ -277,7 +277,7 @@ phase_correction_noeff = pc.eval_corr(srd_noeff)
 #plt.savefig(plot_dir+"PhaseCorrection_mass.png")
 print("Total time taken: ",time5-time1)
 
-log_path = "/shared/scratch/pc24403/single_bias/v1.0"
+log_path = "/shared/scratch/pc24403/toy_lhcb_bes/v1.0"
 os.makedirs(log_path,exist_ok=True)
 with open(log_path+f"/fit_result_{index}.txt","w") as f:
     means = mg.values
@@ -285,3 +285,24 @@ with open(log_path+f"/fit_result_{index}.txt","w") as f:
     #print all parameters and errors into a file
     print("Means", *means, sep=", ", file=f)
     print("Errors", *errors, sep=", ", file=f)
+
+#Save all the generated data
+time6 = time.time()
+np.savez(log_path+f"/data_{index}.npz", 
+         srd_p=srd_p, srd_m=srd_m, srd_sig=srd_sig, srd_tag=srd_tag, srd_cp_odd=srd_cp_odd, srd_cp_even=srd_cp_even,
+         srd_phsp_p=srd_phsp_p, srd_phsp_m=srd_phsp_m,
+         amp_p=amp_p, amp_m=amp_m, amp_sig=amp_sig, amp_tag=amp_tag, amp_cp_odd=amp_cp_odd, amp_cp_even=amp_cp_even,
+         amp_phsp_p=amp_phsp_p, amp_phsp_m=amp_phsp_m, ampbar_phsp_p=ampbar_phsp_p, ampbar_phsp_m=ampbar_phsp_m,
+         Norm_p=Norm_p, Norm_m=Norm_m, Norm_kspipi=Norm_kspipi, Norm_cp_odd=Norm_cp_odd, Norm_cp_even=Norm_cp_even,
+         ampMC=ampMC, ampbarMC=ampbarMC)
+
+print("All data saved")
+print("Save data: ",time6-time5)
+#Save the fit result with mg class
+import pickle
+with open(log_path+f"/fit_result_{index}.pkl","wb") as f:
+    pickle.dump(mg,f)
+print("Fit result saved")
+time7 = time.time()
+print("Total time taken: ",time7-time1)
+

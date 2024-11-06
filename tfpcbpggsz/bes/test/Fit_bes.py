@@ -1,8 +1,6 @@
 
-from tfpcbpggsz.tensorflow_wrapper import *
+from tfpcbpggsz.tensorflow_wrapper import tf
 import numpy as np
-import uproot as up
-
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
 from tfpcbpggsz.ulti import get_mass, phsp_to_srd, get_mass_bes
 from matplotlib import pyplot as plt
@@ -13,7 +11,8 @@ from tfpcbpggsz.generator.gen_pcbpggsz import pcbpggsz_generator
 from plothist import plot_hist, make_hist 
 from tfpcbpggsz.variable import VarsManager
 from tfpcbpggsz.bes.config_loader import ConfigLoader
-
+from tfpcbpggsz.bes.plotter import Plotter
+import os
 import time
 
 
@@ -27,8 +26,14 @@ config.get_all_data()
 config.vm
 
 
+s12_sig, s13_sig = [], []
+for tag in config.idx:
+    s12_sig_i, s13_sig_i = config.get_data_mass(tag=tag)
+    s12_sig.append(s12_sig_i)
+    s13_sig.append(s13_sig_i)
 
-s12_sig, s13_sig = config.get_data_mass(tag='ksetap_pipieta')
+s12_sig = np.concatenate(s12_sig)
+s13_sig = np.concatenate(s13_sig)
 
 
 plot_dir="/software/pc24403/tfpcbpggsz/benchmark/plots/"
@@ -36,7 +41,7 @@ os.makedirs(plot_dir,exist_ok=True)
 from plothist import plot_hist, make_hist, make_2d_hist, plot_2d_hist
 
 
-h_2d_sig = make_2d_hist([s12_sig,s13_sig],bins=[100,100])
+h_2d_sig = make_2d_hist([s12_sig,s13_sig],bins=[100,100],range=[[0.3,3.2],[0.3,3.2]])
 
 
 fig1, ax1, ax_colorbar1 = plot_2d_hist(h_2d_sig, colorbar_kwargs={"label": "Entries"})
@@ -60,9 +65,6 @@ phsp = PhaseSpaceGenerator().generate
 
 time3 = time.time()
 print("D decay amplitudes generated")
-
-import tfpcbpggsz.core as core
-
 from tfpcbpggsz.bes.model import BaseModel
 
 Model = BaseModel(config)
@@ -81,7 +83,7 @@ var_args = {}
 var_names = Model.vm.trainable_vars
 x0 = []
 for i in var_names:
-    x0.append(Model.vm.get(i))
+    x0.append(tf.ones_like(Model.vm.get(i)).shape)
     var_args[i] = Model.vm.get(i)
 
 m = Minuit(
@@ -93,6 +95,11 @@ m = Minuit(
 mg = m.migrad()
 print(mg)   
 
+Plotter = Plotter(Model)
+Plotter.plot_cato('cp_odd')
+
+
+'''
 time5 = time.time()
 #plot the phase correction in phase space
 plot_phsp = phsp(100000)
@@ -111,4 +118,5 @@ plt.clf()
 plt.scatter(m12_noeff,m13_noeff,c=phase_correction_noeff)
 plt.colorbar()
 plt.savefig(plot_dir+"data_PhaseCorrection_mass.png")
+'''
 print("Total time taken: ",time5-time1)

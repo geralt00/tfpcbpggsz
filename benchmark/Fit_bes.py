@@ -11,6 +11,7 @@ from tfpcbpggsz.generator.data import data_mask, data_merge, data_shape
 from tfpcbpggsz.amp_test import *
 from tfpcbpggsz.generator.gen_pcbpggsz import pcbpggsz_generator
 from plothist import plot_hist, make_hist 
+from tfpcbpggsz.variable import VarsManager
 
 import time
 
@@ -122,12 +123,15 @@ ampbarMC={'charm_sig':ampbar_phsp_p,'charm_tag':ampbar_phsp_m}
 Norm_cpmix = core.Normalisation(ampMC, ampbarMC, 'charm_sig')
 Norm_cpmix.initialise()
 
+vm = VarsManager()
+
 from tfpcbpggsz.phasecorrection import PhaseCorrection
-pc = PhaseCorrection()
+pc = PhaseCorrection(vm)
 pc.correctionType = "antiSym_legendre"
 pc.order = 3
 pc.PhaseCorrection()
 pc.DEBUG = False
+print(pc.vm.get_all_dic())
 
 
 @tf.function
@@ -161,6 +165,7 @@ print("NLL function defined")
 from iminuit import Minuit
 
 x_phase_correction = np.zeros((pc.nTerms_),dtype=np.float64)
+
 
 m = Minuit(NLL, x_phase_correction)
 mg = m.migrad()
