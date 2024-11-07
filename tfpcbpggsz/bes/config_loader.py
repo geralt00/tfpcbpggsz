@@ -27,8 +27,18 @@ class ConfigLoader:
         self.idx = {}
         self.data = load_data(self)
         self._data = {}
-        self._phsp = {}
+        self._mc = {}
         self._pdf = {}
+        '''
+        self._mc['phsp'] = {}
+        self._qcmc = {}
+        self._qcmc_oth = {}
+        self._dpdm = {}
+        self._qqbar = {}
+        self._sig_um = {}
+        '''
+        #It will be easier to use MC as a big dictionary
+
         self.D02KsPiPi = D02KsPiPi()
         self.yields = yields(self.D02KsPiPi)
         self.mass_fit_results = {}
@@ -56,11 +66,12 @@ class ConfigLoader:
         return self.idx
     
     def get_all_data(self):
-        datafile = ['data', 'phsp', 'pdf']
+        datafile = ['data', 'phsp', 'pdf', 'qcmc', 'dpdm', 'qqbar']
         self.get_order()
 
-        self._data, self._phsp, self._pdf = [self.data.get_data(i) for i in datafile]
-        return self._data, self._phsp, self._pdf
+        #self._data, self._mc['phsp'], self._pdf = [self.data.get_data(i) for i in datafile]
+        self._data, self._mc['phsp'], self._pdf, self._mc['qcmc'], self._mc['dpdm'], self._mc['qqbar'] = [self.data.get_data(i) for i in datafile]
+        return self._data, self._mc, self._pdf
 
     def get_data(self, type):
         self.get_order()
@@ -87,23 +98,27 @@ class ConfigLoader:
         else:
             return self._data[tag]['ampbar']
         
+    def get_mc_mass(self, tag, key):
+        return self._mc[key][tag]['s12'], self._mc[key][tag]['s13']
+        
     def get_phsp_srd(self, tag):
-        return self._phsp[tag]['srd']
+        return self._mc['phsp'][tag]['srd']
     
     def get_phsp_mass(self, tag):
-        return self._phsp[tag]['s12'], self._phsp[tag]['s13']
+        return self._mc['phsp'][tag]['s12'], self._mc['phsp'][tag]['s13']
+    
     
     def get_phsp_amp(self, tag, key=None):
-        if isinstance(self._phsp[tag]['amp'], dict):
-            return self._phsp[tag]['amp'][key]
+        if isinstance(self._mc['phsp'][tag]['amp'], dict):
+            return self._mc['phsp'][tag]['amp'][key]
         else:
-            return self._phsp[tag]['amp']
+            return self._mc['phsp'][tag]['amp']
         
     def get_phsp_ampbar(self, tag, key=None):
-        if isinstance(self._phsp[tag]['ampbar'], dict):
-            return self._phsp[tag]['ampbar'][key]
+        if isinstance(self._mc['phsp'][tag]['ampbar'], dict):
+            return self._mc['phsp'][tag]['ampbar'][key]
         else:
-            return self._phsp[tag]['ampbar']
+            return self._mc['phsp'][tag]['ampbar']
         
     def get_data_bkg(self, tag):
         """Get the probability of the background
@@ -125,3 +140,15 @@ class ConfigLoader:
         ret = np.array([self.mass_fit_results[f'sig_range_nb_{key}'] for key in self._pdf[tag].keys()])/ntot
         #shape as (n,1)
         return ret.reshape(-1,1)
+
+    def get_bkg_num(self, tag, key):
+        self.yields.load(self._config_data['data'].get('mass_fit_results'))
+        self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        val = self.mass_fit_results[f'sig_range_nb_{key}']
+        return val
+    
+    def get_sig_num(self, tag):
+        self.yields.load(self._config_data['data'].get('mass_fit_results'))
+        self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        val = self.mass_fit_results[f'sig_range_nsig']
+        return val

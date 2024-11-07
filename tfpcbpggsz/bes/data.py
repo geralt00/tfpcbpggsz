@@ -24,22 +24,25 @@ class load_data:
             dic: dictionary with the data path
         """
 
-
         if (idx != 'pdf' and len(self.config.idx) == len(self.config._config_data['data'].get(idx))) or idx == 'pdf':
             for tag in self.config.idx.keys():
                 self.data_path[idx] = {} if idx not in self.data_path.keys() else self.data_path[idx]
                 if idx != 'pdf':
-                    for i_file in self.config.idx.values():
-                        self.data_path[idx][tag] = self.config._config_data['data'].get(idx)[i_file]
+                    #for i_file in self.config.idx.values():
+                    self.data_path[idx][tag] = self.config._config_data['data'].get(idx)[self.config.idx.get(tag)]
+                    #print(f'{tag}: {self.data_path[idx][tag]}')
                 else:
-                    self.data_path[idx][tag]={} if tag not in self.data_path[idx].keys() else self.data_path[idx][tag]
+                    self.data_path[idx][tag]={} #if tag not in self.data_path[idx].keys() else self.data_path[idx][tag]
                     for i_pdf in self.config._config_data['data'].get(idx).keys():
                         if isinstance(self.config._config_data['data'].get(idx).get(i_pdf), list):
-                            self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx)[i_pdf]
+                            self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx)[i_pdf][self.config.idx.get(tag)]
+                            #print(f'{tag}: {self.data_path[idx][tag][i_pdf]}')
                         elif tag in self.config._config_data['data'].get(idx).get(i_pdf).keys():
-                            self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx).get(i_pdf)[tag]
+                            self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx).get(i_pdf)[self.config.idx.get(tag)]
+                            #print(f'{tag}: {self.data_path[idx][tag][i_pdf]}')
         else:
             warnings.warn("The number of tags is not equal to the number of files")
+
 
         return self.data_path
 
@@ -69,6 +72,7 @@ class load_data:
                         self.data[tag][idx] = data_io(root_data(path, self.config._config_data['data'].get('tree'), cut=cuts, branches=branches).load_tuple()).load_all()
                     else:
                         self.data[tag][idx] = data_io(root_data(path, self.config._config_data['data'].get('tree'),cut=self.config.D02KsPiPi.cuts(tag)).load_tuple()).load_all()
+                        #print(f'{path}: {self.data[tag][idx]['amp'].shape}')
                 elif path.endswith('.npy'):
                     #prob = 
                     self.data[tag][idx] = np.load(path)   
@@ -76,13 +80,13 @@ class load_data:
                 self.data[tag][idx] = {}
                 for i_pdf in self.data_path[idx][tag].keys():
                     self.data[tag][idx][i_pdf] = {}
-                    if isinstance(self.data_path[idx][tag][i_pdf], list):
-                        for i_pdf_tag in range(len(self.data_path[idx][tag][i_pdf])):
-                            path = self.data_path[idx][tag][i_pdf][i_pdf_tag]
-                            if path.endswith('.root'):
-                                self.data[tag][idx][i_pdf] = data_io(root_data(path, self.config._config_data['data'].get('tree')).load_tuple()).load_all()
-                            elif path.endswith('.npy'):
-                                self.data[tag][idx][i_pdf] = np.load(path)
+                    if isinstance(self.data_path[idx][tag][i_pdf], str):
+                        #for i_pdf_tag in range(len(self.data_path[idx][tag][i_pdf])):
+                        path = self.data_path[idx][tag][i_pdf]
+                        if path.endswith('.root'):
+                            self.data[tag][idx][i_pdf] = data_io(root_data(path, self.config._config_data['data'].get('tree')).load_tuple()).load_all()
+                        elif path.endswith('.npy'):
+                            self.data[tag][idx][i_pdf] = np.load(path)
                     else:
                         for i_ext_pdf in self.data_path[idx][tag][i_pdf].keys():
                             path = self.data_path[idx][tag][i_pdf][i_ext_pdf]

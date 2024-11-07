@@ -67,7 +67,7 @@ class BaseModel(object):
 
         #test_term = frac_bkg*tf.ones_like(prob)
         #print(test_term.shape)
-
+        #print(f"bkg_part: {bkg_part.shape}")
         nll = tf.reduce_sum(-2*tf.math.log( sig_part + bkg_part))
 
         return nll
