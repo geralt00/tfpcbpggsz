@@ -22,7 +22,6 @@ class data_io:
         Returns:
             dic: dictionary with all variables
         """
-
         if len(self.data) == 3:
             self.variables['amp'], self.variables['ampbar'] = self.get_amplitude(self.data)
             self.variables['s12'], self.variables['s13'], self.variables['srd'] = self.get_mass(self.data)
@@ -30,7 +29,6 @@ class data_io:
 
         elif len(self.data) == 2:
             self.variables['amp'], self.variables['ampbar'], self.variables['s12'], self.variables['s13'], self.variables['srd'] = {}, {}, {}, {}, {}
-
             for i, key in enumerate(['sig', 'tag']):
                 self.variables['amp'][key], self.variables['ampbar'][key] = self.get_amplitude(self.data[i])
                 self.variables['s12'][key], self.variables['s13'][key], self.variables['srd'][key] = self.get_mass(self.data[i])

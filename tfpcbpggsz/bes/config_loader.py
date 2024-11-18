@@ -80,11 +80,17 @@ class ConfigLoader:
 
     #def get_data
 
-    def get_data_srd(self, tag):
-        return self._data[tag]['srd']
+    def get_data_srd(self, tag, key=None):
+        if isinstance(self._data[tag]['srd'], dict):
+            return self._data[tag]['srd'][key]
+        else:
+            return self._data[tag]['srd']
     
-    def get_data_mass(self, tag):
-        return self._data[tag]['s12'], self._data[tag]['s13']
+    def get_data_mass(self, tag, key=None):
+        if isinstance(self._data[tag]['s12'], dict):
+            return self._data[tag]['s12'][key], self._data[tag]['s13'][key]
+        else:
+            return self._data[tag]['s12'], self._data[tag]['s13']
     
     def get_data_amp(self, tag, key=None):
         if isinstance(self._data[tag]['amp'], dict):
@@ -98,14 +104,23 @@ class ConfigLoader:
         else:
             return self._data[tag]['ampbar']
         
-    def get_mc_mass(self, tag, key):
-        return self._mc[key][tag]['s12'], self._mc[key][tag]['s13']
+    def get_mc_mass(self, tag, key, key_tag=None):
+        if isinstance(self._mc[key][tag]['s12'], dict):
+            return self._mc[key][tag]['s12'][key_tag], self._mc[key][tag]['s13'][key_tag]
+        else:
+            return self._mc[key][tag]['s12'], self._mc[key][tag]['s13']
         
-    def get_phsp_srd(self, tag):
-        return self._mc['phsp'][tag]['srd']
+    def get_phsp_srd(self, tag, key=None):
+        if isinstance(self._mc['phsp'][tag]['srd'], dict):
+            return self._mc['phsp'][tag]['srd'][key]
+        else:
+            return self._mc['phsp'][tag]['srd']
     
-    def get_phsp_mass(self, tag):
-        return self._mc['phsp'][tag]['s12'], self._mc['phsp'][tag]['s13']
+    def get_phsp_mass(self, tag, key=None):
+        if isinstance(self._mc['phsp'][tag]['srd'], dict):
+            return self._mc['phsp'][tag]['s12'][key], self._mc['phsp'][tag]['s13'][key]
+        else:    
+            return self._mc['phsp'][tag]['s12'], self._mc['phsp'][tag]['s13']
     
     
     def get_phsp_amp(self, tag, key=None):

@@ -19,11 +19,16 @@ class BaseModel(object):
     def load_norm(self):
         
         for tag in self.tags:
-            self.norm[tag] = normalisation({tag: self.config_loader.get_phsp_amp(tag)}, {tag: self.config_loader.get_phsp_ampbar(tag)}, tag)
-            self.norm[tag].initialise()
+            if tag in ["full", "misspi", "misspi0"]:
+                self.norm[tag] = normalisation({f'{tag}_sig': self.config_loader.get_phsp_amp(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_amp(tag, 'tag')}, {f'{tag}_sig': self.config_loader.get_phsp_ampbar(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_ampbar(tag, 'tag')}, f'{tag}_sig')
+                
+                self.norm[tag].initialise()                
+            else:
+                self.norm[tag] = normalisation({tag: self.config_loader.get_phsp_amp(tag)}, {tag: self.config_loader.get_phsp_ampbar(tag)}, tag)
+                self.norm[tag].initialise()
 
 
-
+    #@tf.function
     def NLL_Kspipi(self, tag):
 
         params = self.pc.coefficients.values()
@@ -36,18 +41,20 @@ class BaseModel(object):
         self.norm[tag].Update_crossTerms()
 
         #need to be flexible with the function name
-        prob = core.prob_totalAmplitudeSquared_CP_mix(self.config_loader.get_data_amp(tag,'sig'), self.config_loader.get_data_ampbar(tag,'sig'), self.config_loader.get_data_amp(tag,'tag'), self.config_loader.get_data_amp(tag,'tag'), phase_correction_sig, phase_correction_tag)
+        prob = core.prob_totalAmplitudeSquared_CP_mix(self.config_loader.get_data_amp(tag,'sig'), self.config_loader.get_data_ampbar(tag,'sig'), self.config_loader.get_data_amp(tag,'tag'), self.config_loader.get_data_ampbar(tag,'tag'), phase_correction_sig, phase_correction_tag)
         norm = self.norm[tag]._crossTerms_complex
         prob_bkg = self.config_loader.get_data_bkg(tag)
-        frac_bkg = self.config_loader.get_frac_bkg(tag)
+        frac_bkg = self.config_loader.get_bkg_frac(tag)
         prob_bkg = (prob_bkg)*frac_bkg
         bkg_part = tf.reduce_sum(prob_bkg, axis=0)
         sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
 
-        nll = tf.reduce_sum(-2*tf.math.log( sig_part + bkg_part))
+
+        nll = tf.reduce_sum(-2*core.clip_log( sig_part + bkg_part))
 
         return nll
     
+    #@tf.function    
     def NLL_CP(self, tag, Dsign):
 
         params = self.pc.coefficients.values()
@@ -80,6 +87,7 @@ class BaseModel(object):
         elif tag in ["kk", "pipi", "pipipi0", "kspi0pi0", "klpi0"]:
             return self.NLL_CP(tag, 1)
 
+    
     def fun(self, x):
         self.set_params(x)
         #nll = []

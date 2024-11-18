@@ -47,18 +47,32 @@ class GetCiSi:
             The bin index.
         """
 
-        s01 = event['s12']#event.s(0, 1)
-        s02 = event['s13']#event.s(0, 2)
+        s01 = event['s12']
+        s02 = event['s13']
         s01_list, s02_list, binList = self.read_binning()[:,0], self.read_binning()[:,1], self.read_binning()[:,2]
-        # Calculate squared distances using NumPy broadcasting
-        distances = (s01_list - s01[:, np.newaxis])**2 + (s02_list - s02[:, np.newaxis])**2  
-
-        # Find the index of the minimum distance
-        minIndex = np.argmin(distances, axis=1)
-
-        # Get the bin index as float
         binList = binList.astype(float)
-        bin = binList[minIndex]
+
+        # Calculate squared distances using NumPy broadcasting
+        s01_list = np.array(s01_list)
+        s02_list = np.array(s02_list)
+
+        # Broadcasting to get distances:
+        s01_expanded = s01[:, np.newaxis]  # Add a new axis to s01
+        s02_expanded = s02[:, np.newaxis] 
+        chunk_size = 1000  # Adjust this based on your memory constraints
+        min_index = []
+
+        for i in range(0, len(s01), chunk_size):
+            chunk_s01 = s01_expanded[i:i + chunk_size]
+            chunk_s02 = s02_expanded[i:i + chunk_size]
+
+            distances = (s01_list - chunk_s01)**2 + (s02_list - chunk_s02)**2
+            chunk_min_index = np.argmin(distances, axis=1)
+            min_index.append(chunk_min_index)
+
+        min_index = np.concatenate(min_index)
+
+        bin = binList[min_index]
         bin = np.where(s01 < s02, bin, np.negative(bin))
         return bin
     

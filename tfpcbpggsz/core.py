@@ -313,9 +313,9 @@ class Normalisation:
     def __init__(self, amp_MC, ampbar_MC, name='b2dk'):
 
         self._name = name
-        if self._name[3] == 'k':
+        if len(self._name)>4 and self._name[3] == 'k':
             self._name_misid = self._name.replace('k', 'pi')
-        elif self._name[3] == 'p':
+        elif len(self._name)>4 and self._name[3] == 'p':
             self._name_misid = self._name.replace('pi', 'k')
         else:
             self._name_misid = None

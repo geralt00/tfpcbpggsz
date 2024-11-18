@@ -128,6 +128,25 @@ class pcbpggsz_generator:
         ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
         return ampbar_i
 
+    def amp_np(self, data):
+        #"""Calculate the amplitude of the decay from momenta."""    
+
+        Kspipi = self.Kspipi
+        p1,p2,p3 = data
+        if not isinstance(p1, tf.Tensor):
+            amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())     
+        else:
+            amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
+        return amp_i
+    
+    def ampbar_np(self, data):
+        #"""Calculate the amplitude of the decay from momenta."""
+
+        Kspipi = self.Kspipi
+        p1,p2,p3 = data
+        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
+        ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
+        return ampbar_i
     
     def formula(self):
         #"""Decay rate formula"""

@@ -64,15 +64,14 @@ class load_data:
             cuts=self.config.D02KsPiPi.cuts(tag)
             if idx != 'pdf':
                 path = self.data_path[idx][tag]
-                if idx == 'qcmc':
-                    cuts = cuts + ' & ' + self.config.D02KsPiPi.topo_cut(tag)
+                #if idx == 'qcmc':
+                #    cuts = cuts + ' & ' + self.config.D02KsPiPi.topo_cut(tag)
                 if path.endswith('.root'):
                     if tag in ['full', 'misspi0', 'misspi']:
                         branches = ['p4_Ks','p4_pim','p4_pip','p4_Ks2','p4_pim2','p4_pip2']
                         self.data[tag][idx] = data_io(root_data(path, self.config._config_data['data'].get('tree'), cut=cuts, branches=branches).load_tuple()).load_all()
                     else:
                         self.data[tag][idx] = data_io(root_data(path, self.config._config_data['data'].get('tree'),cut=self.config.D02KsPiPi.cuts(tag)).load_tuple()).load_all()
-                        #print(f'{path}: {self.data[tag][idx]['amp'].shape}')
                 elif path.endswith('.npy'):
                     #prob = 
                     self.data[tag][idx] = np.load(path)   

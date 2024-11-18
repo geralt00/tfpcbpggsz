@@ -11,7 +11,6 @@ from tfpcbpggsz.generator.gen_pcbpggsz import pcbpggsz_generator
 from plothist import plot_hist, make_hist 
 from tfpcbpggsz.variable import VarsManager
 from tfpcbpggsz.bes.config_loader import ConfigLoader
-from tfpcbpggsz.bes.plotter import Plotter
 import os
 import time
 
@@ -21,32 +20,10 @@ time1 = time.time()
 
 
 #CP odd Kspipi
-config = ConfigLoader("config.yml")
+config = ConfigLoader("config_big.yml")
 config.get_all_data()
 config.vm
 
-'''
-s12_sig, s13_sig = [], []
-for tag in config.idx:
-    s12_sig_i, s13_sig_i = config.get_data_mass(tag=tag)
-    s12_sig.append(s12_sig_i)
-    s13_sig.append(s13_sig_i)
-
-s12_sig = np.concatenate(s12_sig)
-s13_sig = np.concatenate(s13_sig)
-
-
-
-from plothist import plot_hist, make_hist, make_2d_hist, plot_2d_hist
-
-
-h_2d_sig = make_2d_hist([s12_sig,s13_sig],bins=[100,100],range=[[0.3,3.2],[0.3,3.2]])
-
-
-fig1, ax1, ax_colorbar1 = plot_2d_hist(h_2d_sig, colorbar_kwargs={"label": "Entries"})
-fig1.savefig(plot_dir+"data_cp_odd_sig_2d_hist.png")
-
-'''
 print("Signal generated")
 
 time2 = time.time()
@@ -63,7 +40,7 @@ from tfpcbpggsz.bes.model import BaseModel
 Model = BaseModel(config)
 
 Model.pc.correctionType = "antiSym_legendre"
-Model.pc.order = 4
+Model.pc.order = 1
 Model.pc.PhaseCorrection()
 Model.pc.DEBUG = False
 
@@ -88,9 +65,13 @@ m = Minuit(
 mg = m.migrad()
 print(mg)   
 
+from tfpcbpggsz.bes.plotter import Plotter
+
 Plotter = Plotter(Model)
 Plotter.plot_cato('cp_odd')
-#Plotter.plot_cato('cp_even')
+Plotter.plot_cato('cp_even')
+Plotter.plot_cato('dks')
+
 
 
 
@@ -110,10 +91,20 @@ phase_correction_noeff = Model.pc.eval_corr(srd_noeff)
 plt.clf()
 plt.scatter(srd_noeff[0],srd_noeff[1],c=phase_correction_noeff)
 plt.colorbar()
-plt.savefig(plot_dir+"data_PhaseCorrection_srd.png")
+plt.savefig(plot_dir+f"data_PhaseCorrection_srd_order{Model.pc.order}.png")
 plt.clf()
 plt.scatter(m12_noeff,m13_noeff,c=phase_correction_noeff)
 plt.colorbar()
-plt.savefig(plot_dir+"data_PhaseCorrection_mass.png")
+plt.savefig(plot_dir+f"data_PhaseCorrection_mass_order{Model.pc.order}.png")
 
-print("Total time taken: ",time5-time1)
+#Save all the generated data
+time6 = time.time()
+np.savez(f"full_data_fit_order{Model.pc.order}.npz", 
+         fitted_params=m.values, fitted_params_error= mg.errors,
+         )
+#import pickle
+#with open('fitted_model.pkl', 'wb') as f:
+#    pickle.dumps(Model, f)
+
+print("All data saved")
+print("Save data: ",time6-time1)
