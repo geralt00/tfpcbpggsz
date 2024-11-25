@@ -4,6 +4,9 @@ from tfpcbpggsz.Includes.variables import *
 from tfpcbpggsz.Includes.common_constants import *
 from tfpcbpggsz.Includes.functions import *
 from tfpcbpggsz.Includes.VARDICT import VARDICT
+from tfpcbpggsz.core import *
+from tfpcbpggsz.masspdfs import *
+from tfpcbpggsz.amp import *
 import json
 import os
 from scipy.stats import poisson
@@ -15,7 +18,8 @@ import sys
 import tensorflow_probability as tfp
 
 
-from tfpcbpggsz.masspdfs import MassPDF, norm_pdf, norm_distribution
+from tfpcbpggsz.masspdfs    import MassPDF, norm_pdf, norm_distribution
+from tfpcbpggsz.dalitz_pdfs import DalitzPDF
 
 
 class MagPol:
@@ -313,12 +317,6 @@ class Ntuple:
         self.i_c = INDEX_CHANNEL_TO_VARDICT[self.channel.name]
         pass
 
-    def initialise_mass_fit(self,components):
-        ##### invariant mass fit objects
-        self.components = components[self.source.name][self.channel.name]
-        self.variable_to_fit = VARIABLE_TO_FIT[self.channel.name]
-        pass
-
     
     def __str__(self):
         pattern = '''
@@ -417,30 +415,59 @@ class Ntuple:
         print("MAP_TRUTH_MATCHING[self.source.name]", MAP_TRUTH_MATCHING[self.source.name])
         return MAP_TRUTH_MATCHING[self.source.name]
 
-    def define_mass_pdfs(self):
-        self.mass_pdfs = []
-        for comp in self.components:
-            self.mass_pdfs.append(MassPDF(comp[1], comp[0]))
+
+    ################### Fit stuff
+    def initialise_fit(self,components):
+        ##### invariant mass fit objects
+        self.components      = components[self.source.name][self.channel.name]
+        self.variable_to_fit = VARIABLE_TO_FIT[self.channel.name]
+        pass
+
+
+    def initialise_fixed_pdfs(self, fixed_variables):
+        #### first initialise the mass pdfs for the sum of Bplus and Bminus
+        for i_comp in range(len(self.mass_pdfs["both"])):
+            # tf.print("i_comp: ",i_comp)
+            self.mass_pdfs["both"][i_comp].get_mass_pdf(
+                fixed_variables[self.i_c][i_comp],
+                Bsign=None
+            )
+            pass
+        # and then initialise both dalitz and mass separately for Bplus and Bminus
+        for Bsign in BSIGNS.keys():
+            for i_comp in range(len(self.mass_pdfs[Bsign])):
+                # tf.print("i_comp: ",i_comp)
+                self.mass_pdfs[Bsign][i_comp].get_mass_pdf(
+                    fixed_variables[self.i_c][i_comp],
+                    Bsign=Bsign
+                )
+                self.dalitz_pdfs[Bsign][i_comp].get_dalitz_pdf(
+                    self.norm_ampD0[Bsign]   ,
+                    self.norm_ampD0bar[Bsign],
+                    self.norm_zp_p[Bsign]    ,
+                    self.norm_zm_pp[Bsign]   ,
+                    fixed_variables[INDEX_SHARED_THROUGH_CHANNELS][0]
+                    ### the 0 here doesn't mean anything, it refers to the
+                    # "component" column of the dictionary, which is irrelevant
+                    # for the parameters that are shared through channels.
+                    # In the origin dictionary VARDICT, it corresponds to the "parameters"
+                    # column
+                )
+                pass
             pass
         return
     
     # @tf.function
-    def get_mass_pdf_functions(self, variables, params=None, shared_parameters=None, constrained_parameters=None):
-        print("in get_mass_pdf_functions")
-        if (params==None):
-            for i_comp in range(len(self.mass_pdfs)):
-                # tf.print("i_comp: ",i_comp)
-                self.mass_pdfs[i_comp].get_pdf(variables[i_comp])
-                pass
-            return
+    def get_list_variables(self, fixed_variables, params=None, shared_parameters=None, constrained_parameters=None):
         ##### self.list_variables will contain all variables
         #  (all channels etc, similarly to list_vardict)
         # self.list_variables = np.zeros(2*12*16).reshape((2,12,16))
-        list_variables = [[[0 for col in range(16)] for col in range(12)] for row in range(3)]
+        list_variables = fixed_variables.copy()
+        # [[[0 for col in range(16)] for col in range(12)] for row in range(3)]
         # print(self.mass_pdfs)
-        for i_channel in range(3):
-            for i_comp in range(12):
-                for i_var in range(16):
+        for i_channel in range(len(list_variables)): # loop channels
+            for i_comp in range(len(list_variables[i_channel])): # loop components
+                for i_var in range(len(list_variables[i_channel][i_comp])): # loop params
                     for i_par in range(len(shared_parameters)):
                         # tf.print(" start loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
                         if ([i_channel, i_comp, i_var] in shared_parameters[i_par]):
@@ -451,7 +478,7 @@ class Ntuple:
                             # tf.print("list_variables[",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[i_channel][i_comp][i_var])
                             break
                         else:
-                            list_variables[i_channel][i_comp][i_var] = variables[i_channel][i_comp][i_var]
+                            # list_variables[i_channel][i_comp][i_var] = variables[i_channel][i_comp][i_var]
                             pass
                         # tf.print(" end loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
                         pass
@@ -496,14 +523,78 @@ class Ntuple:
         ####
         
 
-    def store_events(self, paths, list_var, cuts, aliases = None):
+    def store_events(self, paths, list_var, cuts, Kspipi_ampModel, aliases = None):
+        print("STARTING STORING THE EVENTS FOR ", self.tex)
         self.uproot_data = pd.DataFrame.from_dict(
             uproot.concatenate(paths,
                                list_var,
                                cuts,
                                aliases = aliases,
                                library='np'))
-        self.Bu_M = np.asarray(self.uproot_data[self.variable_to_fit])
+        ##### Amplitudes
+        tmp_Amp    = []
+        tmp_Ampbar = []
+        indices    = []
+        for index, row in self.uproot_data.iterrows():
+            indices.append(index)
+            # print(index)
+            # print(row["zp_p"])
+            # print(row["zm_pp"])
+            tmp_amps = Kspipi_ampModel.get_amp(
+                row["zp_p"] ,
+                row["zm_pp"]
+            )
+            # print(tmp_amps)
+            tmp_Amp.append(tmp_amps[0])
+            tmp_Ampbar.append(tmp_amps[1])
+            pass
+        tmp_Amp    = np.asarray(tmp_Amp)
+        tmp_Ampbar = np.asarray(tmp_Ampbar)
+        self.uproot_data[f"AmpD0"]    = pd.DataFrame(tmp_Amp,   index=indices)
+        self.uproot_data[f"AmpD0bar"] = pd.DataFrame(tmp_Ampbar,index=indices)
+        self.uproot_data = self.uproot_data.dropna()
+        ############ now some assignments
+        self.Bplus_data  = self.uproot_data.query("Bu_ID>0")
+        self.Bminus_data = self.uproot_data.query("Bu_ID<0")
+        self.Bu_M    = {
+            "Bplus" : np.asarray(self.Bplus_data[self.variable_to_fit]),
+            "Bminus": np.asarray(self.Bminus_data[self.variable_to_fit]),
+            "all"   : np.asarray(self.uproot_data[self.variable_to_fit])
+        }
+        self.zp_p    = {
+            "Bplus" : np.asarray(self.Bplus_data["zp_p"]),
+            "Bminus": np.asarray(self.Bminus_data["zp_p"]),
+        }
+        self.zm_pp    = {
+            "Bplus" : np.asarray(self.Bplus_data["zm_pp"]),
+            "Bminus": np.asarray(self.Bminus_data["zm_pp"]),
+        }
+        self.m_Kspip    = {
+            "Bplus" : np.asarray(self.Bplus_data["m_Kspip"]),
+            "Bminus": np.asarray(self.Bminus_data["m_Kspip"]),
+        }
+        self.m_Kspim    = {
+            "Bplus" : np.asarray(self.Bplus_data["m_Kspim"]),
+            "Bminus": np.asarray(self.Bminus_data["m_Kspim"]),
+        }
+        self.AmpD0    = {
+            "Bplus" : np.asarray(self.Bplus_data["AmpD0"]),
+            "Bminus": np.asarray(self.Bminus_data["AmpD0"]),
+        }
+        self.AmpD0bar = {
+            "Bplus" : np.asarray(self.Bplus_data["AmpD0bar"]),
+            "Bminus": np.asarray(self.Bminus_data["AmpD0bar"]),
+        }
+        return
+
+
+    ############## mass PDFs
+    def define_mass_pdfs(self):
+        self.mass_pdfs = []
+        for comp in self.components:
+            self.mass_pdfs.append(MassPDF(comp[1], comp[0]))
+            pass
+        return
 
     # @tf.function
     def total_mass_pdf(self,Bu_M):
@@ -514,12 +605,12 @@ class Ntuple:
         return total_mass_pdf_values
         
     # @tf.function
-    def get_nll(self, params, variables, shared_parameters, constrained_parameters, components, gaussian_constraints=[]):
+    def get_mass_nll(self, params, fixed_variables, shared_parameters, constrained_parameters, components, gaussian_constraints=[]):
         try:
-            total_yield = len(self.Bu_M)
+            total_yield = len(self.Bu_M["all"])
             tf_total_yield = tf.cast(total_yield, tf.float64)
         except ValueError:
-            print("ERROR -------------- in get_nll for ntuple")
+            print("ERROR -------------- in get_mass_nll for ntuple")
             print(self)
             print("  -- For this to work you need to first store the data in ntuple.uproot_data")
             print("        by running ntuple.store_events()")
@@ -533,13 +624,13 @@ class Ntuple:
         # all_fit_variables = self.get_all_fit_variables()
         #### constraint on the number of events
         self.define_mass_pdfs()
-        # self.initialise_mass_fit(components)
-        Bu_M = tf.cast(self.Bu_M, tf.float64)
-        nevents = tf.cast(len(self.Bu_M), tf.float64)
-        list_variables = self.get_mass_pdf_functions(variables, params=params, shared_parameters=shared_parameters, constrained_parameters=constrained_parameters)
+        # self.initialise_fit(components)
+        Bu_M = tf.cast(self.Bu_M["all"], tf.float64)
+        nevents = tf.cast(len(self.Bu_M["all"]), tf.float64)
+        list_variables = self.get_list_variables(fixed_variables, params=params, shared_parameters=shared_parameters, constrained_parameters=constrained_parameters)
         for i_comp in range(len(self.mass_pdfs)):
             # print("i_comp: ",i_comp)
-            self.mass_pdfs[i_comp].get_pdf(list_variables[self.i_c][i_comp])
+            self.mass_pdfs[i_comp].get_mass_pdf(list_variables[self.i_c][i_comp])
             pass
         sum_yields    = sum([comp[0] for comp in list_variables[self.i_c]])
         tf_sum_yields = tf.cast(sum_yields,tf.float64)
@@ -564,7 +655,182 @@ class Ntuple:
         tf.print(" =  nll :                  ", nll)
         tf.print(" ")
         return nll
+    
+    def draw_mass_pdfs(self, np_input, variables):
+        self.initialise_fixed_pdfs(variables)
+        pdf_values = {}
+        for Bsign in list(BSIGNS.keys()) + ["both"]:
+            pdf_values[Bsign] = {}
+            pdf_values[Bsign]["total_mass_pdf"] = np.zeros(np.shape(np_input))
+            for comp_pdf in self.mass_pdfs[Bsign]:
+                pdf_values[Bsign][comp_pdf.component] = comp_pdf.pdf(np_input)
+                pdf_values[Bsign]["total_mass_pdf"]  += comp_pdf.pdf(np_input)
+                pass
+            pass
+        return pdf_values
 
+
+
+    ############## Dalitz PDFs
+    def define_dalitz_pdfs(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp):
+        ##### dalitz_components
+        self.dalitz_pdfs = {}
+        self.dalitz_pdfs["Bplus"]  = []
+        self.dalitz_pdfs["Bminus"] = []
+        print("Define Dalitz PDFs")
+        for comp in self.components:
+            for Bsign in BSIGNS.keys():
+                isSignalDK   = (comp[0] in SIGNAL_COMPONENTS_DK )
+                isSignalDPI  = (comp[0] in SIGNAL_COMPONENTS_DPI)
+                isSignal     = ((isSignalDK == True) or (isSignalDPI == True))
+                print("")
+                print(comp[0])
+                print("isSignalDK : ", isSignalDK)
+                print("isSignalDPI: ", isSignalDPI)
+                print("isSignal   : ", isSignal)
+                self.dalitz_pdfs[Bsign].append(
+                    DalitzPDF(
+                        comp[1], # function name like "Exponential" 
+                        comp[0], # component name like "DK_Kspipi"
+                        Bsign  , # this is the momentum of the kaon no i'm joking
+                                 # this is obv the sign of the B
+                        isSignal = isSignal # this might be important at some point
+                        # I'm not sure yet
+                    )
+                )
+                pass
+            pass
+        self.mass_pdfs = {}
+        self.mass_pdfs["Bplus"]  = []
+        self.mass_pdfs["Bminus"] = []
+        self.mass_pdfs["both"] = []
+        for comp in self.components:
+            self.mass_pdfs["both"].append(MassPDF(comp[1], comp[0], "both"))
+            for Bsign in BSIGNS.keys():
+                self.mass_pdfs[Bsign].append(MassPDF(comp[1], comp[0], Bsign))
+                pass
+            pass
+        self.norm_ampD0    = norm_ampD0
+        self.norm_ampD0bar = norm_ampD0bar
+        self.norm_zp_p     = norm_zp_p
+        self.norm_zm_pp    = norm_zm_pp
+        return
+
+    
+    # @tf.function
+    def get_total_pdf_values(self,Bsign):
+        Bu_M     = self.Bu_M[Bsign]
+        ampD0    = self.AmpD0[Bsign]
+        ampD0bar = self.AmpD0bar[Bsign]
+        zp_p     = self.zp_p[Bsign]
+        zm_pp    = self.zm_pp[Bsign] 
+        try:
+            test = self.dalitz_pdfs
+        except AttributeError:
+            print(" ")
+            print(" ")
+            print("=================================== ")
+            print("ERROR IN get_total_pdf_values --------------- ")
+            print("      DALITZ AND MASS PDFS IN NTUPLE ARE NOT DEFINED ")
+            print(self.source)
+            print(self.channel)
+            print("PLEASE RUN define_dalitz_pdfs")
+            print("=================================== ")
+            print(" ")
+            print(" ")
+            return np.zeros(np.shape(ampD0)), np.zeros(np.shape(ampD0))
+        total_dalitz_pdf_values = np.zeros(np.shape(ampD0))
+        # total_dalitz_pdf_values["Bplus"]  = np.zeros(np.shape(ampD0))
+        # total_dalitz_pdf_values["Bminus"] = np.zeros(np.shape(ampD0))
+        # for Bsign in BSIGNS.keys():
+        for comp_pdf in self.dalitz_pdfs[Bsign]:
+            isSignalDK   = (comp_pdf.component in SIGNAL_COMPONENTS_DK )
+            isSignalDPI  = (comp_pdf.component in SIGNAL_COMPONENTS_DPI)
+            if ( (isSignalDK == True) or (isSignalDPI == True)):
+                total_dalitz_pdf_values += comp_pdf.pdf(ampD0, ampD0bar)
+            else:
+                total_dalitz_pdf_values += comp_pdf.pdf(zp_p, zm_pp)
+                pass
+            pass
+        total_mass_pdf_values = np.zeros(np.shape(Bu_M))
+        # total_mass_pdf_values["Bplus"]  = np.zeros(np.shape(Bu_M))
+        # total_mass_pdf_values["Bminus"] = np.zeros(np.shape(Bu_M))
+        # for Bsign in BSIGNS.keys():
+        for comp_pdf in self.mass_pdfs[Bsign]:
+            total_mass_pdf_values += comp_pdf.pdf(Bu_M)
+            pass
+        return total_mass_pdf_values, total_dalitz_pdf_values
+
+    ##### dalitz * mass pdfs
+    # @tf.function
+    def get_total_nll(self, params, fixed_variables, shared_parameters, constrained_parameters, components, gaussian_constraints=[]):
+        try:
+            total_yield    = {}
+            total_yield["Bplus"]    = tf.cast(len(self.Bu_M["Bplus"]  ), tf.float64)
+            total_yield["Bminus"]   = tf.cast(len(self.Bu_M["Bminus"] ), tf.float64)
+        except ValueError:
+            print("ERROR -------------- in get_mass_nll for ntuple")
+            print(self)
+            print("  -- For this to work you need to first store the data in ntuple.uproot_data")
+            print("        by running ntuple.store_events()")
+            print(" EXIT ")
+            print("  ")
+            return 0
+        #### prepare the data
+        Bu_M_Bplus      = tf.cast(self.Bu_M["Bplus"]     , tf.float64)
+        Bu_M_Bminus     = tf.cast(self.Bu_M["Bminus"]    , tf.float64)
+        ampD0_Bplus     = tf.cast(self.AmpD0["Bplus"]    , tf.complex128)
+        ampD0_Bminus    = tf.cast(self.AmpD0["Bminus"]   , tf.complex128)
+        ampD0bar_Bplus  = tf.cast(self.AmpD0bar["Bplus"] , tf.complex128)
+        ampD0bar_Bminus = tf.cast(self.AmpD0bar["Bminus"], tf.complex128)
+        nevents = {
+            "Bplus" : tf.cast(len(self.Bu_M["Bplus"]), tf.float64),
+            "Bminus": tf.cast(len(self.Bu_M["Bminus"]), tf.float64)
+        }
+        list_variables = self.get_list_variables(fixed_variables, params=params, shared_parameters=shared_parameters, constrained_parameters=constrained_parameters)
+        self.initialise_fixed_pdfs(list_variables)
+        nll = 0
+        for Bsign in BSIGNS.keys():
+            ##### getting the yields of Bsign component
+            # in the list for the Bplus, second for the Bminus
+            # This is defined in VARDICT
+            index_yields  = INDEX_YIELDS[Bsign]
+            ######## the first term is the sum of the product of the two pdfs
+            mass_pdf_values, dalitz_pdf_values = self.get_total_pdf_values(
+                Bsign
+            )
+            term1 = tf.reduce_sum(-2 * clip_log(mass_pdf_values*dalitz_pdf_values))
+            ### sum the yields of all components and
+            # constrain it to the total number of events
+            sum_yields    = sum([comp[index_yields] for comp in list_variables[self.i_c]])
+            tf_sum_yields    = tf.cast(sum_yields, tf.float64)
+            poisson = tfp.distributions.Poisson(rate=tf_sum_yields)
+            log_poisson_constraint = tf.cast(
+                poisson.log_prob(total_yield[Bsign]),
+                tf.float64
+            )
+            term2 = - 2*log_poisson_constraint
+            term3 = 2*nevents[Bsign]*clip_log(tf_sum_yields)
+            nll  += term1 + term2 + term3
+            tf.print(f"sum_yields             {Bsign} ", tf_sum_yields)
+            tf.print(f"total_yield            {Bsign} ", total_yield)
+            tf.print(f"log_poisson_constraint {Bsign} ", log_poisson_constraint)
+            tf.print("                          sum_events ", term1)
+            tf.print(" -          2*log_poisson_constraint ", term2)
+            tf.print(" + 2*nevents*clip_log(tf_sum_yields) ", term3)
+            tf.print(" ")
+            pass
+        term4 = self.get_gaussian_constraints(gaussian_constraints, list_variables)
+        nll  += term4
+        tf.print(" +              gaussian_constraints ", term4)
+        tf.print(" =  nll :                  ", nll)
+        tf.print(" ")
+        tf.print(" ")
+        tf.print(" ")
+        return nll
+
+    
+    ############## constraints
     def get_gaussian_constraints(self, gaussian_constraints, list_variables):
         res = 0
         for i_const in gaussian_constraints:
@@ -573,20 +839,6 @@ class Ntuple:
             res    += delta_x*delta_x / (sigma*sigma)
         return res
         
-    
-    def pdf_values_draw(self, np_input, variables):
-        pdf_values = {}
-        mass_pdfs = []
-        for i_comp in range(len(self.components)):
-            comp = self.components[i_comp]
-            mass_pdfs.append(MassPDF(comp[1], comp[0]))
-            mass_pdfs[i_comp].get_pdf(variables[i_comp])
-            pass
-        pdf_values["total_mass_pdf"] = np.zeros(np.shape(np_input))
-        for comp_pdf in mass_pdfs:
-            pdf_values[comp_pdf.component] = comp_pdf.pdf(np_input)
-            pdf_values["total_mass_pdf"]  += comp_pdf.pdf(np_input)
-        return pdf_values
 
 
         

@@ -41,6 +41,8 @@ pathname_local = "/afs/cern.ch/work/j/jocottee/private/camilles_pipeline/" # - l
 pathname_storage = "/dice/users/rj23972/safety_net/Gamma_measurement/" # - usually eos, tuples stored here
 pathname_local = "/software/rj23972/safety_net/tfpcbpggsz/tfpcbpggsz/" # - local filepath, probably where you have cloned the repo, for plots etc
 
+
+################## Fit stuff
 COMPONENTS = {
     "SDATA":
     {
@@ -95,4 +97,21 @@ INDEX_SOURCE_TO_VARDICT = {
 INDEX_CHANNEL_TO_VARDICT = {
     "CB2DK_D2KSPIPI_DD" : 0,
     "CB2DPI_D2KSPIPI_DD": 1,
+}
+
+SIGNAL_COMPONENTS_DK  = ["DK_Kspipi", "DK_Kspipi_misID"]
+SIGNAL_COMPONENTS_DPI = ["Dpi_Kspipi_misID", "Dpi_Kspipi"]
+
+BSIGNS = {
+    "Bplus"  :  1,
+    "Bminus" : -1
+}
+
+
+##### the parameters that are shared accross channels (CP obs, ratio of yields etc)
+# are the last column of our long list of parameters
+INDEX_SHARED_THROUGH_CHANNELS = -1
+INDEX_YIELDS = {
+    "Bplus"  : 0,
+    "Bminus" : 1
 }

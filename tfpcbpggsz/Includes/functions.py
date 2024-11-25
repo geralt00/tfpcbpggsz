@@ -1,5 +1,19 @@
 import tensorflow as tf
 import numpy as np
+from tfpcbpggsz.Includes.common_constants import *
+
+def INFO(string):
+    print(" INFO ====== ")
+    print(string)
+    print(" ")
+    return
+
+def ERROR(string):
+    print(" ======= ERROR ====== ")
+    print(" ======= ERROR ====== ")
+    print(string)
+    print(" ")
+    return
 
 def invariant_mass(h1_PE, h1_PX, h1_PY, h1_PZ, h2_PE, h2_PX, h2_PY, h2_PZ, sqrt = False):
     energy = np.power( (h1_PE+h2_PE) ,2)
@@ -41,17 +55,38 @@ def Dalitz_lower_limit(skpip): # in GeV !!
     res =  (0.394465 + 1.8821*skpip - 0.5* np.power(skpip,2) - 1.86484* np.sqrt(0.044744 - 0.485412*skpip + 1.13203*np.power(skpip,2) - 0.541203*np.power(skpip,3) + 0.0718881*np.power(skpip,4) ) ) / skpip
     return res
 
-def in_Dalitz_plot(skpip, skpim): 
-  if ( (skpip < QMI_smin_Kspi ) or (skpip > QMI_smax_Kspi) ) :
-      return False
-  UP  = Dalitz_upper_limit(skpip)
-  LOW = Dalitz_lower_limit(skpip)
-  if (skpim > UP):
-    return False
-  if (skpim < LOW):
-    return False
-  return True
+# def in_Dalitz_plot(skpip, skpim): 
+#   if ( (skpip < QMI_smin_Kspi ) or (skpip > QMI_smax_Kspi) ) :
+#       return False
+#   UP  = Dalitz_upper_limit(skpip)
+#   LOW = Dalitz_lower_limit(skpip)
+#   if (skpim > UP):
+#     return False
+#   if (skpim < LOW):
+#     return False
+#   return True
 
+def in_Dalitz_plot(skpip, skpim):
+    UP  = Dalitz_upper_limit(skpip)
+    LOW = Dalitz_lower_limit(skpip)
+    res = np.where(
+        (LOW<skpim) & (skpim<UP) & (QMI_smin_Kspi<skpip) & (skpip<QMI_smax_Kspi),
+        True,
+        False
+    )
+    return res
+
+def in_Dalitz_plot_SRD(zp_p, zm_pp):
+    skpip, skpim = SRD_to_masses(zp_p, zm_pp, QMI_zpmax_Kspi, QMI_zpmin_Kspi, QMI_zmmax_Kspi, QMI_zmmin_Kspi)
+    return in_Dalitz_plot(skpip, skpim)
+
+def SRD_to_masses(zp_p, zm_pp, zpmax, zpmin, zmmax, zmmin):
+    z_p   = 0.5*(zp_p*(zpmax - zpmin) + zpmax+zpmin)
+    zm_p    = zm_pp*(2+zp_p)/2
+    z_m   = 0.5*(zm_p*(zmmax - zmmin) + zmmax+zmmin)
+    Kspip   = 0.5*(z_p+z_m)
+    Kspim   = 0.5*(z_p-z_m)
+    return Kspip, Kspim
 
 def clip_log(x, _epsilon=1e-6):
     """clip log to allowed large value"""

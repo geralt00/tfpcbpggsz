@@ -1,6 +1,8 @@
 import tensorflow as tf
 import tensorflow_probability as tfp
 import math
+from tfpcbpggsz.Includes.common_constants import *
+
 
 #Repare for the class build
 
@@ -49,13 +51,13 @@ def HORNSdini(m, variables):
     # print("PRINTIN SOME STUFF IN HORNSdini")
     # print("PRINTIN SOME STUFF IN HORNSdini")
     # print(variables)
-    a_new          = tf.cast(variables[1], tf.float64)
-    b_new          = tf.cast(variables[2], tf.float64)
-    csi            = tf.cast(variables[3], tf.float64)
-    shift          = tf.cast(variables[4], tf.float64)
-    sigma          = tf.cast(variables[5], tf.float64)
-    ratio_sigma    = tf.cast(variables[6], tf.float64)
-    fraction_sigma = tf.cast(variables[7], tf.float64)
+    a_new          = tf.cast(variables[2], tf.float64)
+    b_new          = tf.cast(variables[3], tf.float64)
+    csi            = tf.cast(variables[4], tf.float64)
+    shift          = tf.cast(variables[5], tf.float64)
+    sigma          = tf.cast(variables[6], tf.float64)
+    ratio_sigma    = tf.cast(variables[7], tf.float64)
+    fraction_sigma = tf.cast(variables[8], tf.float64)
 
     sigma2 = tf.cast(sigma * ratio_sigma, tf.float64)
     B_NEW = (a_new + b_new) / 2.0
@@ -78,12 +80,12 @@ def CruijffExtended(m, variables):
     # print("PRINTIN SOME STUFF IN CruijffExtended")
     # print("PRINTIN SOME STUFF IN CruijffExtended")
     # print(variables)
-    m0     = tf.cast(variables[1],tf.float64)
-    sigmaL = tf.cast(variables[2],tf.float64)
-    sigmaR = tf.cast(variables[3],tf.float64)
-    alphaL = tf.cast(variables[4],tf.float64)
-    alphaR = tf.cast(variables[5],tf.float64)
-    beta   = tf.cast(variables[6],tf.float64)
+    m0     = tf.cast(variables[2],tf.float64)
+    sigmaL = tf.cast(variables[3],tf.float64)
+    sigmaR = tf.cast(variables[4],tf.float64)
+    alphaL = tf.cast(variables[5],tf.float64)
+    alphaR = tf.cast(variables[6],tf.float64)
+    beta   = tf.cast(variables[7],tf.float64)
     sigma  = 0.0
     alpha  = 0.0
     dx     = tf.cast(m - m0, tf.float64)
@@ -103,20 +105,20 @@ def HORNSdini_misID(m, variables):
     #    print("PRINTIN SOME STUFF IN HORNSdini_misID")
     #    print("PRINTIN SOME STUFF IN HORNSdini_misID")
     #    print(variables)
-    a_new = tf.cast(variables[1], tf.float64)
-    b_new = tf.cast(variables[2], tf.float64)
-    csi = tf.cast(variables[3], tf.float64)
-    m1  = tf.cast(variables[4], tf.float64)
-    s1  = tf.cast(variables[5], tf.float64)
-    m2  = tf.cast(variables[6], tf.float64)
-    s2  = tf.cast(variables[7], tf.float64)
-    m3  = tf.cast(variables[8], tf.float64)
-    s3  = tf.cast(variables[9], tf.float64)
-    m4  = tf.cast(variables[10], tf.float64)
-    s4  = tf.cast(variables[11], tf.float64)
-    f1  = tf.cast(variables[12], tf.float64)
-    f2  = tf.cast(variables[13], tf.float64)
-    f3  = tf.cast(variables[14], tf.float64)
+    a_new = tf.cast(variables[2], tf.float64)
+    b_new = tf.cast(variables[3], tf.float64)
+    csi = tf.cast(variables[4], tf.float64)
+    m1  = tf.cast(variables[5], tf.float64)
+    s1  = tf.cast(variables[6], tf.float64)
+    m2  = tf.cast(variables[7], tf.float64)
+    s2  = tf.cast(variables[8], tf.float64)
+    m3  = tf.cast(variables[9], tf.float64)
+    s3  = tf.cast(variables[10], tf.float64)
+    m4  = tf.cast(variables[11], tf.float64)
+    s4  = tf.cast(variables[12], tf.float64)
+    f1  = tf.cast(variables[13], tf.float64)
+    f2  = tf.cast(variables[14], tf.float64)
+    f3  = tf.cast(variables[15], tf.float64)
 
     B_NEW = (a_new + b_new) / 2.0
     constant = tf.constant(2.0, dtype=tf.float64)
@@ -148,10 +150,10 @@ def CBShape(m,variables):
     #    print("PRINTIN SOME STUFF IN CBShape")
     #    print("PRINTIN SOME STUFF IN CBShape")
     #    print(variables)
-    m0    = tf.cast(variables[1],tf.float64)
-    sigma = tf.cast(variables[2],tf.float64)
-    alpha = tf.cast(variables[3],tf.float64)
-    n     = tf.cast(variables[4],tf.float64)
+    m0    = tf.cast(variables[2],tf.float64)
+    sigma = tf.cast(variables[3],tf.float64)
+    alpha = tf.cast(variables[4],tf.float64)
+    n     = tf.cast(variables[5],tf.float64)
     t =tf.cast((m-m0)/sigma, tf.float64)
 
     if alpha <0:
@@ -177,7 +179,7 @@ def Exponential(m, variables):
     #    print("PRINTIN SOME STUFF IN EXPONNTIAL")
     #    print("PRINTIN SOME STUFF IN EXPONNTIAL")
     #    print(variables)
-    c = tf.cast(variables[1], tf.float64)
+    c = tf.cast(variables[2], tf.float64)
     return tf.math.exp(c*m)
 
 
@@ -187,8 +189,8 @@ def Gaussian(m, variables):
     #    print("PRINTIN SOME STUFF IN Gaussian")
     #    print("PRINTIN SOME STUFF IN Gaussian")
     #    print(variables)
-    mu = tf.cast(variables[1], dtype=tf.float64)
-    sigma = tf.cast(variables[2], dtype=tf.float64)
+    mu    = tf.cast(variables[2], dtype=tf.float64)
+    sigma = tf.cast(variables[3], dtype=tf.float64)
     return (tf.math.exp(-0.5*((m-mu)/sigma)**2))/(sigma*tf.math.sqrt(2.0*_PI))
 
 def HILLdini(m,variables): #a,b,csi,shift,sigma,ratio_sigma,fraction_sigma
@@ -197,13 +199,13 @@ def HILLdini(m,variables): #a,b,csi,shift,sigma,ratio_sigma,fraction_sigma
     #    print("PRINTIN SOME STUFF IN HILLdini")
     #    print("PRINTIN SOME STUFF IN HILLdini")
     #    print(variables)
-    a_new = tf.cast(variables[1], tf.float64)
-    b_new = tf.cast(variables[2], tf.float64)
-    csi   = tf.cast(variables[3], tf.float64)
-    shift = tf.cast(variables[4], tf.float64)
-    sigma = tf.cast(variables[5], tf.float64)
-    ratio_sigma = tf.cast(variables[6], tf.float64)
-    fraction_sigma = tf.cast(variables[7], tf.float64)
+    a_new = tf.cast(variables[2], tf.float64)
+    b_new = tf.cast(variables[3], tf.float64)
+    csi   = tf.cast(variables[4], tf.float64)
+    shift = tf.cast(variables[5], tf.float64)
+    sigma = tf.cast(variables[6], tf.float64)
+    ratio_sigma = tf.cast(variables[7], tf.float64)
+    fraction_sigma = tf.cast(variables[8], tf.float64)
     sigma2 = sigma * ratio_sigma
     constant = tf.constant(2.0, dtype=tf.float64)
 
@@ -223,20 +225,20 @@ def HILLdini_misID(m,variables):
     #    print("PRINTIN SOME STUFF IN HILLdini_misID")
     #    print("PRINTIN SOME STUFF IN HILLdini_misID")
     #    print(variables)
-    a_new = tf.cast(variables[1], tf.float64)
-    b_new = tf.cast(variables[2], tf.float64)
-    csi = tf.cast(variables[3], tf.float64)
-    m1 = tf.cast(variables[ 4], tf.float64)
-    s1 = tf.cast(variables[ 5], tf.float64)
-    m2 = tf.cast(variables[ 6], tf.float64)
-    s2 = tf.cast(variables[ 7], tf.float64)
-    m3 = tf.cast(variables[ 8], tf.float64)
-    s3 = tf.cast(variables[ 9], tf.float64)
-    m4 = tf.cast(variables[10], tf.float64)
-    s4 = tf.cast(variables[11], tf.float64)
-    f1 = tf.cast(variables[12], tf.float64)
-    f2 = tf.cast(variables[13], tf.float64)
-    f3 = tf.cast(variables[14], tf.float64)
+    a_new = tf.cast(variables[2], tf.float64)
+    b_new = tf.cast(variables[3], tf.float64)
+    csi   = tf.cast(variables[4], tf.float64)
+    m1 = tf.cast(variables[ 5], tf.float64)
+    s1 = tf.cast(variables[ 6], tf.float64)
+    m2 = tf.cast(variables[ 7], tf.float64)
+    s2 = tf.cast(variables[ 8], tf.float64)
+    m3 = tf.cast(variables[ 9], tf.float64)
+    s3 = tf.cast(variables[10], tf.float64)
+    m4 = tf.cast(variables[11], tf.float64)
+    s4 = tf.cast(variables[12], tf.float64)
+    f1 = tf.cast(variables[13], tf.float64)
+    f2 = tf.cast(variables[14], tf.float64)
+    f3 = tf.cast(variables[15], tf.float64)
     constant = tf.constant(2.0, dtype=tf.float64)
 
 
@@ -262,12 +264,12 @@ def HORNSdini_Gaussian(m, variables):
     #    print("PRINTIN SOME STUFF IN HORNSdini_Gaussian")
     #    print(variables)
     ## HORNSdini
-    var_HORNSdini = tf.convert_to_tensor([variables[0],variables[1],variables[2],variables[3],variables[4],variables[5],variables[6],variables[7]])
-    frac_HORNSdini = tf.cast(variables[8],tf.float64)
+    var_HORNSdini = tf.convert_to_tensor([variables[0],variables[1],variables[2],variables[3],variables[4],variables[5],variables[6],variables[7],variables[8]])
+    frac_HORNSdini = tf.cast(variables[9],tf.float64)
     pdf_HORNSdini  = lambda Bu_M: HORNSdini(m,var_HORNSdini)
     norm_HORNSdini = norm_pdf(m, pdf_HORNSdini)
     ### Gaussian
-    var_Gaussian  = tf.convert_to_tensor([variables[0],variables[9],variables[10]])
+    var_Gaussian  = tf.convert_to_tensor([variables[0],variables[1],variables[10],variables[11]])
     pdf_Gaussian = lambda Bu_M: Gaussian(m,var_Gaussian)
     norm_Gaussian = norm_pdf(m, pdf_Gaussian)
     ## total
@@ -281,12 +283,12 @@ def HORNSdini_HORNSdini(m, variables):
     #    print("PRINTIN SOME STUFF IN HORNSdini_HORNSdini")
     #    print(variables)
     #### first 
-    var_I  = tf.convert_to_tensor([variables[0],variables[1],variables[2],variables[3],variables[4],variables[5],variables[6],variables[7]])
-    frac_I = tf.cast(variables[8],tf.float64)
+    var_I  = tf.convert_to_tensor([variables[0],variables[1],variables[2],variables[3],variables[4],variables[5],variables[6],variables[7],variables[8]])
+    frac_I = tf.cast(variables[9],tf.float64)
     pdf_I  = lambda Bu_M: HORNSdini(m,var_I)
     norm_I = norm_pdf(m, pdf_I)
     ### second
-    var_II = tf.convert_to_tensor([variables[0],variables[9],variables[10],variables[11],variables[12],variables[13],variables[14],variables[15]])
+    var_II = tf.convert_to_tensor([variables[0],variables[1],variables[10],variables[11],variables[12],variables[13],variables[14],variables[15], variables[16]])
     pdf_II  = lambda Bu_M: HORNSdini(m,var_II)
     norm_II = norm_pdf(m, pdf_II)
     ## total
@@ -301,12 +303,12 @@ def Cruijff_Gaussian(m, variables):
     # print(variables)
     ### Cruijff
     # var_Cruijff  = tf.convert_to_tensor([variables[0],variables[1],variables[2],variables[3],variables[4],variables[5],variables[6]])
-    var_Cruijff  = [variables[0],variables[1],variables[2],variables[3],variables[4],variables[5],variables[6]]
-    frac_Cruijff = tf.cast(variables[7],tf.float64)
+    var_Cruijff  = [variables[0],variables[1],variables[2],variables[3],variables[4],variables[5],variables[6],variables[7]]
+    frac_Cruijff = tf.cast(variables[8],tf.float64)
     pdf_Cruijff  = lambda Bu_M: CruijffExtended(m,var_Cruijff)
     norm_Cruijff = norm_pdf(m, pdf_Cruijff)
     ### Gaussian
-    var_Gaussian = tf.convert_to_tensor([variables[0],variables[8],variables[9]])
+    var_Gaussian = tf.convert_to_tensor([variables[0],variables[1],variables[9],variables[10]])
     pdf_Gaussian = lambda Bu_M: Gaussian(m,var_Gaussian)
     norm_Gaussian = norm_pdf(m, pdf_Gaussian)
     ### total
@@ -320,13 +322,13 @@ def SumCBShape(m, variables):
     #    print("PRINTIN SOME STUFF IN SumCBShape")
     #    print(variables)
     ### first
-    var_I  = tf.convert_to_tensor([variables[0],variables[1],variables[2],variables[3],variables[4]])
-    frac_I = tf.cast(variables[5],tf.float64)
+    var_I  = tf.convert_to_tensor([variables[0],variables[1],variables[2],variables[3],variables[4],variables[5]])
+    frac_I = tf.cast(variables[6],tf.float64)
     pdf_I  = lambda Bu_M: CBShape(m,var_I)
     norm_I = norm_pdf(m, pdf_I)
     ### second
-    var_II  = tf.convert_to_tensor([variables[0],variables[6],variables[7],variables[8],variables[9]])
-    frac_II = tf.cast(variables[10],tf.float64)
+    var_II  = tf.convert_to_tensor([variables[0],variables[1],variables[7],variables[8],variables[9],variables[10]])
+    frac_II = tf.cast(variables[11],tf.float64)
     pdf_II  = lambda Bu_M: CBShape(m,var_II)
     norm_II = norm_pdf(m, pdf_II)
     ### total
@@ -528,9 +530,10 @@ def preparePdf_data(varDict, mode='b2dk_LL'):
 
 
 class MassPDF():
-    def __init__(self, name, component):
-        self.name      = name
+    def __init__(self, name_function, component, Bsign=None):
+        self.name      = name_function
         self.component = component
+        self.Bsign     = Bsign
         self.function  = self.get_function()
 
     def get_function(self):
@@ -570,17 +573,30 @@ class MassPDF():
         return function
 
     # @tf.function
-    def get_pdf(self,variables):
+    def get_mass_pdf(self,variables, Bsign=None):
         # print(" PRINTING some stuff !")
         # print(self.name)
         # print(self.component)
         # print(variables)
+        if (Bsign==None):
+            # print("Bsign not specified ------ summing B+ and B- samples")
+            ######### explaining what's happening here:
+            # we don't sum the two yields because they are just a single
+            # parameter in the fit. That means that the free parameter is
+            # called "{component}_yield_Bplus", but the actual result
+            # will be the total yield
+            comp_yield = variables[INDEX_YIELDS["Bplus"]] + variables[INDEX_YIELDS["Bminus"]]
+        else:
+            # print(Bsign)
+            # print(INDEX_YIELDS[Bsign])
+            comp_yield = variables[INDEX_YIELDS[Bsign]]
+            pass
         pdf = lambda Bu_M: self.function(Bu_M, variables)
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
-        res = lambda Bu_M: variables[0]*norm_pdf(Bu_M,pdf)
+        res = lambda Bu_M: comp_yield*norm_pdf(Bu_M,pdf)
         # print(" after norm_pdf !")
         # print(" after norm_pdf !")
         # print(" after norm_pdf !")
