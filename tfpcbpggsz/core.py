@@ -200,7 +200,7 @@ def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampb
 
     return (absA_sig*absAbar_tag)**2 + (absAbar_sig*absA_tag)**2 - 2*absA_sig*absAbar_tag*absAbar_sig*absA_tag*tf.math.cos(phase_sig-phase_tag)
 
-def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], pc=None):
+def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], **kwargs):
     """
     Function to calculate the amplitude squared for the CP tag decay
 
@@ -218,15 +218,18 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], pc=None):
 
     DDsign = -1
     phase = DeltadeltaD(amp, ampbar)
+    pc = None if kwargs.get('pc') is None else kwargs.get('pc')
+    Fplus = None if kwargs.get('Fplus') is None else kwargs.get('Fplus')
     if pc is not None:
         phase = phase + pc
 
     absA = tf.cast(tf.abs(amp), tf.float64)
     absAbar = tf.cast(tf.abs(ampbar), tf.float64)
 
-
-
-    return (absA**2  + absAbar **2  + 2.0 * DDsign * CPsign * (absA * absAbar) * tf.cos(phase))
+    if Fplus is not None:
+        return (absA**2  + absAbar **2  + 2.0 * DDsign * CPsign * (absA * absAbar) * tf.cos(phase)*(2*Fplus-1))
+    else:
+        return (absA**2  + absAbar **2  + 2.0 * DDsign * CPsign * (absA * absAbar) * tf.cos(phase))
 
 def prob_totalAmplitudeSquared_DPi_XY( Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0,0,0,0,0,0,0,0,0)):
     """
@@ -605,7 +608,7 @@ class Normalisation:
             return tf.cast(normA + normAbar  * rB2 + 2.0 *(xMinus *crossTerm[0] + yMinus * crossTerm[1]), tf.float64)    
 
 
-    def Integrated_CP_tag(self, CPsign=1):
+    def Integrated_CP_tag(self, CPsign=1, **kwargs):
         r"""
 
         .. math:: 
@@ -631,7 +634,12 @@ class Normalisation:
         normAbar = self._normAbar
         crossTerm = self._crossTerms
 
-        return tf.cast(normA + normAbar + 2.0 * DD_sign* CPsign * crossTerm[0], tf.float64)
+        if kwargs.get('Fplus') is not None:
+            Fplus = kwargs.get('Fplus')
+            return tf.cast(normA + normAbar + 2.0 * DD_sign* CPsign * crossTerm[0]*(2*Fplus-1), tf.float64)
+        else:
+            return tf.cast(normA + normAbar + 2.0 * DD_sign* CPsign * crossTerm[0], tf.float64)
+
 
 
     def Integrated_4p_a(self, Bsign=1, x=(0,0,0,0)):
@@ -1195,14 +1203,6 @@ class DecayNLL_Charm:
         else:
             print('Invalid type')
 
-    def sig_model(self):
-        """
-        Signal model for the decay.
-        """
-        _params = model.trainable_variables
-
-
-        return self.sig_model
     
     def nll_cfit(self):
         """

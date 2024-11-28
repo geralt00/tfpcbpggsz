@@ -1,25 +1,22 @@
 data:
   data_dir: '/dice/users/pc24403/bes/pcfit/'
-  tag_list: ['ksetap_pipieta', 'kseta_3pi', 'kseta_gamgam', 'ksetap_gamrho', 'ksomega', 'kspi0']
+  tag_list: ['full', 'misspi', 'misspi0']
   tree: 'nt'
-  data: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/data_ksetap_pipieta.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/data_kseta_3pi.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/data_kseta_gamgam.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/data_ksetap_gamrho.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/data_ksomega.root', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/data_kspi0.root']
-        #  '/dice/users/pc24403/bes/pcfit/cpeven/kk/data_kk.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/data_pipi.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/data_pipipi0.root']
-  phsp: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/phsp_ksetap_pipieta.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/phsp_kseta_3pi.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/phsp_kseta_gamgam.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/phsp_ksetap_gamrho.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/phsp_ksomega.root', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/phsp_kspi0.root']
-        #  '/dice/users/pc24403/bes/pcfit/cpeven/kk/phsp_kk.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/phsp_pipi.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/phsp_pipipi0.root']
-  qcmc: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/qcmc_ksetap_pipieta.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/qcmc_kseta_3pi.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/qcmc_kseta_gamgam.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/qcmc_ksetap_gamrho.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/qcmc_ksomega.root', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/qcmc_kspi0.root']
-        #  '/dice/users/pc24403/bes/pcfit/cpeven/kk/qcmc_kk.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/qcmc_pipi.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/qcmc_pipipi0.root']
-  qqbar: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/qqbar_ksetap_pipieta.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/qqbar_kseta_3pi.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/qqbar_kseta_gamgam.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/qqbar_ksetap_gamrho.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/qqbar_ksomega.root', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/qqbar_kspi0.root']
-        #  '/dice/users/pc24403/bes/pcfit/cpeven/kk/qqbar_kk.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/qqbar_pipi.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/qqbar_pipipi0.root'] 
-  dpdm: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/dpdm_ksetap_pipieta.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/dpdm_kseta_3pi.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/dpdm_kseta_gamgam.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/dpdm_ksetap_gamrho.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/dpdm_ksomega.root', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/dpdm_kspi0.root']
-        #  '/dice/users/pc24403/bes/pcfit/cpeven/kk/dpdm_kk.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/dpdm_pipi.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/dpdm_pipipi0.root']
+  data: ['/dice/users/pc24403/bes/pcfit/dks/full/data_full.root', '/dice/users/pc24403/bes/pcfit/dks/misspi/data_misspi.root', '/dice/users/pc24403/bes/pcfit/dks/misspi0/data_misspi0.root']
+          
+
+  phsp: ['/dice/users/pc24403/bes/pcfit/dks/full/phsp_full.root', '/dice/users/pc24403/bes/pcfit/dks/misspi/phsp_misspi.root', '/dice/users/pc24403/bes/pcfit/dks/misspi0/phsp_misspi0.root']
+  qcmc: ['/dice/users/pc24403/bes/pcfit/dks/full/qcmc_full.root', '/dice/users/pc24403/bes/pcfit/dks/misspi/qcmc_misspi.root', '/dice/users/pc24403/bes/pcfit/dks/misspi0/qcmc_misspi0.root']
+  qqbar: ['/dice/users/pc24403/bes/pcfit/dks/full/qqbar_full.root', '/dice/users/pc24403/bes/pcfit/dks/misspi/qqbar_misspi.root', '/dice/users/pc24403/bes/pcfit/dks/misspi0/qqbar_misspi0.root']
+  dpdm: ['/dice/users/pc24403/bes/pcfit/dks/full/dpdm_full.root', '/dice/users/pc24403/bes/pcfit/dks/misspi/dpdm_misspi.root', '/dice/users/pc24403/bes/pcfit/dks/misspi0/dpdm_misspi0.root']
+  sig_um:
+    misspi0: ['/dice/users/pc24403/bes/pcfit/dks/misspi0/sig_um_misspi0.root']
+    klpi0: ['/dice/users/pc24403/bes/pcfit/dks/misspi0/klpi0_misspi0.root']
   
   pdf:
-    dpdm: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/pdf_dpdm_roundall.npy']
-         # '/dice/users/pc24403/bes/pcfit/cpeven/kk/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/pdf_dpdm_roundall.npy']
-    qcmc: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/pdf_qcmc_roundall.npy']
-          #'/dice/users/pc24403/bes/pcfit/cpeven/kk/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/pdf_qcmc_roundall.npy']
-    qqbar: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/pdf_qqbar_roundall.npy']
-          #'/dice/users/pc24403/bes/pcfit/cpeven/kk/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/pdf_qqbar_roundall.npy']
+    dpdm: ['/dice/users/pc24403/bes/pcfit/dks/full/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/dks/misspi/pdf_dpdm_roundall.npy', '/dice/users/pc24403/bes/pcfit/dks/misspi0/pdf_dpdm_roundall.npy']
+    qcmc: ['/dice/users/pc24403/bes/pcfit/dks/full/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/dks/misspi/pdf_qcmc_roundall.npy', '/dice/users/pc24403/bes/pcfit/dks/misspi0/pdf_qcmc_roundall.npy']
+    qqbar: ['/dice/users/pc24403/bes/pcfit/dks/full/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/dks/misspi/pdf_qqbar_roundall.npy', '/dice/users/pc24403/bes/pcfit/dks/misspi0/pdf_qqbar_roundall.npy']
 
     qcmc_oth:
       k3pi: ['pdf_qcmc_k3pi_roundall.npy']
@@ -38,5 +35,5 @@ plot:
   bins: 50
   range: [0.3, 3.0]
   plot_sum:
-    cp_odd: ['ksetap_pipieta', 'kseta_3pi', 'kseta_gamgam', 'ksetap_gamrho', 'ksomega', 'kspi0']
-    #cp_even: ['kk', 'pipi', 'pipipi0']
+
+    dks: ['misspi', 'full', 'misspi0']

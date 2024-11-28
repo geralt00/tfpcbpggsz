@@ -66,11 +66,10 @@ class ConfigLoader:
         return self.idx
     
     def get_all_data(self):
-        datafile = ['data', 'phsp', 'pdf', 'qcmc', 'dpdm', 'qqbar']
+        datafile = ['data', 'phsp', 'pdf', 'qcmc', 'dpdm', 'qqbar', 'sigmc_um', 'qcmc_oth']
         self.get_order()
-
-        #self._data, self._mc['phsp'], self._pdf = [self.data.get_data(i) for i in datafile]
-        self._data, self._mc['phsp'], self._pdf, self._mc['qcmc'], self._mc['dpdm'], self._mc['qqbar'] = [self.data.get_data(i) for i in datafile]
+        
+        self._data, self._mc['phsp'], self._pdf, self._mc['qcmc'], self._mc['dpdm'], self._mc['qqbar'], self._mc['sigmc_um'], self._mc['qcmc_oth'] = [self.data.get_data(i) for i in datafile]
         return self._data, self._mc, self._pdf
 
     def get_data(self, type):

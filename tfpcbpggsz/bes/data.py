@@ -24,12 +24,21 @@ class load_data:
             dic: dictionary with the data path
         """
 
-        if (idx != 'pdf' and len(self.config.idx) == len(self.config._config_data['data'].get(idx))) or idx == 'pdf':
+        if (idx != 'pdf' and len(self.config.idx) == len(self.config._config_data['data'].get(idx))) or idx == 'pdf' or idx == 'sigmc_um' or idx == 'qcmc_oth':
             for tag in self.config.idx.keys():
                 self.data_path[idx] = {} if idx not in self.data_path.keys() else self.data_path[idx]
+                
                 if idx != 'pdf':
+                    if idx in ['sigmc_um', 'qcmc_oth'] and (tag in self.config._config_data['data'].get('sigmc_um').keys() or tag in self.config._config_data['data'].get('qcmc_oth').keys()):
+                        self.data_path[idx] = {} if idx not in self.data_path.keys() else self.data_path[idx]
+                        if tag in self.config._config_data['data'].get(idx).keys():
+                            self.data_path[idx][tag] = self.config._config_data['data'].get(idx).get(tag)
+                        #self.data_path[idx][tag] = self.config._config_data['data'].get(idx).get(tag)
+                        #print(f'{tag}: {self.data_path[idx][tag]}')
+                        #print(f'{tag}: {self.data_path[idx][tag]}')
                     #for i_file in self.config.idx.values():
-                    self.data_path[idx][tag] = self.config._config_data['data'].get(idx)[self.config.idx.get(tag)]
+                    elif idx != 'sigmc_um' and idx != 'qcmc_oth':
+                        self.data_path[idx][tag] = self.config._config_data['data'].get(idx)[self.config.idx.get(tag)]
                     #print(f'{tag}: {self.data_path[idx][tag]}')
                 else:
                     self.data_path[idx][tag]={} #if tag not in self.data_path[idx].keys() else self.data_path[idx][tag]
@@ -38,8 +47,13 @@ class load_data:
                             self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx)[i_pdf][self.config.idx.get(tag)]
                             #print(f'{tag}: {self.data_path[idx][tag][i_pdf]}')
                         elif tag in self.config._config_data['data'].get(idx).get(i_pdf).keys():
-                            self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx).get(i_pdf)[self.config.idx.get(tag)]
+                            if tag in self.config._config_data['data'].get(idx).get(i_pdf).keys():
+                                self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx).get(i_pdf)[tag]
+                            #self.data_path[idx][tag][i_pdf] = self.config._config_data['data'].get(idx).get(i_pdf)[self.config.idx.get(tag)]
                             #print(f'{tag}: {self.data_path[idx][tag][i_pdf]}')
+
+
+        
         else:
             warnings.warn("The number of tags is not equal to the number of files")
 
@@ -58,24 +72,29 @@ class load_data:
         Returns:
             dic: dictionary with the data
         """
+
+        #Loading the data path
         self.get_data_path(idx)
-        for tag in self.config.idx.keys():
+
+        #It will be better to loop over the tags that the data is loaded
+        for tag in self.data_path[idx].keys():
+            #print(f"Loading data for {tag}, {idx}")
             self.data[tag] = {} if tag not in self.data.keys() else self.data[tag]
             cuts=self.config.D02KsPiPi.cuts(tag)
             if idx != 'pdf':
                 path = self.data_path[idx][tag]
-                #if idx == 'qcmc':
-                #    cuts = cuts + ' & ' + self.config.D02KsPiPi.topo_cut(tag)
+                #print(f"Path: {path}")
                 if path.endswith('.root'):
                     if tag in ['full', 'misspi0', 'misspi']:
                         branches = ['p4_Ks','p4_pim','p4_pip','p4_Ks2','p4_pim2','p4_pip2']
                         self.data[tag][idx] = data_io(root_data(path, self.config._config_data['data'].get('tree'), cut=cuts, branches=branches).load_tuple()).load_all()
+                        #print(f'Loading {tag} for {idx} alread: {self.data[tag].keys()}')
                     else:
                         self.data[tag][idx] = data_io(root_data(path, self.config._config_data['data'].get('tree'),cut=self.config.D02KsPiPi.cuts(tag)).load_tuple()).load_all()
                 elif path.endswith('.npy'):
                     #prob = 
                     self.data[tag][idx] = np.load(path)   
-            else:
+            else :
                 self.data[tag][idx] = {}
                 for i_pdf in self.data_path[idx][tag].keys():
                     self.data[tag][idx][i_pdf] = {}
@@ -93,11 +112,33 @@ class load_data:
                                 self.data[tag][idx][i_pdf][i_ext_pdf] = data_io(root_data(path, self.config._config_data['data'].get('tree')).load_tuple()).load_all()
                             elif path.endswith('.npy'):
                                 self.data[tag][idx][i_pdf][i_ext_pdf] = np.load(path)
+
+
+
+
         #reform the data as for returning the data
         data = {}
         for tag in self.data.keys():
             data[tag] = {}
+            for i_idx in self.data[tag].keys():
+                if idx != i_idx: continue
+                if i_idx != 'pdf':
+                #print(self.data[tag])
+                    data[tag] = self.data[tag][i_idx]
+                else:
+                    for i_pdf in self.data[tag][i_idx].keys():
+                        data[tag][i_pdf] = {}
+                        if isinstance(self.data[tag][i_idx][i_pdf], np.ndarray):
+                            #for i_pdf_tag in range(len(self.data[tag][i_idx][i_pdf])):
+                            data[tag][i_pdf] = self.data[tag][i_idx][i_pdf]
+                        else:
+                            for i_pdf_tag in self.data[tag][i_idx][i_pdf].keys():
+                                data[tag][i_pdf][i_pdf_tag] = self.data[tag][i_idx][i_pdf][i_pdf_tag]
+        '''
+        for tag in self.data.keys():
+            data[tag] = {}
             if idx != 'pdf':
+                #print(self.data[tag])
                 data[tag] = self.data[tag][idx]
             else:
                 for i_pdf in self.data[tag][idx].keys():
@@ -108,6 +149,7 @@ class load_data:
                     else:
                         for i_pdf_tag in self.data[tag][idx][i_pdf].keys():
                             data[tag][i_pdf][i_pdf_tag] = self.data[tag][idx][i_pdf][i_pdf_tag]
+        '''
 
 
         return data

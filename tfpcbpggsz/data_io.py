@@ -58,8 +58,7 @@ class data_io:
             amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())
         else:
             amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())
-        amp_i = tf.cast(amp_i, tf.complex128)
-        return amp_i
+        return tf.cast(amp_i, tf.complex128)
    
     def ampbar(self, data):
         """Calculate the amplitude of the decay from momenta."""
@@ -69,7 +68,7 @@ class data_io:
         p1,p2,p3 = data
         p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
         ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-        ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
+        ampbar_i = tf.negative(ampbar_i)
         return ampbar_i
     
     def get_mass(self, data):

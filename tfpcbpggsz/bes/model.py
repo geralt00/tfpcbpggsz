@@ -4,7 +4,6 @@ from tfpcbpggsz.phasecorrection import PhaseCorrection as pc
 from tfpcbpggsz.core import Normalisation as normalisation
 
 
-
 class BaseModel(object):
     def __init__(self, config):
         self.norm = {}
@@ -64,8 +63,13 @@ class BaseModel(object):
         self.norm[tag].add_pc(phase_correction_MC)
         self.norm[tag].Update_crossTerms()
 
-        prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), phase_correction)
-        norm = self.norm[tag].Integrated_CP_tag(Dsign)
+        if tag == 'pipipi0':
+            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign,self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, Fplus=0.9406)
+            norm = self.norm[tag].Integrated_CP_tag(Dsign, Fplus=0.9406)
+
+        else:
+            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction)
+            norm = self.norm[tag].Integrated_CP_tag(Dsign)
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
         prob_bkg = (prob_bkg)*frac_bkg
@@ -87,14 +91,42 @@ class BaseModel(object):
         elif tag in ["kk", "pipi", "pipipi0", "kspi0pi0", "klpi0"]:
             return self.NLL_CP(tag, 1)
 
-    
-    def fun(self, x):
-        self.set_params(x)
+    @tf.function
+    def nll_dks(self):
         #nll = []
         ret = 0
         for tag in self.tags:
+            if tag not in ["full", "misspi", "misspi0"]: continue
             self._nll[tag] = self.NLL_selector(tag)
             ret += self._nll[tag]
+        return ret
+    
+    @tf.function
+    def nll_cpeven(self):
+        #nll = []
+        ret = 0
+        for tag in self.tags:
+            if tag not in ["kk", "pipi", "pipipi0", "kspi0pi0", "klpi0"]: continue
+            self._nll[tag] = self.NLL_selector(tag)
+            ret += self._nll[tag]
+        return ret
+    
+    @tf.function
+    def nll_cpodd(self):
+        #nll = []
+        ret = 0
+        for tag in self.tags:
+            if tag not in ["kspi0", "kseta_gamgam", "ksetap_pipieta", "kseta_3pi", "ksetap_gamrho", "ksomega", "klpi0pi0"]: continue
+            self._nll[tag] = self.NLL_selector(tag)
+            ret += self._nll[tag]
+        
+        return ret
+    
+    @tf.function
+    def fun(self, x):
+        self.set_params(x)
+        ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()
+
         return ret
         
     def set_params(self, x={}):

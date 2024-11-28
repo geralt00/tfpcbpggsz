@@ -184,8 +184,12 @@ class PhaseCorrection:
             corr += self.polynomial(coords, int(self.iTerms_[i].split('_')[1]), int( self.iTerms_[i].split('_')[2])) * self.coefficients[self.iTerms_[i]]
         return corr
 
-    def eval_corr(self, coords):
-        return self.eval_corr_norm(coords) #tf.function(self.eval_corr_norm)(coords)  
+    def eval_corr(self, coords, reduce_retracing=False):
+        """
+        Returns the phase correction for the given coordinates
+        """
+
+        return tf.function(self.eval_corr_norm,reduce_retracing=reduce_retracing)(coords)  
     
     def term_to_string(self, i):
         """
