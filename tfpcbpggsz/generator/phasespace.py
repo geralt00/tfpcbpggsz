@@ -34,8 +34,9 @@ class UniformGenerator:
 
     def generate(self, N):
         random = tf.random.uniform([N], dtype="float64")
+        ###### add another random with a chosen range
         ms = (self.b - self.a) * random + self.a
-        return ms
+        return ms # and return the mass
 
 
 class PhaseSpaceGenerator(object):
