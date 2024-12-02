@@ -6,6 +6,7 @@ from tfpcbpggsz.generator.generator import multi_sampling, multi_sampling2
 from tfpcbpggsz.core import DeltadeltaD
 from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
+from tfpcbpggsz.variable import VarsManager as vm
 
 class pcbpggsz_generator:
     #"""
@@ -25,14 +26,23 @@ class pcbpggsz_generator:
         self.pc = None
         self.DEBUG = False
         self.apply_eff = False
+        self._corr_from_fit = False
 
-    def add_bias(self, correctionType="singleBias"):
-        #"""Adding the bias in different type"""
+    def add_bias(self, correctionType="singleBias", **kwargs):
+        
 
-        self.pc = PhaseCorrection()
+        self.pc = PhaseCorrection(vm=vm())
         self.pc.DEBUG = self.DEBUG
         self.pc.correctionType=correctionType
-        self.pc.PhaseCorrection()
+
+        if kwargs.get('coefficients') is not None:
+            self.pc.order = kwargs['order']
+            self.pc.PhaseCorrection()
+            self.pc.set_coefficients(coefficients=kwargs['coefficients'])
+            self._corr_from_fit = True
+
+
+
 
     def add_eff(self, charge, decay):
         #"""Calling the efficiency map for decay"""
@@ -43,8 +53,15 @@ class pcbpggsz_generator:
         print(f'Efficiency applied with: {decay}_{charge}')
 
     def eval_bias(self, data):
-        #"""Getting the bias value for given 4 momentum"""
-        return self.pc.eval_bias(p4_to_phsp(data))
+        """
+        Getting the bias value for given 4 momentum
+        
+        
+        """
+        if self._corr_from_fit:
+            return self.pc.eval_corr(p4_to_srd(data), reduce_retracing=True)
+        else:
+            return self.pc.eval_bias(p4_to_phsp(data))
     
     def eval_eff(self, data):
         #"""Getting the efficiency value for given 4 momentum"""

@@ -80,7 +80,7 @@ class PhaseCorrection:
                     self.nTerms_+=1
             self.vm.variables = self.coefficients
             self.vm.trainable_vars = self.coefficients
-            self.vm.set_all(self.coefficients, val_in_fit=True)
+            self.vm.set_all(vals=self.coefficients, val_in_fit=True)
         
 
     def set_coefficients(self, **kwargs):
