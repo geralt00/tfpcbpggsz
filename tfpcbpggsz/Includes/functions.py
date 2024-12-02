@@ -99,3 +99,34 @@ def clip_log(x, _epsilon=1e-6):
     )
     return tf.where(x > _epsilon, b_t, b_f)
 
+
+# @tf.function
+def Legendre_2_2(zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
+    Legendre_zp_1 = zp_p
+    Legendre_zp_2 = (3 * np.power(zp_p, 2) - 1) / 2.
+    Legendre_zm_1 = zm_pp
+    Legendre_zm_2 = (3 * np.power(zm_pp, 2) - 1) / 2.
+    res = (
+        variables[0] +
+        Legendre_zp_1*variables[1] +
+        Legendre_zp_2*variables[2] +
+        Legendre_zm_1*variables[3] + 
+        Legendre_zm_2*variables[4] + 
+        Legendre_zp_1*Legendre_zm_1*variables[5] + 
+        Legendre_zp_2*Legendre_zm_1*variables[6] + 
+        Legendre_zp_1*Legendre_zm_2*variables[7] + 
+        Legendre_zp_2*Legendre_zm_2*variables[8]
+    )
+    #### phase space
+    res = tf.where(
+        in_Dalitz_plot_SRD(zp_p, zm_pp) == True,
+        res,
+        0
+    )
+    ### doing this to avoid negative values
+    res = tf.math.maximum(res, 0)
+    # print("res:")
+    # print(res)
+    # print(variables)
+    # print(shared_variables)
+    return res

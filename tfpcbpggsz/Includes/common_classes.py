@@ -313,8 +313,6 @@ class Ntuple:
         self.BDT_training_paths = get_ntuple(self.source, self.channel, self.year, self.magpol, selec = "BDT_training")
         self.With_BDT_paths = get_ntuple(self.source, self.channel, self.year, self.magpol, selec = "With_BDT")
         self.truth_matching_cuts = self.get_truth_matching_cuts()
-        #### for mass fit
-        self.i_c = INDEX_CHANNEL_TO_VARDICT[self.channel.name]
         pass
 
     
@@ -417,41 +415,55 @@ class Ntuple:
 
 
     ################### Fit stuff
-    def initialise_fit(self,components):
+    def initialise_fit(self,components, index_channel):
         ##### invariant mass fit objects
-        self.components      = components[self.source.name][self.channel.name]
+        self.components      = components # [self.source.name][self.channel.name]
         self.variable_to_fit = VARIABLE_TO_FIT[self.channel.name]
+        #### for mass fit
+        self.i_c = index_channel
         pass
 
 
     def initialise_fixed_pdfs(self, fixed_variables):
         #### first initialise the mass pdfs for the sum of Bplus and Bminus
+        # print("Initialising PDFS")
         for i_comp in range(len(self.mass_pdfs["both"])):
+            # print("   mass pdf for ",self.mass_pdfs["both"][i_comp].component)
             # tf.print("i_comp: ",i_comp)
             self.mass_pdfs["both"][i_comp].get_mass_pdf(
-                fixed_variables[self.i_c][i_comp],
+                fixed_variables[self.i_c][i_comp][2], # last index is space
                 Bsign=None
             )
             pass
         # and then initialise both dalitz and mass separately for Bplus and Bminus
         for Bsign in BSIGNS.keys():
+            print(Bsign)
             for i_comp in range(len(self.mass_pdfs[Bsign])):
                 # tf.print("i_comp: ",i_comp)
+                # print("   mass and dalitz pdf for ",self.mass_pdfs[Bsign][i_comp].component)
                 self.mass_pdfs[Bsign][i_comp].get_mass_pdf(
-                    fixed_variables[self.i_c][i_comp],
+                    fixed_variables[self.i_c][i_comp][2],
                     Bsign=Bsign
                 )
+                # print(" in get_dalitz_pdfs")
+                # print("    i_comp ", i_comp)
+                # print(" component ", self.mass_pdfs[Bsign][i_comp].component)
+                # print("  function ", self.dalitz_pdfs[Bsign][i_comp].name)
+                # print(" variables ", fixed_variables[self.i_c][i_comp])
+                # print(" shraed_variables ", fixed_variables[INDEX_SHARED_THROUGH_CHANNELS][0])
+                # print(i_comp)
                 self.dalitz_pdfs[Bsign][i_comp].get_dalitz_pdf(
                     self.norm_ampD0[Bsign]   ,
                     self.norm_ampD0bar[Bsign],
                     self.norm_zp_p[Bsign]    ,
                     self.norm_zm_pp[Bsign]   ,
-                    fixed_variables[INDEX_SHARED_THROUGH_CHANNELS][0]
+                    variables        = fixed_variables[self.i_c][i_comp][INDEX_YIELDS[Bsign]],
+                    shared_variables = fixed_variables[INDEX_SHARED_THROUGH_CHANNELS][0]
                     ### the 0 here doesn't mean anything, it refers to the
                     # "component" column of the dictionary, which is irrelevant
                     # for the parameters that are shared through channels.
                     # In the origin dictionary VARDICT, it corresponds to the "parameters"
-                    # column
+                    # column. Then the [2] selects the "mass" entry
                 )
                 pass
             pass
@@ -461,26 +473,25 @@ class Ntuple:
     def get_list_variables(self, fixed_variables, params=None, shared_parameters=None, constrained_parameters=None):
         ##### self.list_variables will contain all variables
         #  (all channels etc, similarly to list_vardict)
-        # self.list_variables = np.zeros(2*12*16).reshape((2,12,16))
         list_variables = fixed_variables.copy()
-        # [[[0 for col in range(16)] for col in range(12)] for row in range(3)]
-        # print(self.mass_pdfs)
         for i_channel in range(len(list_variables)): # loop channels
             for i_comp in range(len(list_variables[i_channel])): # loop components
-                for i_var in range(len(list_variables[i_channel][i_comp])): # loop params
-                    for i_par in range(len(shared_parameters)):
-                        # tf.print(" start loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
-                        if ([i_channel, i_comp, i_var] in shared_parameters[i_par]):
-                            # print(i_channel)
-                            # print(list_variables)
-                            list_variables[i_channel][i_comp][i_var] = params[i_par]
-                            # tf.print("params[",i_par,"]                           :", params[i_par])
-                            # tf.print("list_variables[",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[i_channel][i_comp][i_var])
-                            break
-                        else:
-                            # list_variables[i_channel][i_comp][i_var] = variables[i_channel][i_comp][i_var]
+                for i_space in range(len(list_variables[i_channel][i_comp])): # loop params
+                    for i_var in range(len(list_variables[i_channel][i_comp][i_space])): # loop space
+                        for i_par in range(len(shared_parameters)):
+                            # tf.print(" start loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
+                            if ([i_channel, i_comp, i_space, i_var] in shared_parameters[i_par]):
+                                # print(i_channel)
+                                # print(list_variables)
+                                list_variables[i_channel][i_comp][i_space][i_var] = params[i_par]
+                                # tf.print("params[",i_par,"]                           :", params[i_par])
+                                # tf.print("list_variables[",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[i_channel][i_comp][i_var])
+                                break
+                            else:
+                                # list_variables[i_channel][i_comp][i_var] = variables[i_channel][i_comp][i_var]
+                                pass
+                            # tf.print(" end loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
                             pass
-                        # tf.print(" end loop i_par CB2DK Kspipi mean at  [",i_channel,"][",i_comp,"][",i_var,"] :", list_variables[0][0][1])
                         pass
                     pass
                 pass
@@ -489,36 +500,43 @@ class Ntuple:
         # tf.print("CB2DK Kspipi mean      ",list_variables[0][0][1])
         ### now we look if one of the shared_param is also used for constraining
         for i_const in constrained_parameters:
-            i_chan = i_const[0][0]
-            i_comp = i_const[0][1]
-            i_var  = i_const[0][2]
+            i_chan   = i_const[0][0]
+            i_comp   = i_const[0][1]
+            i_space  = i_const[0][2]
+            i_var    = i_const[0][3]
             if (type(i_const[1])==float):
-                list_variables[i_chan][i_comp][i_var] = i_const[1]
+                list_variables[i_chan][i_comp][i_space][i_var] = i_const[1]
                 continue
             for i_par in range(len(shared_parameters)):
                 if (i_const[1][:-1] in shared_parameters[i_par]):
-                    const_i_chan = i_const[1][0]
-                    const_i_comp = i_const[1][1]
-                    const_i_var  = i_const[1][2]
+                    const_i_chan  = i_const[1][0]
+                    const_i_comp  = i_const[1][1]
+                    const_i_space = i_const[1][2]
+                    const_i_var   = i_const[1][3]
                     # list_variables[i_chan][i_comp][i_var] = tf.cast(params[i_par]*i_const[1][-1],tf.float64)
-                    factor = list_variables[const_i_chan][const_i_comp][const_i_var]
-                    new_const = i_const[1][3]
+                    factor = list_variables[const_i_chan][const_i_comp][const_i_space][const_i_var]
+                    # print("list_variables[const_i_chan][const_i_comp]")
+                    # print(list_variables[const_i_chan][const_i_comp])
+                    new_const = i_const[1][4]
                     while (type(new_const) == list):
-                        print(factor, " = factor should be equal to Dpi yield " , list_variables[1][0][0])
-                        const_i_chan = new_const[0] # contains the indices of the next parameter to multiply
-                        const_i_comp = new_const[1] # contains the indices of the next parameter to multiply
-                        const_i_var  = new_const[2] # contains the indices of the next parameter to multiply
-                        print(list_variables[const_i_chan][const_i_comp][const_i_var], " should be equal to BR_ratio ", list_variables[-1][0][0])
-                        factor *= list_variables[const_i_chan][const_i_comp][const_i_var]
-                        new_const = new_const[3]
-                        print(new_const, " should be equal to efficiency ratio 0.78")
+                        # print(factor, " = factor should be equal to Dpi yield " , list_variables[1][0][2][0])
+                        const_i_chan  = new_const[0] # contains the indices of the next parameter to multiply
+                        const_i_comp  = new_const[1] # contains the indices of the next parameter to multiply
+                        const_i_space = new_const[2] # contains the indices of the next parameter to multiply
+                        const_i_var   = new_const[3] # contains the indices of the next parameter to multiply
+                        # print(new_const  )
+                        # print(list_variables[const_i_chan][const_i_comp][const_i_space][const_i_var], " should be equal to BR_ratio ", list_variables[-1][0][2][0])
+                        factor *= list_variables[const_i_chan][const_i_comp][const_i_space][const_i_var]
+                        new_const = new_const[4]
+                        # print(new_const, " should be equal to efficiency ratio 1.2672565348886882")
                         pass
-                    list_variables[i_chan][i_comp][i_var] = new_const*factor
+                    list_variables[i_chan][i_comp][i_space][i_var] = new_const*factor
                     pass
                 pass
             pass
         # tf.print(" AFTER CONSTRAINED")
         # tf.print("CB2DK Kspipi mean      ",list_variables[0][0][1])
+        self.list_variables = list_variables
         return list_variables
         ####
         
@@ -630,9 +648,11 @@ class Ntuple:
         list_variables = self.get_list_variables(fixed_variables, params=params, shared_parameters=shared_parameters, constrained_parameters=constrained_parameters)
         for i_comp in range(len(self.mass_pdfs)):
             # print("i_comp: ",i_comp)
-            self.mass_pdfs[i_comp].get_mass_pdf(list_variables[self.i_c][i_comp])
+            ### the last index correspond to the space
+            self.mass_pdfs[i_comp].get_mass_pdf(list_variables[self.i_c][i_comp][2])
             pass
-        sum_yields    = sum([comp[0] for comp in list_variables[self.i_c]])
+        ### first index is space, second is yield - fixed to be yield_Bplus
+        sum_yields    = sum([comp[2][0] for comp in list_variables[self.i_c]])
         tf_sum_yields = tf.cast(sum_yields,tf.float64)
         poisson = tfp.distributions.Poisson(rate=sum_yields)
         log_poisson_constraint = tf.cast(poisson.log_prob(total_yield),tf.float64)
@@ -690,7 +710,7 @@ class Ntuple:
                 print("isSignal   : ", isSignal)
                 self.dalitz_pdfs[Bsign].append(
                     DalitzPDF(
-                        comp[1], # function name like "Exponential" 
+                        comp[2], # function name like "Legendre_2_2" 
                         comp[0], # component name like "DK_Kspipi"
                         Bsign  , # this is the momentum of the kaon no i'm joking
                                  # this is obv the sign of the B
@@ -763,7 +783,7 @@ class Ntuple:
 
     ##### dalitz * mass pdfs
     # @tf.function
-    def get_total_nll(self, params, fixed_variables, shared_parameters, constrained_parameters, components, gaussian_constraints=[]):
+    def get_total_nll(self, params, fixed_variables, shared_parameters, constrained_parameters, gaussian_constraints=[]):
         try:
             total_yield    = {}
             total_yield["Bplus"]    = tf.cast(len(self.Bu_M["Bplus"]  ), tf.float64)
@@ -802,7 +822,9 @@ class Ntuple:
             term1 = tf.reduce_sum(-2 * clip_log(mass_pdf_values*dalitz_pdf_values))
             ### sum the yields of all components and
             # constrain it to the total number of events
-            sum_yields    = sum([comp[index_yields] for comp in list_variables[self.i_c]])
+            # print(" the yields are:")
+            # print([comp[2][index_yields] for comp in list_variables[self.i_c]])
+            sum_yields    = sum([comp[2][index_yields] for comp in list_variables[self.i_c]])
             tf_sum_yields    = tf.cast(sum_yields, tf.float64)
             poisson = tfp.distributions.Poisson(rate=tf_sum_yields)
             log_poisson_constraint = tf.cast(
@@ -812,21 +834,21 @@ class Ntuple:
             term2 = - 2*log_poisson_constraint
             term3 = 2*nevents[Bsign]*clip_log(tf_sum_yields)
             nll  += term1 + term2 + term3
-            tf.print(f"sum_yields             {Bsign} ", tf_sum_yields)
-            tf.print(f"total_yield            {Bsign} ", total_yield)
-            tf.print(f"log_poisson_constraint {Bsign} ", log_poisson_constraint)
-            tf.print("                          sum_events ", term1)
-            tf.print(" -          2*log_poisson_constraint ", term2)
-            tf.print(" + 2*nevents*clip_log(tf_sum_yields) ", term3)
-            tf.print(" ")
+            # tf.print(f"sum_yields             {Bsign} ", tf_sum_yields)
+            # tf.print(f"total_yield            {Bsign} ", total_yield)
+            # tf.print(f"log_poisson_constraint {Bsign} ", log_poisson_constraint)
+            # tf.print("                     term sum_events ", term1)
+            # tf.print(" -          2*log_poisson_constraint ", term2)
+            # tf.print(" + 2*nevents*clip_log(tf_sum_yields) ", term3)
+            # tf.print(" ")
             pass
         term4 = self.get_gaussian_constraints(gaussian_constraints, list_variables)
         nll  += term4
-        tf.print(" +              gaussian_constraints ", term4)
-        tf.print(" =  nll :                  ", nll)
-        tf.print(" ")
-        tf.print(" ")
-        tf.print(" ")
+        # tf.print(" +              gaussian_constraints ", term4)
+        # tf.print(" =  nll :                  ", nll)
+        # tf.print(" ")
+        # tf.print(" ")
+        # tf.print(" ")
         return nll
 
     
@@ -834,8 +856,8 @@ class Ntuple:
     def get_gaussian_constraints(self, gaussian_constraints, list_variables):
         res = 0
         for i_const in gaussian_constraints:
-            delta_x = list_variables[i_const[0][0]][i_const[0][1]][i_const[0][2]]-list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]]*i_const[1][3]
-            sigma   = list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]]*i_const[1][4]
+            delta_x = list_variables[i_const[0][0]][i_const[0][1]][i_const[0][2]][i_const[0][3]]-list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]][i_const[1][3]]*i_const[1][4]
+            sigma   = list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]][i_const[1][3]]*i_const[1][5]
             res    += delta_x*delta_x / (sigma*sigma)
         return res
         

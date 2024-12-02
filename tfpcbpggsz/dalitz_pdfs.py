@@ -24,7 +24,7 @@ from tfpcbpggsz.core import *
 #     return a
 
 
-def Flat(zp_p, zm_pp, Bsign, variables):
+def Flat(zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     res = np.ones(zp_p.shape)
     res = np.where(
         in_Dalitz_plot_SRD(zp_p, zm_pp) == True,
@@ -50,12 +50,14 @@ class DalitzPDF:
             function = prob_totalAmplitudeSquared_XY
         elif (self.component == "Dpi_Kspipi_misID" or self.component == "Dpi_Kspipi"):
             function = prob_totalAmplitudeSquared_DPi_XY
+        elif (self.name == "Legendre_2_2"):
+            function = Legendre_2_2
         else:
             print("ERROR ---------------------- get_function ")
             print(" component ", self.component, " undefined in DalitzPDF")
         return function
 
-    def get_normalisation(self, norm_ampD0, norm_ampD0bar, variables):
+    def get_normalisation(self, norm_ampD0, norm_ampD0bar, variables=None, shared_variables=None):
         N_normalisation = len(norm_ampD0)
         if ( not (N_normalisation == len(norm_ampD0bar) ) ):
             print("ERROR ----------------------- in B2DK_Kspipi_norm")
@@ -67,33 +69,44 @@ class DalitzPDF:
         # we need to add this amplitude here
         gen_amplitude = 1
         ####
-        ampSq = self.function(norm_ampD0, norm_ampD0bar, self.Bsign, variables)
+        ampSq = self.function(norm_ampD0, norm_ampD0bar, self.Bsign, variables=variables, shared_variables=shared_variables)
+        # print("shared_variables:")
+        # print(shared_variables)
+        print("variables:")
+        print(variables)
+        # print(" ")
         # print("nan in ampSq in normalisation:")
         # print(np.isnan(ampSq).any())
         #### 
         res = tf.math.reduce_mean(ampSq / gen_amplitude)
+        res *= tf.constant(
+            (QMI_smax_Kspi-QMI_smin_Kspi)*(QMI_smax_Kspi-QMI_smin_Kspi),
+            tf.float64
+        )
         # print("res in normalisation:")
         # print(res)
         return res ## is a number
 
 
     # @tf.function
-    def get_dalitz_pdf(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, variables):
+    def get_dalitz_pdf(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, variables=None, shared_variables=None):
         # print(" PRINTING some stuff !")
         # print(self.name)
         # print(self.component)
         # print(self.Bsign)
         if (self.isSignal == True):
             self.norm_constant = self.get_normalisation(
-                norm_ampD0,
-                norm_ampD0bar,
-                variables
+                norm_ampD0         ,
+                norm_ampD0bar      ,
+                variables=variables,
+                shared_variables=shared_variables
             )
         else:
             self.norm_constant = self.get_normalisation(
-                norm_zp_p ,
-                norm_zm_pp,
-                variables
+                norm_zp_p          ,
+                norm_zm_pp         ,
+                variables=variables,
+                shared_variables=shared_variables
             )
             pass
         # print("norm_constant")
@@ -104,7 +117,7 @@ class DalitzPDF:
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
-        pdf  = lambda ampD0, ampD0bar: self.function(ampD0, ampD0bar, self.Bsign, variables) / self.norm_constant #
+        pdf = lambda ampD0, ampD0bar: self.function(ampD0, ampD0bar, self.Bsign, variables=variables, shared_variables=shared_variables) / self.norm_constant #
         self.pdf = pdf
-        return pdf
+        return
 

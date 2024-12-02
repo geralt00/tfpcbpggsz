@@ -154,7 +154,7 @@ def eff_fun(x, charge='p', decay='dk_LL'):
 
     return res #( res+offset[decay])/mean[decay]
 
-def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, Bsign, variables, pc=None, **kwargs):
+def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, Bsign, variables=None, shared_variables=None, pc=None, **kwargs):
     """
     Function to calculate the amplitude squared for the B2DK and B2Dpi decays
 
@@ -168,6 +168,11 @@ def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, Bsign, variables, pc=None, **
     Returns:
         float64: the amplitude squared
     """
+
+    ##### the phase-correction will be stored in
+    # shared_variables[0] for Bplus and shared_variables[1] for Bminus
+    # the CP observables are in shared_variables[2]
+    
     phase = DeltadeltaD(ampD0, ampD0bar)
     if 'model_name' in kwargs:
         if kwargs['model_name'] == 'ampgen':
@@ -178,15 +183,20 @@ def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, Bsign, variables, pc=None, **
     absA = tf.cast(tf.abs(ampD0), tf.float64)
     absAbar = tf.cast(tf.abs(ampD0bar), tf.float64)
 
+    # print("xPlus : ", shared_variables[2][1])
+    # print("yPlus : ", shared_variables[2][2])
+    # print("xMinus: ", shared_variables[2][3])
+    # print("yMinus: ", shared_variables[2][4])
+    
     if Bsign == 1:
-        xPlus = tf.cast(variables[1], tf.float64)
-        yPlus = tf.cast(variables[2], tf.float64)
+        xPlus = tf.cast(shared_variables[2][1], tf.float64)
+        yPlus = tf.cast(shared_variables[2][2], tf.float64)
         rB2 = tf.cast(xPlus**2 + yPlus**2, tf.float64)
         return tf.cast((absA**2 * rB2  + absAbar **2  + 2.0 * (absA * absAbar) * (xPlus * tf.cos(phase) - yPlus * tf.sin(phase))),tf.float64)
     
     elif Bsign == -1:
-        xMinus = tf.cast(variables[3], tf.float64)
-        yMinus = tf.cast(variables[4], tf.float64)
+        xMinus = tf.cast(shared_variables[2][3], tf.float64)
+        yMinus = tf.cast(shared_variables[2][4], tf.float64)
         rB2 = tf.cast(xMinus**2 + yMinus**2, tf.float64)
 
         return tf.cast((absA**2  + absAbar **2 * rB2 + 2.0 * (absA * absAbar) * (xMinus * tf.cos(phase) + yMinus * tf.sin(phase))), tf.float64)
@@ -270,7 +280,7 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], **kwargs):
     else:
         return (absA**2  + absAbar **2  + 2.0 * DDsign * CPsign * (absA * absAbar) * tf.cos(phase))
 
-def prob_totalAmplitudeSquared_DPi_XY( ampD0, ampD0bar, Bsign, variables):
+def prob_totalAmplitudeSquared_DPi_XY( ampD0, ampD0bar, Bsign, variables=None, shared_variables=None):
     """
     Function to calculate the amplitude squared for the B2Dpi decay, the ratio between B2DK and B2Dpi is used, then two additional parameters are added
 
@@ -288,12 +298,12 @@ def prob_totalAmplitudeSquared_DPi_XY( ampD0, ampD0bar, Bsign, variables):
     absA = tf.cast(tf.abs(ampD0), tf.float64)
     absAbar = tf.cast(tf.abs(ampD0bar), tf.float64)
 
-    xXi = tf.cast(variables[5], tf.float64)
-    yXi = tf.cast(variables[6], tf.float64)
+    xXi = tf.cast(shared_variables[2][5], tf.float64)
+    yXi = tf.cast(shared_variables[2][6], tf.float64)
 
     if Bsign == 1:
-        xPlus = tf.cast(variables[1], tf.float64)
-        yPlus = tf.cast(variables[2], tf.float64)
+        xPlus = tf.cast(shared_variables[2][1], tf.float64)
+        yPlus = tf.cast(shared_variables[2][2], tf.float64)
         xPlus_DPi = tf.cast(xPlus * xXi - yPlus * yXi, tf.float64)
         yPlus_DPi = tf.cast(yPlus * xXi + xPlus * yXi, tf.float64)
         rB2 = tf.cast(xPlus_DPi**2 + yPlus_DPi**2, tf.float64)
@@ -301,8 +311,8 @@ def prob_totalAmplitudeSquared_DPi_XY( ampD0, ampD0bar, Bsign, variables):
         return tf.cast((absA**2 * rB2  + absAbar **2  + 2.0 * (absA * absAbar) * (xPlus_DPi * tf.cos(phase) - yPlus_DPi * tf.sin(phase))),tf.float64)
     
     elif Bsign == -1:
-        xMinus = tf.cast(variables[3], tf.float64)
-        yMinus = tf.cast(variables[4], tf.float64)
+        xMinus = tf.cast(shared_variables[2][3], tf.float64)
+        yMinus = tf.cast(shared_variables[2][4], tf.float64)
         xMinus_DPi = tf.cast(xMinus * xXi - yMinus * yXi, tf.float64)
         yMinus_DPi = tf.cast(yMinus * xXi + xMinus * yXi, tf.float64)
         rB2 = tf.cast(xMinus_DPi**2 + yMinus_DPi**2, tf.float64)
@@ -1277,7 +1287,7 @@ class DecayNLL_Charm:
             
 class NLLComputation:
 
-    def __init__(self, start_values, limit_values, dict_shared_parameters, dict_constrained_parameters, dict_gaussian_constraints, list_channels, dict_fixed_variables, ntuples, components):
+    def __init__(self, start_values, limit_values, dict_shared_parameters, dict_constrained_parameters, dict_gaussian_constraints, list_channels, dict_fixed_variables, ntuples):
         self.start_values                  = start_values                 
         self.limit_values                  = limit_values                 
         self.dict_shared_parameters        = dict_shared_parameters       
@@ -1286,7 +1296,6 @@ class NLLComputation:
         self.list_channels                 = list_channels                
         self.dict_fixed_variables          = dict_fixed_variables
         self.ntuples                       = ntuples
-        self.components                    = components
         ##### +1 because we have the entry for the parameters shared across channels
         self.number_of_channels = len(self.list_channels) + 1
         ######### simply the list of variables that will be fitted
@@ -1302,6 +1311,7 @@ class NLLComputation:
     def tensorflowing_shared_parameters(self):
         ########### necessary magic to go from dictionaries to "TensorFlowable" lists
         ## shared parameters
+        print("FIRST --- TENSORTFLOWING SHARED PARAMETERS")
         shared_parameters = [] # list_variables
         for i in range(len(self.parameters_to_fit)):
             par_name = self.parameters_to_fit[i]
@@ -1312,16 +1322,23 @@ class NLLComputation:
             for var in list_sharing_parameters:
                 i_channel   = list(self.dict_fixed_variables.keys()).index(var[0])
                 i_component = list(self.dict_fixed_variables[var[0]].keys()).index(var[1])
-                i_variable  = list(self.dict_fixed_variables[var[0]][var[1]].keys()).index(var[2])
-                shared_parameters[i].append([i_channel, i_component, i_variable])
+                i_space     = list(self.dict_fixed_variables[var[0]][var[1]].keys()).index(var[2])
+                i_variable  = list(self.dict_fixed_variables[var[0]][var[1]][var[2]].keys()).index(var[3])
+                shared_parameters[i].append([i_channel, i_component, i_space, i_variable])
                 pass
             print(shared_parameters[i])
             pass
+        print("            ")
+        print("            ")
+        print("            ")
+        print("            ")
+        print("            ")
         return shared_parameters
 
 
     def tensorflowing_constrained_parameters(self):
         ## constrain
+        print(" --- TENSORTFLOWING CONSTRAINED PARAMETERS")
         constrained_parameters = [] # list_variables
         for i in range(len(self.dict_constrained_parameters)):
             constrained_parameters.append([])
@@ -1330,26 +1347,30 @@ class NLLComputation:
             print(to_const, " is constrained to ", const)
             to_const_channel   = list(self.dict_fixed_variables.keys()).index(to_const[0])
             to_const_component = list(self.dict_fixed_variables[to_const[0]].keys()).index(to_const[1])
-            to_const_variable  = list(self.dict_fixed_variables[to_const[0]][to_const[1]].keys()).index(to_const[2])
+            to_const_space     = list(self.dict_fixed_variables[to_const[0]][to_const[1]].keys()).index(to_const[2])
+            to_const_variable  = list(self.dict_fixed_variables[to_const[0]][to_const[1]][to_const[2]].keys()).index(to_const[3])
             const_channel      = list(self.dict_fixed_variables.keys()).index(const[0])
             const_component    = list(self.dict_fixed_variables[const[0]].keys()).index(const[1])
-            const_variable     = list(self.dict_fixed_variables[const[0]][const[1]].keys()).index(const[2])
-            const_value        = const[3]
+            const_space        = list(self.dict_fixed_variables[const[0]][const[1]].keys()).index(const[2])
+            const_variable     = list(self.dict_fixed_variables[const[0]][const[1]][const[2]].keys()).index(const[3])
+            const_value        = const[4]
             if (type(const_value) == list):
                 ii_const_channel   = list(self.dict_fixed_variables.keys()).index(const_value[0])
                 ii_const_component = list(self.dict_fixed_variables[const_value[0]].keys()).index(const_value[1])
-                ii_const_variable  = list(self.dict_fixed_variables[const_value[0]][const_value[1]].keys()).index(const_value[2])
-                const_value = [ii_const_channel, ii_const_component, ii_const_variable, const_value[3]]
+                ii_const_space     = list(self.dict_fixed_variables[const_value[0]][const_value[1]].keys()).index(const_value[2])
+                ii_const_variable  = list(self.dict_fixed_variables[const_value[0]][const_value[1]][const_value[2]].keys()).index(const_value[3])
+                const_value = [ii_const_channel, ii_const_component, ii_const_space, ii_const_variable, const_value[4]]
                 pass
             constrained_parameters[i] = [
-                [to_const_channel, to_const_component, to_const_variable],
-                [const_channel, const_component, const_variable, const_value],
+                [to_const_channel, to_const_component, to_const_space, to_const_variable],
+                [const_channel, const_component, const_space, const_variable, const_value],
             ]
             pass
         return constrained_parameters
 
     def tensorflowing_gaussian_constraints(self):
         ## constrain
+        print(" --- TENSORTFLOWING GAUSSIAN PARAMETERS")
         gaussian_constraints = [] # list_variables
         for i in range(len(self.dict_gaussian_constraints)):
             gaussian_constraints.append([])
@@ -1358,15 +1379,17 @@ class NLLComputation:
             print(to_const, " is gaussian constrained to ", const)
             to_const_channel   = list(self.dict_fixed_variables.keys()).index(to_const[0])
             to_const_component = list(self.dict_fixed_variables[to_const[0]].keys()).index(to_const[1])
-            to_const_variable  = list(self.dict_fixed_variables[to_const[0]][to_const[1]].keys()).index(to_const[2])
+            to_const_space     = list(self.dict_fixed_variables[to_const[0]][to_const[1]].keys()).index(to_const[2])
+            to_const_variable  = list(self.dict_fixed_variables[to_const[0]][to_const[1]][to_const[2]].keys()).index(to_const[3])
             const_channel   = list(self.dict_fixed_variables.keys()).index(const[0])
             const_component = list(self.dict_fixed_variables[const[0]].keys()).index(const[1])
-            const_variable  = list(self.dict_fixed_variables[const[0]][const[1]].keys()).index(const[2])
-            const_value     = const[3]
-            const_error     = const[4]
+            const_space     = list(self.dict_fixed_variables[const[0]][const[1]].keys()).index(const[2])
+            const_variable  = list(self.dict_fixed_variables[const[0]][const[1]][const[2]].keys()).index(const[3])
+            const_value     = const[4]
+            const_error     = const[5]
             gaussian_constraints[i] = [
-                [to_const_channel, to_const_component, to_const_variable],
-                [const_channel, const_component, const_variable, const_value, const_error],
+                [to_const_channel, to_const_component, to_const_space, to_const_variable],
+                [const_channel, const_component, const_space, const_variable, const_value, const_error],
             ]
             pass
         return gaussian_constraints
@@ -1374,36 +1397,48 @@ class NLLComputation:
     
     def tensorflowing_fixed_variables(self):
         fixed_variables = [] # first index is source
+        print(" --- TENSORTFLOWING FIXED PARAMETERS")
         ########### transform the dictionary in a list
         for i in range(self.number_of_channels):
             channel = list(self.dict_fixed_variables.keys())[i]
-            print("channel")
-            print(channel)
+            # print("channel")
+            # print(channel)
             fixed_variables.append([]) # second index is channel
             for component in self.dict_fixed_variables[channel]:
                 ### third index is component
-                print("component")
+                # print("component")
+                # print(component)
                 fixed_variables[-1].append([])
-                print(component)
-                for variables_values in self.dict_fixed_variables[channel][component].values():
-                    fixed_variables[-1][-1].append(variables_values)
+                for space in self.dict_fixed_variables[channel][component]:
+                    # print("space")
+                    # print(space)
+                    fixed_variables[-1][-1].append([])
+                    for variables_values in self.dict_fixed_variables[channel][component][space].values():
+                        fixed_variables[-1][-1][-1].append(variables_values)
+                        pass
                     pass
                 pass
-            print("end channel")
-            print(" ")
+            # print("end channel")
+            # print(" ")
             pass
         ########### make the list square so that we can tensor it
-        self.len_channelDim  = self.number_of_channels
+        self.len_channelDim   = self.number_of_channels
+        self.len_spaces = 3 # mass, Bplus and Bminus
         self.len_componentDim = max([len(fixed_variables[i]) for i in range(self.len_channelDim)])
         tmp_list = []
         for i in range(self.len_channelDim):
-            tmp_list += [len(fixed_variables[i][j]) for j in range(len(fixed_variables[i])) ]
+            for j in range(len(fixed_variables[i])):
+                for k in range(len(fixed_variables[i][j])):
+                    tmp_list.append(len(fixed_variables[i][j][k]))
+                    pass
+                pass
             pass
         self.len_variablesDim = max(tmp_list)
         INFO(
             "The table of variables is a list of size: \n " +
             str(self.len_channelDim  ) + " x " +
             str(self.len_componentDim) + " x " +
+            str(self.len_spaces)       + " x " +
             str(self.len_variablesDim)
         )
         for i in range(self.len_channelDim): ## loop channel
@@ -1411,11 +1446,23 @@ class NLLComputation:
                 fixed_variables[i].append([]) ## add empty component
                 pass
             for j in range(len(fixed_variables[i])): ## loop component
-                while (len(fixed_variables[i][j]) < self.len_variablesDim): 
-                    fixed_variables[i][j].append(0) ## add 0 variables
+                while (len(fixed_variables[i][j]) < self.len_spaces): 
+                    fixed_variables[i][j].append([]) ## add empty list variables
+                    pass
+                for k in range(self.len_spaces):
+                    while (len(fixed_variables[i][j][k]) < self.len_variablesDim): 
+                        fixed_variables[i][j][k].append(0) ## add 0 variables
+                        pass
                     pass
                 pass
             pass
+        INFO(
+            "FINAL CHECK ---- SHOULD BE THE SAME AS ABOVE: \n " +
+            str(len(fixed_variables)  )           + " x " +
+            str(len(fixed_variables[-1]))          + " x " +
+            str(len(fixed_variables[-1][0]))       + " x " +
+            str(len(fixed_variables[-1][0][2]))
+        )
         return fixed_variables
 
     def initialise_dalitz_fit(self,
@@ -1425,7 +1472,7 @@ class NLLComputation:
                               dict_norm_zm_pp
                               ):
         for channel in self.ntuples.keys():
-            self.ntuples[channel]["SDATA"].define_dalitz_pdfs(
+            self.ntuples[channel].define_dalitz_pdfs(
                 dict_norm_ampD0[channel]   ,
                 dict_norm_ampD0bar[channel],
                 dict_norm_zp_p[channel]    ,
@@ -1461,6 +1508,15 @@ class NLLComputation:
                     pass
                 pass
             pass
+        remaining_channels = list(self.dict_fixed_variables.keys())
+        for channel in self.list_channels + ["SHARED_THROUGH_CHANNELS"]:
+            remaining_channels.remove(channel)
+            pass
+        if (len(remaining_channels) > 0):
+            ERROR(" There are more channels in the fixed_variables table than in the list of channels to be fitted")
+            ERROR(" This will lead to inconsistencies ----- please check")
+            res = False
+            pass            
         #### quick comment: we don't have to do the same for gaussian constrained parameters
         ## because if we just fix them, the gaussian constrain just becomes constant and
         ## does not change the result of the fit
@@ -1476,12 +1532,11 @@ class NLLComputation:
     def get_total_mass_nll(self,x):
         total_nll = 0
         for _channel in self.list_channels:
-            total_nll += self.ntuples[_channel]["SDATA"].get_mass_nll(
+            total_nll += self.ntuples[_channel].get_mass_nll(
                 x,
                 self.fixed_variables,
                 self.shared_parameters,
                 self.constrained_parameters,
-                self.components,
                 gaussian_constraints=self.gaussian_constraints
             )
             pass
@@ -1491,12 +1546,11 @@ class NLLComputation:
     def get_total_nll(self,x):
         total_nll = 0
         for _channel in self.list_channels:
-            total_nll += self.ntuples[_channel]["SDATA"].get_total_nll(
+            total_nll += self.ntuples[_channel].get_total_nll(
                 x,
                 self.fixed_variables,
                 self.shared_parameters,
                 self.constrained_parameters,
-                self.components,
                 gaussian_constraints=self.gaussian_constraints
             )
             pass
