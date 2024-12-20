@@ -129,7 +129,7 @@ def eff_fun(x, charge='p', decay='dk_LL'):
         + params[decay][15] * Legendre_zp_6
     )
 
-    return( res+offset[decay])/mean[decay]
+    return res #( res+offset[decay])/mean[decay]
 
 def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), pc=None):
     """

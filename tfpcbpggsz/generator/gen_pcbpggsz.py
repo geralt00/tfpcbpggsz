@@ -21,11 +21,10 @@ class pcbpggsz_generator:
         self.phsp = PhaseSpaceGenerator()
         self.Kspipi = PyD0ToKSpipi2018()
         self.Kspipi.init()
-        self.charge = 1
+        self.charge = 'p'
         self.fun = None
         self.pc = None
         self.DEBUG = False
-        self.apply_eff = False
         self._corr_from_fit = False
 
     def add_bias(self, correctionType="singleBias", **kwargs):
@@ -34,8 +33,10 @@ class pcbpggsz_generator:
         self.pc = PhaseCorrection(vm=vm())
         self.pc.DEBUG = self.DEBUG
         self.pc.correctionType=correctionType
+        if kwargs.get('coefficients') is  None:
+            self.pc.PhaseCorrection()
 
-        if kwargs.get('coefficients') is not None:
+        else:
             self.pc.order = kwargs['order']
             self.pc.PhaseCorrection()
             self.pc.set_coefficients(coefficients=kwargs['coefficients'])
@@ -93,9 +94,14 @@ class pcbpggsz_generator:
 
         if kwargs.get('max_N') is not None:
             max_N = kwargs['max_N']
+        
+        if kwargs.get('apply_eff') is not None:
+            apply_eff = kwargs['apply_eff']
+            self.add_eff(kwargs['charge'], kwargs['decay'])
+
 
         self.fun = self.formula()
-        self.prod_fun = self.make_fun() if self.apply_eff else self.formula()
+        self.prod_fun = self.make_fun() if apply_eff else self.formula()
 
 
 
@@ -244,7 +250,7 @@ class pcbpggsz_generator:
         print(phase_correction) if self.DEBUG else None
 
         
-        if self.charge==1:
+        if self.charge=='p':
             Gamma = absAmp**2*rb**2 + absAmpbar**2 + 2*rb*absAmp*absAmpbar*tf.math.cos(phase + (deltaB + gamma))
         else:
             Gamma = absAmp**2 + absAmpbar**2*rb**2 + 2*rb*absAmp*absAmpbar*tf.math.cos(phase - (deltaB - gamma))
