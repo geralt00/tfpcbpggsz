@@ -4,6 +4,9 @@ import numpy as np
 def get_mass(p1, p2):
     return ((p1[:,0]+p2[:,0])**2 - (p1[:,1]+p2[:,1])**2 - (p1[:,2]+p2[:,2])**2 - (p1[:,3]+p2[:,3])**2)
 
+def get_mass_bes(p1, p2):
+    return ((p1[:,3]+p2[:,3])**2 - (p1[:,1]+p2[:,1])**2 - (p1[:,2]+p2[:,2])**2 - (p1[:,0]+p2[:,0])**2)
+
 
 def phsp_to_srd(x_valid, y_valid):
     """

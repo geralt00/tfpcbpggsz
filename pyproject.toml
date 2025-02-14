@@ -17,8 +17,13 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-#dependencies = [
-#    "tensorflow"]
+dependencies = [
+    "tensorflow",
+    "matplotlib",
+    "sphinx_rtd_theme",
+    "sphinx_gallery",
+    "Sphinx",
+    ]
 
 [tool.setuptools]
 packages = ["tfpcbpggsz"]  # This is based on your project's top-level module

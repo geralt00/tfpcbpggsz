@@ -11,6 +11,7 @@ m_Ks = 0.497614
 m_pi = 0.13957018
 
 def get_p(M, ma, mb):
+    """Get the momentun in the res rest frame"""
     m2 = M * M
     m_p = (ma + mb) ** 2
     m_m = (ma - mb) ** 2
@@ -130,7 +131,7 @@ class PhaseSpaceGenerator(object):
             return weight, pi
 
         mass_f = self.flatten_mass(mass, importances=importances)
-        n_gen += int(mass_f[0].shape[0])
+        n_gen += int(mass_f[0].shape[0]) 
 
         # loop until number of generated events above required
         while force and n_gen < n_iter:

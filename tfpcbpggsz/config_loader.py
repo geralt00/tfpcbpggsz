@@ -1,6 +1,11 @@
-from .amp import *
 import yaml
-from .core import *
+import uproot as up
+import numpy as np
+import time
+from importlib.machinery import SourceFileLoader
+from tfpcbpggsz.core import *
+from tfpcbpggsz.amp import D0ToKSpipi2018
+
 
 def get_mass(p1,p2):
     return ((p1[:,0]+p2[:,0])**2 - (p1[:,1]+p2[:,1])**2 - (p1[:,2]+p2[:,2])**2 - (p1[:,3]+p2[:,3])**2)
@@ -8,9 +13,15 @@ def get_mass(p1,p2):
 def load_int_amp(args):
     p1, p2, p3 = args
 
+    Kspipi = D0ToKSpipi2018()
+    Kspipi.initialise()
+    
     return Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())    
 
 class ConfigLoader:
+    """
+    Class for loading data/mc with the configuration file
+    """
     def __init__(self, config_file):
 
         self.file_path = config_file
@@ -295,16 +306,3 @@ class ConfigLoader:
                         for comp in comp_tag:
                             if name_convert(new_decay).split('_')[0] == 'DPi' and (comp == 'low_Bs2DKPi' or comp == 'low_misID'): continue
                             self._mass_pdfs[type][new_decay][comp] = self._mass_pdfs[type][new_decay][comp]*self._n_yields[new_decay][comp]
-
-
-    @classmethod
-    def register_function(cls, name=None):
-        def _f(f):
-            my_name = name
-            if my_name is None:
-                my_name = f.__name__
-            if hasattr(cls, my_name):
-                warnings.warn("override function {}".format(name))
-            setattr(cls, my_name, f)
-            return f
-        return _f

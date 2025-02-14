@@ -18,26 +18,27 @@ import time
 time1 = time.time()
 #Generating the B2DK signal 
 pcgen = pcbpggsz_generator()
-pcgen.add_bias()
+#pcgen.add_bias()
 #CP odd 
-ret_cp_odd = pcgen.generate(50000, type="cp_odd")
+ret_cp_odd = pcgen.generate(8444, type="cp_odd")
 p1_cp_odd,p2_cp_odd,p3_cp_odd = ret_cp_odd
 m12_cp_odd = get_mass(p1_cp_odd,p2_cp_odd)
 m13_cp_odd = get_mass(p1_cp_odd,p3_cp_odd)
 srd_cp_odd = phsp_to_srd(m12_cp_odd,m13_cp_odd)
 
 #CP even
-ret_cp_even = pcgen.generate(50000, type="cp_even")
+ret_cp_even = pcgen.generate(14646, type="cp_even")
 p1_cp_even,p2_cp_even,p3_cp_even = ret_cp_even
 m12_cp_even = get_mass(p1_cp_even,p2_cp_even)
 m13_cp_even = get_mass(p1_cp_even,p3_cp_even)
 srd_cp_even = phsp_to_srd(m12_cp_even,m13_cp_even)
 
 #Double Kspipi
-ret_sig, ret_tag = pcgen.generate(5000, type="cp_mixed")
+ret_sig, ret_tag = pcgen.generate(10923, type="cp_mixed")
 p1_sig,p2_sig,p3_sig = ret_sig
 p1_tag,p2_tag,p3_tag = ret_tag
 
+#Flavour tagging 143623
 m12_sig = get_mass(p1_sig,p2_sig)
 m13_sig = get_mass(p1_sig,p3_sig)
 m12_tag = get_mass(p1_tag,p2_tag)
@@ -104,21 +105,19 @@ print("D decay amplitudes generated")
 
 import tfpcbpggsz.core as core
 
-ampMC={'charm_p':amp_phsp_p,'charm_m':amp_phsp_m}
-ampbarMC={'charm_p':ampbar_phsp_p,'charm_m':ampbar_phsp_m}
+ampMC={'charm_p':amp_phsp_p,'charm_m':amp_phsp_m,'charm_sig':amp_phsp_p,'charm_tag':amp_phsp_m}
+ampbarMC={'charm_p':ampbar_phsp_p,'charm_m':ampbar_phsp_m,'charm_sig':ampbar_phsp_p,'charm_tag':ampbar_phsp_m}
 
 
 
-Norm_p = core.Normalisation_Charm(ampMC, ampbarMC, 'charm_p')
-Norm_cp_odd = core.Normalisation_Charm(ampMC, ampbarMC,'charm_p')
-Norm_cp_even = core.Normalisation_Charm(ampMC, ampbarMC,'charm_p')
+Norm_p = core.Normalisation(ampMC, ampbarMC, 'charm_sig')
+Norm_cp_odd = core.Normalisation(ampMC, ampbarMC,'charm_p')
+Norm_cp_even = core.Normalisation(ampMC, ampbarMC,'charm_p')
 
 
 Norm_p.initialise()
 Norm_cp_odd.initialise()
 Norm_cp_even.initialise()
-
-srd_phsp_p_tag = (tf.gather(srd_phsp_p[0], Norm_p.tagged_i), tf.gather(srd_phsp_p[1], Norm_p.tagged_i))
 
 from tfpcbpggsz.phasecorrection import PhaseCorrection
 pc = PhaseCorrection()
@@ -138,7 +137,8 @@ def NLL_kspipi(x):
     phase_correction_tag = pc.eval_corr(srd_tag)
     Norm_p.setParams(params)
     phase_correction_MC_sig = pc.eval_corr(srd_phsp_p)
-    phase_correction_MC_tag = pc.eval_corr(srd_phsp_p_tag)
+    phase_correction_MC_tag = pc.eval_corr(srd_phsp_m)
+
     Norm_p.add_pc(phase_correction_MC_sig, pc_tag=phase_correction_MC_tag)
     Norm_p.Update_crossTerms()
 

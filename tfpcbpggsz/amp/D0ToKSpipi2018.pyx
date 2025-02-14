@@ -59,6 +59,10 @@ cdef extern from "D0ToKSpipi2018.h":
         c_complex[double] D0_rho_770_0_pip_pim__K0S0__wParams(double[:] x1);
 
 cdef class PyD0ToKSpipi2018:
+    """
+    This is a Python wrapper for the C++ class D0ToKSpipi2018.
+    """
+
     cdef D0ToKSpipi2018* thisptr  # Pointer to the C++ class instance
 
     def __cinit__(self):
@@ -68,9 +72,23 @@ cdef class PyD0ToKSpipi2018:
         del self.thisptr
 
     def init(self):
+        """
+        Initialize the D0ToKSpipi2018 class.
+        """
         self.thisptr.init()
 
     def AMP(self, list k0, list pip, list pim):
+        """
+        Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay.
+
+        Parameters:
+        k0 (list): List of K0S0 particle momenta.
+        pip (list): List of pi+ particle momenta.
+        pim (list): List of pi- particle momenta.
+
+        Returns:
+        complex: The calculated amplitude.
+        """
         cdef vector[double] ck0 = k0
         cdef vector[double] cpip = pip
         cdef vector[double] cpim = pim
