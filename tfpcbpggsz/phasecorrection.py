@@ -72,15 +72,17 @@ class PhaseCorrection:
         if self.correctionType == "singleBias" or self.correctionType == "doubleBias":
             self.do_bias()
             print(f"Setting up phase correction for a {self.correctionType}") if self.DEBUG else None
-        elif self.correctionType == "antiSym_legendre":
-            for order_i in range(self.order):
-                for order_j in range(1, self.order - order_i + 1, 2):
-                    self.coefficients[f'C_{order_i}_{order_j}'] = tf.Variable(tf.random.normal(shape=(1,), dtype=tf.float64))
-                    self.iTerms_.append(f'C_{order_i}_{order_j}')
-                    self.nTerms_+=1
-            self.vm.variables = self.coefficients
-            self.vm.trainable_vars = self.coefficients
-            self.vm.set_all(vals=self.coefficients, val_in_fit=True)
+        elif self.correctionType in ["antiSym_legendre", "simple_polynomial"]:
+            if self.order != 0 :
+                for order_i in range(self.order):
+                    for order_j in range(1, self.order - order_i + 1, 2):
+                        self.coefficients[f'C_{order_i}_{order_j}'] = tf.Variable(tf.random.normal(shape=(1,), dtype=tf.float64))
+                        self.iTerms_.append(f'C_{order_i}_{order_j}')
+                        self.nTerms_+=1
+                self.vm.variables = self.coefficients
+                self.vm.trainable_vars = self.coefficients
+                self.vm.set_all(vals=self.coefficients, val_in_fit=True)
+                
         
 
     def set_coefficients(self, **kwargs):
@@ -112,8 +114,12 @@ class PhaseCorrection:
             x: SRD coordinate[Z', Z'']
         """
 
-        Pi = self.legendre(s[0], i)
-        Pj = self.legendre(s[1], j)
+        if self.correctionType == "antiSym_legendre":
+            Pi = self.legendre(s[0], i)
+            Pj = self.legendre(s[1], j)
+        elif self.correctionType == "simple_polynomial":
+            Pi = self.simple_polynomial(s[0], i)
+            Pj = self.simple_polynomial(s[1], j)
 
         return Pi*Pj
 
@@ -126,7 +132,17 @@ class PhaseCorrection:
         elif n == 1:
             return s
         else:
-            return (2 - 1/n) * s * self.legendre(s, n-1) - (1 - 1/n) * self.legendre(s, n-2)
+            return tf.cast((2 - 1/n) * s * self.legendre(s, n-1) - (1 - 1/n) * self.legendre(s, n-2), tf.float64)
+
+    def simple_polynomial(self, s, n):
+        """
+        Returns the nth order polynomial of coordinate x, where the coordinate is based on the SRD coordinates
+        x: SRD coordinate[Z', Z'']
+        """
+        if n == 0:
+            return tf.ones_like(s)
+        else:
+            return s**n
         
 
     def gaussianExponential(self, s, mu, sigma):
@@ -178,11 +194,15 @@ class PhaseCorrection:
         Returns the phase correction for the given coordinates
         """
         corr = 0.0
-        for i in range(self.nTerms_):
-            tf.print("i:", i,'coeff:', self.coefficients[self.iTerms_[i]]) if self.DEBUG else None
-            tf.print("term:",self.iTerms_[i].split('_')[1], self.iTerms_[i].split('_')[2])  if self.DEBUG else None
-            corr += self.polynomial(coords, int(self.iTerms_[i].split('_')[1]), int( self.iTerms_[i].split('_')[2])) * self.coefficients[self.iTerms_[i]]
-        return corr
+        if self.order != 0:
+            for i in range(self.nTerms_):
+                tf.print("i:", i,'coeff:', self.coefficients[self.iTerms_[i]]) if self.DEBUG else None
+                tf.print("term:",self.iTerms_[i].split('_')[1], self.iTerms_[i].split('_')[2])  if self.DEBUG else None
+                corr += self.polynomial(coords, int(self.iTerms_[i].split('_')[1]), int( self.iTerms_[i].split('_')[2])) * self.coefficients[self.iTerms_[i]]
+            return corr
+
+        else:
+            return None
 
     def eval_corr(self, coords, reduce_retracing=False):
         """

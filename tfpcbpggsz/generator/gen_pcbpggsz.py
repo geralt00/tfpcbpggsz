@@ -83,7 +83,7 @@ class pcbpggsz_generator:
         #"""
 
         phsp = PhaseSpaceGenerator().generate
-
+        apply_eff = False
         self.type = type
         if type=="b2dh":
             self.rb = kwargs['rb']
@@ -101,7 +101,7 @@ class pcbpggsz_generator:
 
 
         self.fun = self.formula()
-        self.prod_fun = self.make_fun() if apply_eff else self.formula()
+        self.prod_fun = self.make_fun() if apply_eff == True else self.formula()
 
 
 
