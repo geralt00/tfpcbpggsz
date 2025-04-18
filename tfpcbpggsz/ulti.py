@@ -27,6 +27,22 @@ def phsp_to_srd(x_valid, y_valid):
     stretchedAntiSymCoord_dp = (antiSym_scale * (stretchedAntiSymCoord)) / (antiSym_offset + stretchedSymCoord)
     return np.array([stretchedSymCoord, stretchedAntiSymCoord_dp])
 
+def phsp_to_rd(x_valid, y_valid):
+    """
+    Convert the phase space coordinates to the Rotated Dalitz (RD) coordinates
+    """
+    rotatedSymCoord = (y_valid + x_valid)/2  #z_+
+    rotatedAntiSymCoord = (y_valid - x_valid)/2 #z_-
+
+    m1_ = 2.23407421671132946
+    c1_ = -3.1171885586526695
+    m2_ = 0.8051636393861085
+    c2_ = -9.54231895051727e-05
+
+    stretchedSymCoord = m1_ * rotatedSymCoord + c1_
+    stretchedAntiSymCoord = m2_ * rotatedAntiSymCoord + c2_
+    return np.array([stretchedSymCoord, stretchedAntiSymCoord])
+
 def p4_to_srd(data):
     """
     Convert the momenta to the Stretched Rotated Dalitz (SRD) coordinates
@@ -36,6 +52,16 @@ def p4_to_srd(data):
     m13 = get_mass(p1, p3)
     srd = phsp_to_srd(m12, m13)
     return srd
+
+def p4_to_rd(data):
+    """
+    Convert the momenta to the Stretched Rotated Dalitz (SRD) coordinates
+    """
+    p1, p2, p3 = data
+    m12 = get_mass(p1, p2)
+    m13 = get_mass(p1, p3)
+    rd = phsp_to_rd(m12, m13)
+    return rd
 
 def p4_to_phsp(data):
     """

@@ -2,6 +2,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import tfpcbpggsz.core as core
 from plothist import make_hist, get_color_palette, plot_data_model_comparison, plot_model, plot_function
+from tfpcbpggsz.generator.phasespace import gets23
 import os
 
 class Hist:
@@ -55,27 +56,36 @@ class Hist:
 
         if mc_type == 'phsp':
             if cato!='dks':
-                self.count[tag][mc_type]['s12'], self.bins[tag][mc_type]['s12'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[0], self.nbins*3, weights=self.weights[tag], range=self.range)
-                self.count[tag][mc_type]['s13'], self.bins[tag][mc_type]['s13'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[1], self.nbins*3, weights=self.weights[tag], range=self.range)
+                self.count[tag][mc_type]['s12'], self.bins[tag][mc_type]['s12'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[0], self.nbins*3, weights=self.weights[tag], range=self.range['s12'])
+                self.count[tag][mc_type]['s13'], self.bins[tag][mc_type]['s13'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[1], self.nbins*3, weights=self.weights[tag], range=self.range['s13'])
+                self.count[tag][mc_type]['s23'], self.bins[tag][mc_type]['s23'] = np.histogram(gets23(self.config.get_mc_mass(tag, mc_type)[0], self.config.get_mc_mass(tag, mc_type)[1]), self.nbins*3, weights=self.weights[tag], range=self.range['s23'])
             else:
                 self.count[tag][mc_type]['s12'], self.count[tag][mc_type]['s13'], self.bins[tag][mc_type]['s12'], self.bins[tag][mc_type]['s13'] = {}, {}, {}, {}
-                self.count[tag][mc_type]['s12']['sig'], self.bins[tag][mc_type]['s12']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[0], self.nbins*3, weights=self.weights[tag], range=self.range)
-                self.count[tag][mc_type]['s13']['sig'], self.bins[tag][mc_type]['s13']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[1], self.nbins*3, weights=self.weights[tag], range=self.range)
-                self.count[tag][mc_type]['s12']['tag'], self.bins[tag][mc_type]['s12']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[0], self.nbins*3, weights=self.weights[tag], range=self.range)
-                self.count[tag][mc_type]['s13']['tag'], self.bins[tag][mc_type]['s13']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[1], self.nbins*3, weights=self.weights[tag], range=self.range)
+                self.count[tag][mc_type]['s23'], self.bins[tag][mc_type]['s23'] = {}, {}
+                self.count[tag][mc_type]['s12']['sig'], self.bins[tag][mc_type]['s12']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[0], self.nbins*3, weights=self.weights[tag], range=self.range['s12'])
+                self.count[tag][mc_type]['s13']['sig'], self.bins[tag][mc_type]['s13']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[1], self.nbins*3, weights=self.weights[tag], range=self.range['s13'])
+                self.count[tag][mc_type]['s23']['sig'], self.bins[tag][mc_type]['s23']['sig'] = np.histogram(gets23(self.config.get_mc_mass(tag, mc_type, 'sig')[0], self.config.get_mc_mass(tag, mc_type, 'sig')[1]), self.nbins*3, weights=self.weights[tag], range=self.range['s23'])
+                self.count[tag][mc_type]['s12']['tag'], self.bins[tag][mc_type]['s12']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[0], self.nbins*3, weights=self.weights[tag], range=self.range['s12'])
+                self.count[tag][mc_type]['s13']['tag'], self.bins[tag][mc_type]['s13']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[1], self.nbins*3, weights=self.weights[tag], range=self.range['s13'])
+                self.count[tag][mc_type]['s23']['tag'], self.bins[tag][mc_type]['s23']['tag'] = np.histogram(gets23(self.config.get_mc_mass(tag, mc_type, 'tag')[0], self.config.get_mc_mass(tag, mc_type, 'tag')[1]), self.nbins*3, weights=self.weights[tag], range=self.range['s23'])   
 
 
         else:
             if cato!='dks':
                 #Test with null dict
-                self.count[tag][mc_type]['s12'], self.bins[tag][mc_type]['s12'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[0], self.nbins*3, range=self.range)
-                self.count[tag][mc_type]['s13'], self.bins[tag][mc_type]['s13'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[1], self.nbins*3, range=self.range)
+                #print(tag, mc_type, self.config.get_mc_mass(tag, mc_type)[0][0])
+                self.count[tag][mc_type]['s12'], self.bins[tag][mc_type]['s12'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[0], self.nbins*3, range=self.range['s12'])
+                self.count[tag][mc_type]['s13'], self.bins[tag][mc_type]['s13'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[1], self.nbins*3, range=self.range['s13'])
+                self.count[tag][mc_type]['s23'], self.bins[tag][mc_type]['s23'] = np.histogram(gets23(self.config.get_mc_mass(tag, mc_type)[0], self.config.get_mc_mass(tag, mc_type)[1]), self.nbins*3, range=self.range['s23'])
             else:
                 self.count[tag][mc_type]['s12'], self.count[tag][mc_type]['s13'], self.bins[tag][mc_type]['s12'], self.bins[tag][mc_type]['s13'] = {}, {}, {}, {}
-                self.count[tag][mc_type]['s12']['sig'], self.bins[tag][mc_type]['s12']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[0], self.nbins*3, range=self.range)
-                self.count[tag][mc_type]['s13']['sig'], self.bins[tag][mc_type]['s13']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[1], self.nbins*3, range=self.range)
-                self.count[tag][mc_type]['s12']['tag'], self.bins[tag][mc_type]['s12']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[0], self.nbins*3, range=self.range)
-                self.count[tag][mc_type]['s13']['tag'], self.bins[tag][mc_type]['s13']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[1], self.nbins*3, range=self.range)
+                self.count[tag][mc_type]['s23'], self.bins[tag][mc_type]['s23'] = {}, {}
+                self.count[tag][mc_type]['s12']['sig'], self.bins[tag][mc_type]['s12']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[0], self.nbins*3, range=self.range['s12'])
+                self.count[tag][mc_type]['s13']['sig'], self.bins[tag][mc_type]['s13']['sig'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'sig')[1], self.nbins*3, range=self.range['s13'])
+                self.count[tag][mc_type]['s23']['sig'], self.bins[tag][mc_type]['s23']['sig'] = np.histogram(gets23(self.config.get_mc_mass(tag, mc_type, 'sig')[0], self.config.get_mc_mass(tag, mc_type, 'sig')[1]), self.nbins*3, range=self.range['s23'])
+                self.count[tag][mc_type]['s12']['tag'], self.bins[tag][mc_type]['s12']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[0], self.nbins*3, range=self.range['s12'])
+                self.count[tag][mc_type]['s13']['tag'], self.bins[tag][mc_type]['s13']['tag'] = np.histogram(self.config.get_mc_mass(tag, mc_type, 'tag')[1], self.nbins*3, range=self.range['s13'])
+                self.count[tag][mc_type]['s23']['tag'], self.bins[tag][mc_type]['s23']['tag'] = np.histogram(gets23(self.config.get_mc_mass(tag, mc_type, 'tag')[0], self.config.get_mc_mass(tag, mc_type, 'tag')[1]), self.nbins*3, range=self.range['s23'])
 
 
 
@@ -92,6 +102,7 @@ class Hist:
                             self.count[tag][i_mc_type]={} if i_mc_type not in self.count[tag].keys() else self.count[tag][i_mc_type]
                             self.bins[tag][i_mc_type]={} if i_mc_type not in self.bins[tag].keys() else self.bins[tag][i_mc_type]
                             self.count[tag][i_mc_type]['s12'], self.count[tag][i_mc_type]['s13'], self.bins[tag][i_mc_type]['s12'], self.bins[tag][i_mc_type]['s13'] = np.zeros_like(self.count[tag]['phsp']['s12']), np.zeros_like(self.count[tag]['phsp']['s13']), self.bins[tag]['phsp']['s12'], self.bins[tag]['phsp']['s13']
+                            self.count[tag][i_mc_type]['s23'], self.bins[tag][i_mc_type]['s23'] = np.zeros_like(self.count[tag]['phsp']['s12']), self.bins[tag]['phsp']['s12']
                         else: 
                             self.get_hist_each(cato=key, tag=tag, mc_type=i_mc_type)
 
@@ -102,8 +113,11 @@ class Hist:
                     #    self.get_hist_each(cato=key, tag=tag, mc_type=i_mc_type)
                     self.count_sum[key][i_mc_type]['s12'] = np.sum([self.count[tag][i_mc_type]['s12'] for tag in self.plot_list[key]], axis=0)
                     self.count_sum[key][i_mc_type]['s13'] = np.sum([self.count[tag][i_mc_type]['s13'] for tag in self.plot_list[key]], axis=0)
+                    self.count_sum[key][i_mc_type]['s23'] = np.sum([self.count[tag][i_mc_type]['s23'] for tag in self.plot_list[key]], axis=0)
                     self.bins_sum[key][i_mc_type]['s12'] = self.bins[tag][i_mc_type]['s12']
                     self.bins_sum[key][i_mc_type]['s13'] = self.bins[tag][i_mc_type]['s13']
+                    self.bins_sum[key][i_mc_type]['s23'] = self.bins[tag][i_mc_type]['s23']
+
             else:
                 self.bins_sum[key]={}
                 self.count_sum[key]={}
@@ -116,15 +130,20 @@ class Hist:
                             self.count[tag][i_mc_type]={} if i_mc_type not in self.count[tag].keys() else self.count[tag][i_mc_type]
                             self.bins[tag][i_mc_type]={} if i_mc_type not in self.bins[tag].keys() else self.bins[tag][i_mc_type]
                             self.count[tag][i_mc_type]['s12'], self.count[tag][i_mc_type]['s13'], self.bins[tag][i_mc_type]['s12'], self.bins[tag][i_mc_type]['s13'] = {}, {}, {}, {}
-
+                            self.count[tag][i_mc_type]['s23'], self.bins[tag][i_mc_type]['s23'] = {}, {}
                             self.count[tag][i_mc_type]['s12']['tag'] = np.zeros_like(self.count[tag]['phsp']['s12']['sig'])
                             self.count[tag][i_mc_type]['s13']['tag'] = np.zeros_like(self.count[tag]['phsp']['s13']['sig'])
+                            self.count[tag][i_mc_type]['s23']['tag'] = np.zeros_like(self.count[tag]['phsp']['s12']['sig'])
                             self.bins[tag][i_mc_type]['s12']['tag'] = self.bins[tag]['phsp']['s12']['sig']
                             self.bins[tag][i_mc_type]['s13']['tag'] = self.bins[tag]['phsp']['s13']['sig']
+                            self.bins[tag][i_mc_type]['s23']['tag'] = self.bins[tag]['phsp']['s23']['sig']
+
                             self.count[tag][i_mc_type]['s12']['sig'] = np.zeros_like(self.count[tag]['phsp']['s12']['sig'])
                             self.count[tag][i_mc_type]['s13']['sig'] = np.zeros_like(self.count[tag]['phsp']['s13']['sig'])
+                            self.count[tag][i_mc_type]['s23']['sig'] = np.zeros_like(self.count[tag]['phsp']['s12']['sig'])
                             self.bins[tag][i_mc_type]['s12']['sig'] = self.bins[tag]['phsp']['s12']['sig']
                             self.bins[tag][i_mc_type]['s13']['sig'] = self.bins[tag]['phsp']['s13']['sig']
+                            self.bins[tag][i_mc_type]['s23']['sig'] = self.bins[tag]['phsp']['s23']['sig']
                         else:
                             self.get_hist_each(cato=key, tag=tag, mc_type=i_mc_type)
                           
@@ -134,21 +153,30 @@ class Hist:
                     self.count_sum[key][i_mc_type]={} if i_mc_type not in self.count_sum[key].keys() else self.count_sum[key][i_mc_type]
                     self.bins_sum[key][i_mc_type]={} if i_mc_type not in self.bins_sum[key].keys() else self.bins_sum[key][i_mc_type]
                     self.count_sum[key][i_mc_type]['s12'], self.count_sum[key][i_mc_type]['s13'], self.bins_sum[key][i_mc_type]['s12'], self.bins_sum[key][i_mc_type]['s13'] = {}, {}, {}, {}
+                    self.count_sum[key][i_mc_type]['s23'], self.bins_sum[key][i_mc_type]['s23'] = {}, {}
                     self.count_sum[key][i_mc_type]['s12']['sig'] = np.sum([self.count[tag][i_mc_type]['s12']['sig'] for tag in self.plot_list[key]], axis=0)
                     self.count_sum[key][i_mc_type]['s13']['sig'] = np.sum([self.count[tag][i_mc_type]['s13']['sig'] for tag in self.plot_list[key]], axis=0)
+                    self.count_sum[key][i_mc_type]['s23']['sig'] = np.sum([self.count[tag][i_mc_type]['s23']['sig'] for tag in self.plot_list[key]], axis=0)
                     self.bins_sum[key][i_mc_type]['s12']['sig'] = self.bins[tag][i_mc_type]['s12']['sig']
                     self.bins_sum[key][i_mc_type]['s13']['sig'] = self.bins[tag][i_mc_type]['s13']['sig']
+                    self.bins_sum[key][i_mc_type]['s23']['sig'] = self.bins[tag][i_mc_type]['s23']['sig']
                     self.count_sum[key][i_mc_type]['s12']['tag'] = np.sum([self.count[tag][i_mc_type]['s12']['tag'] for tag in self.plot_list[key]], axis=0)
                     self.count_sum[key][i_mc_type]['s13']['tag'] = np.sum([self.count[tag][i_mc_type]['s13']['tag'] for tag in self.plot_list[key]], axis=0)
+                    self.count_sum[key][i_mc_type]['s23']['tag'] = np.sum([self.count[tag][i_mc_type]['s23']['tag'] for tag in self.plot_list[key]], axis=0)
                     self.bins_sum[key][i_mc_type]['s12']['tag'] = self.bins[tag][i_mc_type]['s12']['tag']
                     self.bins_sum[key][i_mc_type]['s13']['tag'] = self.bins[tag][i_mc_type]['s13']['tag']
+                    self.bins_sum[key][i_mc_type]['s23']['tag'] = self.bins[tag][i_mc_type]['s23']['tag']
 
 
     def hist_to_fun(self, count, bins, scale, kind='linear'):
         x = (bins[:-1] + bins[1:])/2
 
         #Do normalization to count
-        count = count*(3*scale/np.sum(count))
+        if np.sum(count) != 0:
+            count = count/np.sum(count)
+            count = count*scale*3#bin factor
+        else:
+            count = count
         f = interp1d(x, count, kind=kind, fill_value='extrapolate')
         return f
 
@@ -159,7 +187,7 @@ class Plotter:
         self.weights = {}
         self.count = {}
         self.bins = {}
-        self.get_plot_into()
+        self.get_plot_info()
         self.hist.get_hist_sum()
         self.save_path = os.environ['PWD']+'/plots'
         if 'save_path' in kwargs:
@@ -167,7 +195,7 @@ class Plotter:
         
 
     
-    def get_plot_into(self):
+    def get_plot_info(self):
         self.hist.nbins = self.config._config_data['plot']['bins']
         self.hist.range = self.config._config_data['plot']['range']
         self.hist.plot_list = self.config._config_data['plot']['plot_sum']
@@ -182,19 +210,23 @@ class Plotter:
             for i_mc_type in mc_type:
                 count[i_mc_type], bins[i_mc_type] = {}, {} 
                 count[i_mc_type]['s12'], count[i_mc_type]['s13'], bins[i_mc_type]['s12'], bins[i_mc_type]['s13'] = {}, {}, {}, {}
+                count[i_mc_type]['s23'], bins[i_mc_type]['s23'] = {}, {}
                 count[i_mc_type]['s12']['sig'], bins[i_mc_type]['s12']['sig'], count[i_mc_type]['s13']['sig'], bins[i_mc_type]['s13']['sig'] = self.hist.count_sum[cato][i_mc_type]['s12']['sig'], self.hist.bins_sum[cato][i_mc_type]['s12']['sig'], self.hist.count_sum[cato][i_mc_type]['s13']['sig'], self.hist.bins_sum[cato][i_mc_type]['s13']['sig']
                 count[i_mc_type]['s12']['tag'], bins[i_mc_type]['s12']['tag'], count[i_mc_type]['s13']['tag'], bins[i_mc_type]['s13']['tag'] = self.hist.count_sum[cato][i_mc_type]['s12']['tag'], self.hist.bins_sum[cato][i_mc_type]['s12']['tag'], self.hist.count_sum[cato][i_mc_type]['s13']['tag'], self.hist.bins_sum[cato][i_mc_type]['s13']['tag']
+                count[i_mc_type]['s23']['sig'], bins[i_mc_type]['s23']['sig'], count[i_mc_type]['s23']['tag'], bins[i_mc_type]['s23']['tag'] = self.hist.count_sum[cato][i_mc_type]['s23']['sig'], self.hist.bins_sum[cato][i_mc_type]['s23']['sig'], self.hist.count_sum[cato][i_mc_type]['s23']['tag'], self.hist.bins_sum[cato][i_mc_type]['s23']['tag']
         elif cato == 'cp_even':
             mc_type.append('qcmc_oth')
             for i_mc_type in mc_type:
                 count[i_mc_type], bins[i_mc_type] = {}, {} 
                 count[i_mc_type]['s12'], bins[i_mc_type]['s12'], count[i_mc_type]['s13'], bins[i_mc_type]['s13'] = self.hist.count_sum[cato][i_mc_type]['s12'], self.hist.bins_sum[cato][i_mc_type]['s12'], self.hist.count_sum[cato][i_mc_type]['s13'], self.hist.bins_sum[cato][i_mc_type]['s13']
+                count[i_mc_type]['s23'], bins[i_mc_type]['s23'] = self.hist.count_sum[cato][i_mc_type]['s23'], self.hist.bins_sum[cato][i_mc_type]['s23']
         else:
             mc_type.append('qcmc_oth')
             mc_type.append('sigmc_um')
             for i_mc_type in mc_type:
                 count[i_mc_type], bins[i_mc_type] = {}, {} 
                 count[i_mc_type]['s12'], bins[i_mc_type]['s12'], count[i_mc_type]['s13'], bins[i_mc_type]['s13'] = self.hist.count_sum[cato][i_mc_type]['s12'], self.hist.bins_sum[cato][i_mc_type]['s12'], self.hist.count_sum[cato][i_mc_type]['s13'], self.hist.bins_sum[cato][i_mc_type]['s13']
+                count[i_mc_type]['s23'], bins[i_mc_type]['s23'] = self.hist.count_sum[cato][i_mc_type]['s23'], self.hist.bins_sum[cato][i_mc_type]['s23']
 
 
 #        for i_mc_type in mc_type:
@@ -209,10 +241,10 @@ class Plotter:
 
         data_hist = {}
         if cato != 'dks':
-            data_hist['s12'], data_hist['s13'], scale = self.make_data_hist(cato=cato)
+            data_hist['s12'], data_hist['s13'], data_hist['s23'], scale = self.make_data_hist(cato=cato)
         else:
-            data_hist['s12'], data_hist['s13'] = {}, {}
-            data_hist['s12']['sig'], data_hist['s13']['sig'], data_hist['s12']['tag'], data_hist['s13']['tag'], scale = self.make_data_hist(cato=cato)
+            data_hist['s12'], data_hist['s13'], data_hist['s23'] = {}, {}, {}
+            data_hist['s12']['sig'], data_hist['s13']['sig'], data_hist['s23']['sig'], data_hist['s12']['tag'], data_hist['s13']['tag'], data_hist['s23']['tag'], scale = self.make_data_hist(cato=cato)
 
 
 
@@ -238,9 +270,9 @@ class Plotter:
                     ylabel="Entries",
                     model_sum_kwargs={"show": True, "label": "Model", "color": "navy"},
                     comparison="pull",
-                    range=self.hist.range,
+                    range=self.hist.range[key],
                 )
-                plot_function([f_sig], range=self.hist.range, ax=ax_main, npoints=100000, label='signal', color='#8EBA42')
+                plot_function([f_sig], range=self.hist.range[key], ax=ax_main, npoints=100000, label='signal', color='#8EBA42')
 
 
                 os.makedirs(self.save_path, exist_ok=True)
@@ -269,9 +301,9 @@ class Plotter:
                     ylabel="Entries",
                     model_sum_kwargs={"show": True, "label": "Model", "color": "navy"},
                     comparison="pull",
-                    range=self.hist.range,
+                    range=self.hist.range[key],
                 )
-                plot_function([f_sig], range=self.hist.range, ax=ax_main, npoints=100000, label='signal', color='#8EBA42')
+                plot_function([f_sig], range=self.hist.range[key], ax=ax_main, npoints=100000, label='signal', color='#8EBA42')
 
 
                 os.makedirs(self.save_path, exist_ok=True)
@@ -303,9 +335,9 @@ class Plotter:
                         ylabel="Entries",
                         model_sum_kwargs={"show": True, "label": "Model", "color": "navy"},
                         comparison="pull",
-                        range=self.hist.range,
+                        range=self.hist.range[key],
                     )
-                    plot_function([f_sig], range=self.hist.range, ax=ax_main, npoints=100000, label='signal', color='#8EBA42')
+                    plot_function([f_sig], range=self.hist.range[key], ax=ax_main, npoints=100000, label='signal', color='#8EBA42')
 
                     os.makedirs(self.save_path, exist_ok=True)
                     fig.savefig(
@@ -316,6 +348,14 @@ class Plotter:
         #Not yet consider the double kspipi yet
 
     def make_data_hist(self, cato='dks'):
+        """This function is used to make the data hist for the given cato.
+
+        Args:
+            cato (str, optional): _description_. Defaults to 'dks'.
+
+        Returns:
+            Hist:s12, s13, s23, scale
+        """
         s12_sig, s13_sig, s12_tag, s13_tag = [], [], [], []
         scale = {'sig': 0, 'qcmc': 0, 'dpdm': 0, 'qqbar': 0, 'sigmc_um': 0, 'qcmc_oth': 0}
         for tag in self.config._config_data['plot']['plot_sum'][cato]:
@@ -326,7 +366,7 @@ class Plotter:
             scale['qqbar'] += self.config.get_bkg_num(tag, 'qqbar')#len(s12_sig_i)*np.sum(self.config.get_bkg_frac(tag), axis=0)
             if tag in ['misspi0', 'klpi0pi0']:
                 scale['sigmc_um'] += self.config.get_bkg_num(tag, 'sigmc_um')
-            if tag in ['klpi0', 'ksomega']:
+            if tag in ['klpi0', 'klpi0pi0', 'ksomega']:
                 scale['qcmc_oth'] += self.config.get_bkg_num(tag, 'qcmc_oth')
             if cato != 'dks':
                 s12_sig_i, s13_sig_i = self.config.get_data_mass(tag=tag)
@@ -349,12 +389,16 @@ class Plotter:
         s12_tag = np.concatenate(s12_tag) if cato == 'dks' else None
         s13_tag = np.concatenate(s13_tag) if cato == 'dks' else None
         if cato != 'dks':
-            data_s12_hist = make_hist(s12_sig, bins=self.hist.nbins,  range=self.hist.range)
-            data_s13_hist = make_hist(s13_sig, bins=self.hist.nbins, range=self.hist.range)
-            return data_s12_hist, data_s13_hist, scale
+            data_s12_hist = make_hist(s12_sig, bins=self.hist.nbins,  range=self.hist.range['s12'])
+            data_s13_hist = make_hist(s13_sig, bins=self.hist.nbins, range=self.hist.range['s13'])
+            data_s23_hist = make_hist(gets23(s12_sig, s13_sig), bins=self.hist.nbins, range=self.hist.range['s23'])
+
+            return data_s12_hist, data_s13_hist, data_s23_hist, scale
         else:
-            data_s12_sig_hist = make_hist(s12_sig, bins=self.hist.nbins, range=self.hist.range)
-            data_s13_sig_hist = make_hist(s13_sig, bins=self.hist.nbins, range=self.hist.range)
-            data_s12_tag_hist = make_hist(s12_tag, bins=self.hist.nbins, range=self.hist.range)
-            data_s13_tag_hist = make_hist(s13_tag, bins=self.hist.nbins, range=self.hist.range)
-            return data_s12_sig_hist, data_s13_sig_hist, data_s12_tag_hist, data_s13_tag_hist, scale
+            data_s12_sig_hist = make_hist(s12_sig, bins=self.hist.nbins, range=self.hist.range['s12'])
+            data_s13_sig_hist = make_hist(s13_sig, bins=self.hist.nbins, range=self.hist.range['s13'])
+            data_s23_sig_hist = make_hist(gets23(s12_sig, s13_sig), bins=self.hist.nbins, range=self.hist.range['s23'])
+            data_s12_tag_hist = make_hist(s12_tag, bins=self.hist.nbins, range=self.hist.range['s12'])
+            data_s13_tag_hist = make_hist(s13_tag, bins=self.hist.nbins, range=self.hist.range['s13'])
+            data_s23_tag_hist = make_hist(gets23(s12_tag, s13_tag), bins=self.hist.nbins, range=self.hist.range['s23'])
+            return data_s12_sig_hist, data_s13_sig_hist, data_s23_sig_hist, data_s12_tag_hist, data_s13_tag_hist, data_s23_tag_hist, scale

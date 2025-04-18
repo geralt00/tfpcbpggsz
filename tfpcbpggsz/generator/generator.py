@@ -151,6 +151,7 @@ def multi_sampling2(
             all_data_tag = [tmp_tag]
             a.set_gen(data_shape(tmp_sig)+data_shape(tmp_tag))
 
+
         a.add_gen(data_shape(data_sig))
         a.add_gen(data_shape(data_tag))
         
@@ -175,7 +176,6 @@ def double_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     Double sampling based on correlation between two decays
     """
     import tensorflow as tf
-
     from tfpcbpggsz.generator.data import data_mask
 
     time1 = time.time()

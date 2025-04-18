@@ -11,6 +11,8 @@ from tfpcbpggsz.generator.data import data_mask, data_merge, data_shape
 from tfpcbpggsz.amp_test import *
 from tfpcbpggsz.generator.gen_pcbpggsz import pcbpggsz_generator
 from plothist import plot_hist, make_hist 
+import mplhep as hep
+plt.style.use(hep.style.LHCb2)  # or ATLAS/LHCb2
 
 import time
 
@@ -37,7 +39,7 @@ srd_cp_even = phsp_to_srd(m12_cp_even,m13_cp_even)
 ret_sig, ret_tag = pcgen.generate(10923, type="cp_mixed")
 p1_sig,p2_sig,p3_sig = ret_sig
 p1_tag,p2_tag,p3_tag = ret_tag
-
+print(len(p1_sig))
 #Flavour tagging 143623
 m12_sig = get_mass(p1_sig,p2_sig)
 m13_sig = get_mass(p1_sig,p3_sig)
@@ -59,17 +61,40 @@ h_2d_cp_odd = make_2d_hist([srd_cp_odd[0],srd_cp_odd[1]],bins=[100,100])
 h_2d_cp_even = make_2d_hist([srd_cp_even[0],srd_cp_even[1]],bins=[100,100])
 
 
-fig1, ax1, ax_colorbar1 = plot_2d_hist(h_2d_cp_odd, colorbar_kwargs={"label": "Entries"})
-fig1.savefig(plot_dir+"cp_odd_2d_hist.png")
+# Original code commented out
+# fig1, ax1, ax_colorbar1 = plot_2d_hist(h_2d_cp_odd, colorbar_kwargs={"label": "Entries"})
+# fig1.savefig(plot_dir+"cp_odd_2d_hist.png")
 
-fig2, ax2, ax_colorbar2 = plot_2d_hist(h_2d_cp_even, colorbar_kwargs={"label": "Entries"})
-fig2.savefig(plot_dir+"cp_even_2d_hist.png")
+# fig2, ax2, ax_colorbar2 = plot_2d_hist(h_2d_cp_even, colorbar_kwargs={"label": "Entries"})
+# fig2.savefig(plot_dir+"cp_even_2d_hist.png")
 
-fig3, ax3, ax_colorbar3 = plot_2d_hist(h_2d_sig, colorbar_kwargs={"label": "Entries"})
-fig3.savefig(plot_dir+"cp_mixed_sig_2d_hist.png")
+# fig3, ax3, ax_colorbar3 = plot_2d_hist(h_2d_sig, colorbar_kwargs={"label": "Entries"})
+# fig3.savefig(plot_dir+"cp_mixed_sig_2d_hist.png")
 
-fig4, ax4, ax_colorbar4 = plot_2d_hist(h_2d_tag, colorbar_kwargs={"label": "Entries"})
-fig4.savefig(plot_dir+"cp_mixed_tag_2d_hist.png")
+# fig4, ax4, ax_colorbar4 = plot_2d_hist(h_2d_tag, colorbar_kwargs={"label": "Entries"})
+# fig4.savefig(plot_dir+"cp_mixed_tag_2d_hist.png")
+
+
+def plot_filtered_hist2d(m12, m13, title, filename, plot_dir):
+    # Compute 2D histogram
+    counts, xedges, yedges = np.histogram2d(m12, m13, bins=100, range=[[0.3, 3.2], [0.3, 3.2]])
+    
+    # Mask bins where count is 0 or NaN
+    mask = (counts == 0) | np.isnan(counts)
+    counts[mask] = np.nan  # Set masked bins to NaN
+    
+    # Plot using pcolormesh
+    plt.pcolormesh(xedges, yedges, counts.T, cmap='plasma')  # Transpose counts for correct orientation
+    plt.text(0.95, 0.95, title, horizontalalignment='right', verticalalignment='top', 
+             transform=plt.gca().transAxes, color='black', fontsize=47)
+    plt.savefig(plot_dir + filename)
+    plt.clf()
+
+# Plot each dataset
+plot_filtered_hist2d(m12_cp_odd, m13_cp_odd, 'CP Odd', "cp_odd_2d_hist.png", plot_dir)
+plot_filtered_hist2d(m12_cp_even, m13_cp_even, 'CP Even', "cp_even_2d_hist.png", plot_dir)
+plot_filtered_hist2d(m12_sig, m13_sig, 'CP Mixed Sig', "cp_mixed_sig_2d_hist.png", plot_dir)
+plot_filtered_hist2d(m12_tag, m13_tag, 'CP Mixed Tag', "cp_mixed_tag_2d_hist.png", plot_dir)
 
 
 print("Signal generated")

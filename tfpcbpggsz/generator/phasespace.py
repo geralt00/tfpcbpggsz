@@ -21,6 +21,10 @@ def get_p(M, ma, mb):
     ret = tf.sqrt(p) / (2.0 * tf.cast(M, p.dtype))
     return ret
 
+def gets23(s12, s13):
+    M, m1, m2, m3 = m_D0, m_Ks, m_pi, m_pi
+    s23 = M*M + m1*m1 + m2*m2 + m3*m3 - s12 - s13
+    return s23
 
 
 class UniformGenerator:

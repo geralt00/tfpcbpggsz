@@ -3,6 +3,7 @@ import tensorflow as tf
 import uproot as up
 
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
+from tfpcbpggsz.generator.gen_pcbpggsz import pcbpggsz_generator
 from tfpcbpggsz.ulti import get_mass, phsp_to_srd
 from matplotlib import pyplot as plt
 
@@ -14,25 +15,30 @@ def get_mass(p1,p2):
     return ((p1[:,0]+p2[:,0])**2 - (p1[:,1]+p2[:,1])**2 - (p1[:,2]+p2[:,2])**2 - (p1[:,3]+p2[:,3])**2)
 
 
-m0 = 1.86483
-m1 = 0.493677
-m2 = 0.13957018
-m3 = 0.13957018
-mi=[m1,m2,m3]
 
-gen = PhaseSpaceGenerator(m0,mi)
+#gen = PhaseSpaceGenerator(m0,mi)
+gen = PhaseSpaceGenerator()
+p1, p2, p3 = gen.generate(1000)
+pcgen = pcbpggsz_generator()
 
-p1, p2, p3 = gen.generate(1000000)
+amp, ampbar = pcgen.amp((p1, p2, p3)), pcgen.ampbar((p1, p2, p3)) 
 
 m12 = get_mass(p1,p2)
 m13 = get_mass(p1,p3)
 srd = phsp_to_srd(m12,m13)
-plt.hist(m12.numpy(),bins=100)
+plt.hist(m12.numpy(),bins=100, weights=np.abs(amp)**2)
 plt.show()
 plt.savefig("m12.png")
-plt.hist2d(srd[:,0],srd[:,1],bins=100)
-plt.show()
-plt.savefig("srd.png")
+plt.clf()
+#plt.hist2d(srd[:,0],srd[:,1],bins=100)
+#plt.show()
+#plt.savefig("srd.png")
+
+
+
+plt.hist(srd[1], weights=np.abs(amp)**2)
+plt.savefig('weighted.png')
+
 
 time2 = time.time()
 print("Gen + Plot: ",time2-time1)

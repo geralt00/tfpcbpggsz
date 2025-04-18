@@ -60,7 +60,7 @@ class pcbpggsz_generator:
         
         """
         if self._corr_from_fit:
-            return self.pc.eval_corr(p4_to_srd(data), reduce_retracing=True)
+            return self.pc.eval_corr_gen(p4_to_srd(data))
         else:
             return self.pc.eval_bias(p4_to_phsp(data))
     
@@ -229,6 +229,7 @@ class pcbpggsz_generator:
         absAmpbar_sig = tf.abs(self.ampbar(data_sig))
         phase_tag = DeltadeltaD(self.amp(data_tag), self.ampbar(data_tag))
         phase_correction_tag = tf.zeros_like(phase_tag) if self.pc is None else self.eval_bias(data_tag)
+        print(phase_correction_tag) if self.DEBUG else None
         phase_tag = phase_tag + phase_correction_tag
         absAmp_tag = tf.abs(self.amp(data_tag))
         absAmpbar_tag = tf.abs(self.ampbar(data_tag))

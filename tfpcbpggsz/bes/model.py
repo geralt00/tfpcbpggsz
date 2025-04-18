@@ -19,8 +19,7 @@ class BaseModel(object):
         
         for tag in self.tags:
             if tag in ["full", "misspi", "misspi0"]:
-                self.norm[tag] = normalisation({f'{tag}_sig': self.config_loader.get_phsp_amp(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_amp(tag, 'tag')}, {f'{tag}_sig': self.config_loader.get_phsp_ampbar(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_ampbar(tag, 'tag')}, f'{tag}_sig')
-                
+                self.norm[tag] = normalisation({f'{tag}_sig': self.config_loader.get_phsp_amp(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_amp(tag, 'tag')}, {f'{tag}_sig': self.config_loader.get_phsp_ampbar(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_ampbar(tag, 'tag')}, f'{tag}_sig') 
                 self.norm[tag].initialise()                
             else:
                 self.norm[tag] = normalisation({tag: self.config_loader.get_phsp_amp(tag)}, {tag: self.config_loader.get_phsp_ampbar(tag)}, tag)
@@ -125,7 +124,9 @@ class BaseModel(object):
     @tf.function
     def fun(self, x):
         self.set_params(x)
-        ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()
+#        ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()
+        ret = self.nll_cpodd()
+
 
         return ret
         

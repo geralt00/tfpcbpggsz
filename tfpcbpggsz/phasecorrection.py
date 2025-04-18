@@ -210,7 +210,14 @@ class PhaseCorrection:
         """
 
         return tf.function(self.eval_corr_norm,reduce_retracing=reduce_retracing)(coords)  
-    
+
+    def eval_corr_gen(self, coords):
+        """
+        Returns the phase correction for the given coordinates
+        """
+
+        return self.eval_corr_norm(coords)  
+        
     def term_to_string(self, i):
         """
         Returns the string representation of the term

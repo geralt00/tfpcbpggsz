@@ -7,6 +7,7 @@ from plothist import get_color_palette
 from plothist import make_hist, plot_error_hist
 from plothist import plot_hist, add_text
 from tfpcbpggsz.core import DecayNLLCalculator
+from tfpcbpggsz.generator.phasespace import gets23
 import os 
 import time
 
@@ -74,9 +75,12 @@ class plotter:
             histos[new_decay][comp+'_B_M'] = make_hist(config._Bu_M['mc_noeff'][new_decay].flatten(), bins=nbins, weights=config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum())
             histos[new_decay][comp+'_s12'] = make_hist(config._dalitz['mc_noeff'][new_decay]['s12'], bins=nbins, range=(0.3, 3.2),weights=config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum())
             histos[new_decay][comp+'_s13'] = make_hist(config._dalitz['mc_noeff'][new_decay]['s13'], bins=nbins, range=(0.3, 3.2),weights=config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum())
+            histos[new_decay][comp+'_s23'] = make_hist(gets23(config._dalitz['mc_noeff'][new_decay]['s12'], config._dalitz['mc_noeff'][new_decay]['s13']), bins=nbins, range=(0.2, 2.1),weights=config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum())
+
         histos[new_decay]['total_B_M'] = make_hist(config._Bu_M['mc_noeff'][new_decay].flatten(),range=(5080, 5800), bins=nbins, weights=sum([config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum() for comp in DecayNLL._prod_prob[new_decay].keys()]))
         histos[new_decay]['total_s12'] = make_hist(config._dalitz['mc_noeff'][new_decay]['s12'], bins=nbins, range=(0.3, 3.2),weights=sum([config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum() for comp in DecayNLL._prod_prob[new_decay].keys()]))
         histos[new_decay]['total_s13'] = make_hist(config._dalitz['mc_noeff'][new_decay]['s13'], bins=nbins, range=(0.3, 3.2),weights=sum([config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum() for comp in DecayNLL._prod_prob[new_decay].keys()]))
+        histos[new_decay]['total_s23'] = make_hist(gets23(config._dalitz['mc_noeff'][new_decay]['s12'], config._dalitz['mc_noeff'][new_decay]['s13']), bins=nbins, range=(0.2, 2.1),weights=sum([config._n_yields[new_decay][comp]* DecayNLL._prod_prob[new_decay][comp].numpy().flatten()/DecayNLL._prod_prob[new_decay][comp].numpy().flatten().sum() for comp in DecayNLL._prod_prob[new_decay].keys()]))
         fig = plt.figure(figsize=(16, 7*2))
         gs = GridSpec(4, 2, figure=fig, height_ratios=[8, 2, 8, 2]) 
 
