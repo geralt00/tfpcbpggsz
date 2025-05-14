@@ -43,8 +43,10 @@ class BaseModel(object):
         norm = self.norm[tag]._crossTerms_complex
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
+        #print(f"The backgdound fraction for {tag}:",frac_bkg)
         prob_bkg = (prob_bkg)*frac_bkg
         bkg_part = tf.reduce_sum(prob_bkg, axis=0)
+        
         sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
 
 
@@ -71,6 +73,7 @@ class BaseModel(object):
             norm = self.norm[tag].Integrated_CP_tag(Dsign)
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
+        #print(f"The backgdound fraction for {tag}:",frac_bkg)
         prob_bkg = (prob_bkg)*frac_bkg
         bkg_part = tf.reduce_sum(prob_bkg, axis=0)
         sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
@@ -124,8 +127,8 @@ class BaseModel(object):
     @tf.function
     def fun(self, x):
         self.set_params(x)
-#        ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()
-        ret = self.nll_cpodd()
+        ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()
+#        ret = self.nll_cpodd()
 
 
         return ret

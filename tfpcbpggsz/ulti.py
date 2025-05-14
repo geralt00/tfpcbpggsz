@@ -7,6 +7,15 @@ def get_mass(p1, p2):
 def get_mass_bes(p1, p2):
     return ((p1[:,3]+p2[:,3])**2 - (p1[:,1]+p2[:,1])**2 - (p1[:,2]+p2[:,2])**2 - (p1[:,0]+p2[:,0])**2)
 
+def read_minos_errors(m):
+    """
+    Read the minos errors from the Minuit object
+    """
+    errors = {}
+    for key in m.merrors.keys():
+        errors[f'{key}_low'] = m.merrors[key].lower
+        errors[f'{key}_high'] = m.merrors[key].upper
+    return errors
 
 def phsp_to_srd(x_valid, y_valid):
     """
