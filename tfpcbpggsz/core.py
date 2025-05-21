@@ -6,6 +6,24 @@ from tfpcbpggsz.phasecorrection import *
 
 #Common functions
 _PI = tf.constant(np.pi, dtype=tf.float64)
+def DeltadeltaD_old(A, Abar):
+    """
+    Function to calculate the phase difference between the amplitude and the conjugate amplitude
+    
+    Args:
+        A (Amplitude): the amplitude from sample
+        Abar (Amplitude Bar): the conjugate amplitude from sample
+
+    Returns:
+        float64: phase difference between the amplitude and the conjugate amplitude
+    """
+    var_a = tf.math.angle(A*np.conj(Abar)) + _PI
+    var_b = tf.where(var_a > _PI, var_a - 2*_PI, var_a)
+    var = tf.where(var_b < -_PI, var_b + 2*_PI, var_b)
+
+    return var
+
+
 def DeltadeltaD(A, Abar):
     """
     Function to calculate the phase difference between the amplitude and the conjugate amplitude
@@ -17,11 +35,14 @@ def DeltadeltaD(A, Abar):
     Returns:
         float64: phase difference between the amplitude and the conjugate amplitude
     """
-    var_a = tf.math.angle(A*np.conj(Abar))+ _PI
+    var_a = tf.math.angle(A*np.conj(Abar))#+ _PI
     var_b = tf.where(var_a > _PI, var_a - 2*_PI, var_a)
     var = tf.where(var_b < -_PI, var_b + 2*_PI, var_b)
 
     return var
+
+
+
 
 def name_convert(decay_str='b2dk_LL_p'):
     """

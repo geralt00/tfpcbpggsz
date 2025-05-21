@@ -2,6 +2,7 @@ import tensorflow as tf
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
 from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd, p4_to_mag
 from tfpcbpggsz.amp_up.D0ToKSpipi2018 import PyD0ToKSpipi2018
+from tfpcbpggsz.amp_masses.D0ToKspipi2018 import PyD0ToKspipi2018
 from tfpcbpggsz.generator.generator import multi_sampling, multi_sampling2
 from tfpcbpggsz.core import DeltadeltaD
 from tfpcbpggsz.phasecorrection import PhaseCorrection
@@ -16,16 +17,22 @@ class pcbpggsz_generator:
     def __init__(self, **kwargs):
         self.type = type
         self.gen = None
+            
 
         self.Gamma=[]
         self.phsp = PhaseSpaceGenerator()
         self.Kspipi = PyD0ToKSpipi2018()
+        self._amp_from_mass = False
+        if kwargs.get('amp_from_mass') is not None:
+           self.Kspipi = PyD0ToKspipi2018()
+           self._amp_from_mass = True
         self.Kspipi.init()
         self.charge = 'p'
         self.fun = None
         self.pc = None
         self.DEBUG = False
         self._corr_from_fit = False
+        self._amp_i = None
 
     def add_bias(self, correctionType="singleBias", **kwargs):
         
@@ -141,26 +148,40 @@ class pcbpggsz_generator:
         #"""Calculate the amplitude of the decay from momenta."""    
 
         Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        if not isinstance(p1, tf.Tensor):
-            amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())     
+        if self._amp_from_mass:
+            s12, s13 = p4_to_phsp(data)
+            self._amp_i = tf.convert_to_tensor(Kspipi.AMP(s12.tolist(), s13.tolist()))
+            amp_i = self._amp_i[:,0]
+            amp_i = tf.cast(amp_i, tf.complex128)
+            #check is there any NaN or Inf or zero
+            return amp_i
+        
         else:
-            amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
-        amp_i = tf.cast(amp_i, tf.complex128)
-        return amp_i
+            p1,p2,p3 = data
+            if not isinstance(p1, tf.Tensor):
+                amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())     
+            else:
+                amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
+            amp_i = tf.cast(amp_i, tf.complex128)
+            return amp_i
     
     def ampbar(self, data):
         #"""Calculate the amplitude of the decay from momenta."""
-
         Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-        ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-        ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
-        return ampbar_i
-
+        if self._amp_from_mass:
+            s12, s13 = p4_to_phsp(data)
+            if self._amp_i is None: 
+                ampbar_i = tf.convert_to_tensor(Kspipi.AMP(s12.tolist(), s13.tolist()))[:,1]
+            else:
+                ampbar_i = self._amp_i[:,1]
+            ampbar_i = tf.cast(ampbar_i, tf.complex128)
+            return ampbar_i
+        else:
+            p1,p2,p3 = data
+            p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
+            ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
+            ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
+            return ampbar_i
     def amp_np(self, data):
         #"""Calculate the amplitude of the decay from momenta."""    
 
