@@ -152,14 +152,25 @@ class ConfigLoader:
             if 'sig_range_n' in key:
                 ntot += self.mass_fit_results[key]
         ret = np.array([self.mass_fit_results[f'sig_range_nb_{key}'] for key in self._pdf[tag].keys()])/ntot
-        #shape as (n,1)
+        #print([f'sig_range_nb_{key}' for key in self._pdf[tag].keys()])
+        #print(f"INFO:: {tag} bkg fraction: {ret}")
         return ret.reshape(-1,1)
 
-    def get_bkg_num(self, tag, key):
+    def get_bkg_num(self, tag, key, default=0):
+        """Get the number of the background
+        Args:
+            tag (str): the tag name
+            key (str): the key name
+            default (int): the default value if not found
+        """
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        val = self.mass_fit_results[f'sig_range_nb_{key}']
-        return val
+        if f'sig_range_nb_{key}' not in self.mass_fit_results.keys():
+            print(f'INFO:: {key} not found in mass_fit_results of {tag}')
+            return default
+        else:
+            val = self.mass_fit_results[f'sig_range_nb_{key}']
+            return val
     
     def get_sig_num(self, tag):
         self.yields.load(self._config_data['data'].get('mass_fit_results'))

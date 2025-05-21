@@ -19,8 +19,7 @@ class BaseModel(object):
         
         for tag in self.tags:
             if tag in ["full", "misspi", "misspi0"]:
-                self.norm[tag] = normalisation({f'{tag}_sig': self.config_loader.get_phsp_amp(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_amp(tag, 'tag')}, {f'{tag}_sig': self.config_loader.get_phsp_ampbar(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_ampbar(tag, 'tag')}, f'{tag}_sig')
-                
+                self.norm[tag] = normalisation({f'{tag}_sig': self.config_loader.get_phsp_amp(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_amp(tag, 'tag')}, {f'{tag}_sig': self.config_loader.get_phsp_ampbar(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_ampbar(tag, 'tag')}, f'{tag}_sig') 
                 self.norm[tag].initialise()                
             else:
                 self.norm[tag] = normalisation({tag: self.config_loader.get_phsp_amp(tag)}, {tag: self.config_loader.get_phsp_ampbar(tag)}, tag)
@@ -44,8 +43,10 @@ class BaseModel(object):
         norm = self.norm[tag]._crossTerms_complex
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
+        #print(f"The backgdound fraction for {tag}:",frac_bkg)
         prob_bkg = (prob_bkg)*frac_bkg
         bkg_part = tf.reduce_sum(prob_bkg, axis=0)
+        
         sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
 
 
@@ -72,6 +73,7 @@ class BaseModel(object):
             norm = self.norm[tag].Integrated_CP_tag(Dsign)
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
+        #print(f"The backgdound fraction for {tag}:",frac_bkg)
         prob_bkg = (prob_bkg)*frac_bkg
         bkg_part = tf.reduce_sum(prob_bkg, axis=0)
         sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
@@ -126,6 +128,8 @@ class BaseModel(object):
     def fun(self, x):
         self.set_params(x)
         ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()
+#        ret = self.nll_cpodd()
+
 
         return ret
         
