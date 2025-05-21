@@ -52,6 +52,16 @@ def phsp_to_rd(x_valid, y_valid):
     stretchedAntiSymCoord = m2_ * rotatedAntiSymCoord + c2_
     return np.array([stretchedSymCoord, stretchedAntiSymCoord])
 
+def p4_to_mag(data):
+    """
+    Calculate the momentum magnitude of a 4-momentum vector
+    """
+    p1, p2, p3 = data
+    P_Ks = np.sqrt(p1[:, 1]**2 + p1[:,2]**2 + p1[:,3]**2)
+    P_pim = np.sqrt(p2[:, 1]**2 + p2[:,2]**2 + p2[:,3]**2)
+    P_pip = np.sqrt(p3[:, 1]**2 + p3[:,2]**2 + p3[:,3]**2)
+    return [P_Ks, P_pim, P_pip]
+
 def p4_to_srd(data):
     """
     Convert the momenta to the Stretched Rotated Dalitz (SRD) coordinates

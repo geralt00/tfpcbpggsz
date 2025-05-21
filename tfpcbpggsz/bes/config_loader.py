@@ -42,6 +42,7 @@ class ConfigLoader:
         self.D02KsPiPi = D02KsPiPi()
         self.yields = yields(self.D02KsPiPi)
         self.mass_fit_results = {}
+        self.new_mass_fit_results = {}
 
 
     def load_config(self):
@@ -143,37 +144,64 @@ class ConfigLoader:
         ret = np.array([self._pdf[tag][key] for key in self._pdf[tag].keys()])
         return ret
     
-    def get_bkg_frac(self, tag):
+    def get_bkg_frac(self, tag, **kwargs):
 
+
+        vary = False
+        if 'vary' in kwargs.keys():
+            vary = kwargs['vary']
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
         ntot = 0
+        nsig = 0
+        nbkg = 0
         for key in self.mass_fit_results.keys():
-            if 'sig_range_n' in key:
-                ntot += self.mass_fit_results[key]
-        ret = np.array([self.mass_fit_results[f'sig_range_nb_{key}'] for key in self._pdf[tag].keys()])/ntot
+            if 'sig_range_nb_' in key:
+                nbkg += self.get_bkg_num(tag, key, vary=vary) if vary else self.get_bkg_num(tag, key)
+            if 'sig_range_nsig' in key:
+                nsig += self.get_sig_num(tag, vary=vary) if vary else self.get_sig_num(tag)
+        
+        ntot = nbkg + nsig
+        ret = np.array([self.get_bkg_num(tag, key, vary=vary) for key in self._pdf[tag].keys()])/ntot
         #print([f'sig_range_nb_{key}' for key in self._pdf[tag].keys()])
         #print(f"INFO:: {tag} bkg fraction: {ret}")
         return ret.reshape(-1,1)
 
-    def get_bkg_num(self, tag, key, default=0):
+    def get_bkg_num(self, tag, key, default=0, vary=False):
         """Get the number of the background
         Args:
             tag (str): the tag name
             key (str): the key name
             default (int): the default value if not found
+            vary (bool): if True, return the value with the error
         """
+            
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
         if f'sig_range_nb_{key}' not in self.mass_fit_results.keys():
             print(f'INFO:: {key} not found in mass_fit_results of {tag}')
             return default
         else:
-            val = self.mass_fit_results[f'sig_range_nb_{key}']
+            val = self.new_mass_fit_results[f'sig_range_nb_{key}'] if vary else self.mass_fit_results[f'sig_range_nb_{key}']
             return val
     
-    def get_sig_num(self, tag):
+    def get_sig_num(self, tag, vary=False):
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        val = self.mass_fit_results[f'sig_range_nsig']
+        val = self.new_mass_fit_results[f'sig_range_nsig'] if vary else self.mass_fit_results[f'sig_range_nsig']
         return val
+    
+    def re_sample_yields(self, tag):
+        """Resample the yields for the given tag
+        Args:
+            tag (str): the tag name
+            kwargs: the keyword arguments for the resampling
+        """
+        self.yields.load(self._config_data['data'].get('mass_fit_results'))
+        self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        covariance = self.yields.get(type='fit_result')['cov']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        name_order = self.yields.get(type='fit_result')['cov_name']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        old_yields = np.array([self.mass_fit_results[key] for key in name_order])
+        new_yields = np.random.multivariate_normal(old_yields, covariance)
+        for i, key in enumerate(name_order):
+            self.new_mass_fit_results[key] = new_yields[i]

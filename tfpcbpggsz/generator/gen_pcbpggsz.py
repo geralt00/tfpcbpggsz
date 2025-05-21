@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
-from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd
+from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd, p4_to_mag
 from tfpcbpggsz.amp_up.D0ToKSpipi2018 import PyD0ToKSpipi2018
 from tfpcbpggsz.generator.generator import multi_sampling, multi_sampling2
 from tfpcbpggsz.core import DeltadeltaD
@@ -53,6 +53,11 @@ class pcbpggsz_generator:
 
         print(f'Efficiency applied with: {decay}_{charge}')
 
+    def add_res(self, params):
+        #"""Adding the resolution parameters"""
+        self.res_params = params
+        self.res = True
+
     def eval_bias(self, data):
         """
         Getting the bias value for given 4 momentum
@@ -67,6 +72,11 @@ class pcbpggsz_generator:
     def eval_eff(self, data):
         #"""Getting the efficiency value for given 4 momentum"""
         return eff_fun(p4_to_srd(data), self.charge, self.decay)
+    
+    def eval_res(self, data):
+        #"""Getting the resolution value for given 4 momentum"""
+        P_Ks, P_pim, P_pip = p4_to_mag(data)
+        return 
     
     def make_eff_fun(self):
         return self.eval_eff 
