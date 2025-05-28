@@ -7,6 +7,14 @@ from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
 from tfpcbpggsz.variable import VarsManager as vm
 from tfpcbpggsz.amp.amplitude import Amplitude
+from tfpcbpggsz.masspdfs import *
+from tfpcbpggsz.Includes.functions import *
+DICT_EFFICIENCY_FUNCTIONS = {
+    "Flat"        : Flat,
+    "Legendre_2_2": Legendre_2_2,
+    "Legendre_5_5": Legendre_5_5,
+}
+
 
 class pcbpggsz_generator:
     #"""
@@ -31,6 +39,7 @@ class pcbpggsz_generator:
         self.amplitude = amplitude
         self.amplitude.init()
         self.model_name = 'evtgen'
+        self.apply_eff = True
         if not isinstance(amplitude, Amplitude):
             raise TypeError("Amplitude must be initialise before passing to the generator")
             
@@ -38,6 +47,7 @@ class pcbpggsz_generator:
 
     def add_bias(self, correctionType="singleBias", **kwargs):
         
+        #"""Adding the bias in different type"""
 
         self.pc = PhaseCorrection(vm=vm())
         self.pc.DEBUG = self.DEBUG
@@ -81,7 +91,21 @@ class pcbpggsz_generator:
     
     def eval_eff(self, data):
         #"""Getting the efficiency value for given 4 momentum"""
-        return eff_fun(p4_to_srd(data), self.charge, self.decay)
+        srd = p4_to_srd(data)
+        if (self.efficiency_function not in DICT_EFFICIENCY_FUNCTIONS.keys()):
+            print("WARNING --------------------- ")
+            print(" efficiency function {self.efficiency_function} not defined for this generation ")
+            print(" returning flat distribution")
+            ret_eff_func = Flat
+        else:    
+            ret_eff_func = DICT_EFFICIENCY_FUNCTIONS[self.efficiency_function]
+            pass
+        return ret_eff_func(0, 0, srd[0], srd[1], 0, variables=self.efficiency_variables)
+    
+    def eval_res(self, data):
+        #"""Getting the resolution value for given 4 momentum"""
+        P_Ks, P_pim, P_pip = p4_to_mag(data)
+        return 
     
     def eval_res(self, data):
         #"""Getting the resolution value for given 4 momentum"""
@@ -110,7 +134,23 @@ class pcbpggsz_generator:
             self.deltaB = kwargs['dB']
             self.gamma = kwargs['gamma']   
             self.charge = kwargs['charge']
-
+            self.efficiency_function  = kwargs['efficiency_function']
+            self.efficiency_variables = kwargs['efficiency_variables']
+            try:
+                self.generate_B_mass = kwargs['generate_B_mass'],
+                self.B_mass_range    = kwargs['B_mass_range'],
+                self.mass_shape_name = kwargs['mass_shape_name']
+                self.mass_variables  = kwargs['mass_variables']
+                self.mass_shape      = None
+            except KeyError:
+                self.generate_B_mass = None
+                self.B_mass_range    = None
+                self.mass_shape_name = None
+                self.mass_variables  = None
+                self.mass_shape      = None
+                pass
+            pass
+            
 
         if kwargs.get('max_N') is not None:
             max_N = kwargs['max_N']
@@ -126,11 +166,30 @@ class pcbpggsz_generator:
 
 
         if type != 'cp_mixed':
+            if (self.generate_B_mass is not None):
+                self.def_mass_PDF = MassPDF(self.mass_shape_name, self.type)
+                self.def_mass_PDF.get_mass_pdf(self.mass_variables)
+                self.mass_shape   = self.def_mass_PDF.pdf
+
+                ret, status, ret_mass = multi_sampling(
+                    phsp,
+                    self.prod_fun,
+                    N,
+                    force=True,
+                    generate_B_mass = self.generate_B_mass[0],
+                    B_mass_range    = self.B_mass_range[0],
+                    mass_shape      = self.mass_shape
+                )
+                return ret, ret_mass
+            
             ret, status = multi_sampling(
                 phsp,
                 self.prod_fun,
                 N,
                 force=True,
+                generate_B_mass = self.generate_B_mass,
+                B_mass_range    = self.B_mass_range,
+                mass_shape      = self.mass_shape
             )
 
             return ret

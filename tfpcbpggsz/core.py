@@ -154,7 +154,7 @@ def eff_fun(x, charge='p', decay='dk_LL'):
 
     return res #( res+offset[decay])/mean[decay]
 
-def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, Bsign, variables=None, shared_variables=None, pc=None, **kwargs):
+def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None, pc=None, **kwargs):
     """
     Function to calculate the amplitude squared for the B2DK and B2Dpi decays
 
@@ -192,6 +192,8 @@ def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, Bsign, variables=None, shared
         xPlus = tf.cast(shared_variables[2][1], tf.float64)
         yPlus = tf.cast(shared_variables[2][2], tf.float64)
         rB2 = tf.cast(xPlus**2 + yPlus**2, tf.float64)
+        # tf.print("xPlus: ", xPlus)
+        # tf.print("yPlus: ", yPlus)
         return tf.cast((absA**2 * rB2  + absAbar **2  + 2.0 * (absA * absAbar) * (xPlus * tf.cos(phase) - yPlus * tf.sin(phase))),tf.float64)
     
     elif Bsign == -1:
@@ -280,7 +282,7 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], **kwargs):
     else:
         return (absA**2  + absAbar **2  + 2.0 * DDsign * CPsign * (absA * absAbar) * tf.cos(phase))
 
-def prob_totalAmplitudeSquared_DPi_XY( ampD0, ampD0bar, Bsign, variables=None, shared_variables=None):
+def prob_totalAmplitudeSquared_DPi_XY(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     """
     Function to calculate the amplitude squared for the B2Dpi decay, the ratio between B2DK and B2Dpi is used, then two additional parameters are added
 
@@ -1499,7 +1501,8 @@ class NLLComputation:
             for shared in self.dict_shared_parameters.values():
                 if (const[0] in shared):
                     ERROR("whopopopopo not so fast")
-                    ERROR("const: " + const)
+                    ERROR("const: ")
+                    ERROR(const)
                     ERROR(" this line constrains a parameter that is also in shared_parameters i.e. is free in the fit --- please check")
                     res = False
                     ### that means that a parameter that is constrained

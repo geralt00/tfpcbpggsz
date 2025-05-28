@@ -23,41 +23,44 @@ from tfpcbpggsz.core import *
 #     a = tf.convert_to_tensor(pdf(x)/norm_const)
 #     return a
 
-
-def Flat(zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
-    res = np.ones(zp_p.shape)
-    res = np.where(
-        in_Dalitz_plot_SRD(zp_p, zm_pp) == True,
-        res,
-        0
-    )
-    return tf.cast(res, tf.float64)
-
+DICT_EFFICIENCY_FUNCTIONS = {
+    "Flat"        : Flat,
+    "Legendre_2_2": Legendre_2_2,
+    "Legendre_5_5": Legendre_5_5,
+}
 
 class DalitzPDF:
 
     def __init__(self, name_function, component, Bsign, isSignal=False):
         self.name         = name_function
         self.component    = component
-        self.function     = self.get_function()
+        self.functions    = self.get_functions()
         self.Bsign        = 1 if (Bsign=="Bplus") else -1
         self.isSignal     = isSignal
         return
 
-    def get_function(self):
-        function = Flat
+    def get_functions(self):
+        # function   = Flat
+        model      = Flat
+        efficiency = Flat
         if   (self.component == "DK_Kspipi" or self.component == "DK_Kspipi_misID"):
-            function = prob_totalAmplitudeSquared_XY
+            model = prob_totalAmplitudeSquared_XY
         elif (self.component == "Dpi_Kspipi_misID" or self.component == "Dpi_Kspipi"):
-            function = prob_totalAmplitudeSquared_DPi_XY
-        elif (self.name == "Legendre_2_2"):
-            function = Legendre_2_2
-        else:
-            print("ERROR ---------------------- get_function ")
-            print(" component ", self.component, " undefined in DalitzPDF")
-        return function
+            model = prob_totalAmplitudeSquared_DPi_XY
+            pass
+        efficiency = DICT_EFFICIENCY_FUNCTIONS[self.name]
+        ### note: it's called efficiency here, but for backgrounds it is really
+        # the model. It's just more practical to call it that way
+        # if (self.name == "Legendre_2_2"):
+        #     print("Using Legendre_2_2 for the efficiency")
+        #     efficiency = Legendre_2_2
+        # else:
+        #     print("ERROR ---------------------- get_function ")
+        #     print(" component ", self.component, " undefined in DalitzPDF")
+        #     pass
+        return model, efficiency
 
-    def get_normalisation(self, norm_ampD0, norm_ampD0bar, variables=None, shared_variables=None):
+    def get_normalisation(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, variables=None, shared_variables=None):
         N_normalisation = len(norm_ampD0)
         if ( not (N_normalisation == len(norm_ampD0bar) ) ):
             print("ERROR ----------------------- in B2DK_Kspipi_norm")
@@ -67,13 +70,17 @@ class DalitzPDF:
         ############
         # if we decide to use normalisation events generated with a non-flat model
         # we need to add this amplitude here
-        gen_amplitude = 1
+        gen_amplitude = 1.
         ####
-        ampSq = self.function(norm_ampD0, norm_ampD0bar, self.Bsign, variables=variables, shared_variables=shared_variables)
+        model = self.functions[0](norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
+        # print("model")
+        # print(model)
+        efficiency = self.functions[1](norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
+        ampSq = model * efficiency
         # print("shared_variables:")
         # print(shared_variables)
-        print("variables:")
-        print(variables)
+        # print("variables:")
+        # print(variables)
         # print(" ")
         # print("nan in ampSq in normalisation:")
         # print(np.isnan(ampSq).any())
@@ -83,8 +90,8 @@ class DalitzPDF:
             (QMI_smax_Kspi-QMI_smin_Kspi)*(QMI_smax_Kspi-QMI_smin_Kspi),
             tf.float64
         )
-        # print("res in normalisation:")
-        # print(res)
+        # tf.print("res in normalisation:")
+        # tf.print("res: ", res)
         return res ## is a number
 
 
@@ -94,30 +101,31 @@ class DalitzPDF:
         # print(self.name)
         # print(self.component)
         # print(self.Bsign)
-        if (self.isSignal == True):
-            self.norm_constant = self.get_normalisation(
-                norm_ampD0         ,
-                norm_ampD0bar      ,
-                variables=variables,
-                shared_variables=shared_variables
-            )
-        else:
-            self.norm_constant = self.get_normalisation(
-                norm_zp_p          ,
-                norm_zm_pp         ,
-                variables=variables,
-                shared_variables=shared_variables
-            )
-            pass
+        self.norm_constant = self.get_normalisation(
+            norm_ampD0         ,
+            norm_ampD0bar      ,
+            norm_zp_p          ,
+            norm_zm_pp         ,
+            variables=variables,
+            shared_variables=shared_variables
+        )
         # print("norm_constant")
         # print("norm_constant")
         # print("norm_constant")
-        # print("norm_constant :", self.norm_constant)
+        # print("variables :", variables)
+        # print("shared_variables :", shared_variables)
+        # print("shared_variables :", shared_variables)
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
-        pdf = lambda ampD0, ampD0bar: self.function(ampD0, ampD0bar, self.Bsign, variables=variables, shared_variables=shared_variables) / self.norm_constant #
+        def pdf(ampD0, ampD0bar, zp_p, zm_pp):
+            model = self.functions[0](ampD0, ampD0bar, zp_p, zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
+            efficiency = self.functions[1](ampD0, ampD0bar, zp_p, zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
+            # tf.print("efficiency: ", efficiency)
+            # tf.print("model     : ", model)
+            ret_pdf = model*efficiency / self.norm_constant
+            return ret_pdf
         self.pdf = pdf
         return
 

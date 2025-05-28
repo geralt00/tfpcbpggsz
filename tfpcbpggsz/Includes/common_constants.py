@@ -1,3 +1,10 @@
+### inputs
+GAMMA      = 68.7
+RB_DK      = 0.0904
+DELTAB_DK  = 118.3
+RB_DPI     = 0.005
+DELTAB_DPI = 291.0
+
 ## PDG constants
 PDG_m_pi = 0.13957039 # ,0.00018);
 PDG_m_Ks = 0.497611   # ,0.013);
@@ -115,3 +122,16 @@ INDEX_YIELDS = {
     "Bplus"  : 0,
     "Bminus" : 1
 }
+
+
+#### efficiency shapes
+EFFICIENCY_SHAPES = ["Flat", "Legendre_2_2", "Legendre_5_5"]
+
+
+### This order is hardcoded in the way the functions Legendre_ZP_ZM are defined in functions.py
+DICT_NAME_COEFF = {
+    "Flat": [],
+    "Legendre_2_2": ["c00","c10","c20","c01", "c02", "c11", "c21", "c12", "c22"],
+    "Legendre_5_5": ["c00","c10","c20","c01", "c02", "c11", "c21", "c12", "c22", "c30", "c40", "c50", "c03", "c04", "c05", "c24", "c32", "c34", "c42", "c44", "c52", "c54"], # I dropped some odd powers of zm because they quantify pi+/pi- asymmetry so I don't think we'll need to go as far as we do for zp
+}
+

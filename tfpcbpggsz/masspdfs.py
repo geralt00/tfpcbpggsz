@@ -20,6 +20,7 @@ def norm_distribution(x, pdf_values):
 
     # Perform integration using tfp.math.trapz along the second axis
     norm_const = tfp.math.trapz(sorted_y, sorted_x)
+    print(norm_const)
 
     a = tf.convert_to_tensor(pdf_values/norm_const)
 

@@ -549,27 +549,85 @@ class Ntuple:
                                cuts,
                                aliases = aliases,
                                library='np'))
+        ##### Momenta
+        # for particle in ["KS", "pip", "pim"]:
+        #     for mom_ in ["PE", "PX", "PY", "PZ"]:                
+        #         pass
+        #     pass
         ##### Amplitudes
-        tmp_Amp    = []
-        tmp_Ampbar = []
-        indices    = []
-        for index, row in self.uproot_data.iterrows():
-            indices.append(index)
-            # print(index)
-            # print(row["zp_p"])
-            # print(row["zm_pp"])
-            tmp_amps = Kspipi_ampModel.get_amp(
-                row["zp_p"] ,
-                row["zm_pp"]
-            )
-            # print(tmp_amps)
-            tmp_Amp.append(tmp_amps[0])
-            tmp_Ampbar.append(tmp_amps[1])
+        if ("KS_PE" not in self.uproot_data):
+            self.uproot_data["KS_PE"] = self.uproot_data["Ks_PE"]
+            self.uproot_data["KS_PX"] = self.uproot_data["Ks_PX"]
+            self.uproot_data["KS_PY"] = self.uproot_data["Ks_PY"]
+            self.uproot_data["KS_PZ"] = self.uproot_data["Ks_PZ"]            
+            self.uproot_data["pip_PE"] = np.where(self.uproot_data["Bu_ID"]>0, self.uproot_data["h1_PE"], self.uproot_data["h2_PE"])
+            self.uproot_data["pip_PX"] = np.where(self.uproot_data["Bu_ID"]>0, self.uproot_data["h1_PX"], self.uproot_data["h2_PX"])
+            self.uproot_data["pip_PY"] = np.where(self.uproot_data["Bu_ID"]>0, self.uproot_data["h1_PY"], self.uproot_data["h2_PY"])
+            self.uproot_data["pip_PZ"] = np.where(self.uproot_data["Bu_ID"]>0, self.uproot_data["h1_PZ"], self.uproot_data["h2_PZ"])
+            self.uproot_data["pim_PE"] = np.where(self.uproot_data["Bu_ID"]<0, self.uproot_data["h1_PE"], self.uproot_data["h2_PE"])
+            self.uproot_data["pim_PX"] = np.where(self.uproot_data["Bu_ID"]<0, self.uproot_data["h1_PX"], self.uproot_data["h2_PX"])
+            self.uproot_data["pim_PY"] = np.where(self.uproot_data["Bu_ID"]<0, self.uproot_data["h1_PY"], self.uproot_data["h2_PY"])
+            self.uproot_data["pim_PZ"] = np.where(self.uproot_data["Bu_ID"]<0, self.uproot_data["h1_PZ"], self.uproot_data["h2_PZ"])
             pass
-        tmp_Amp    = np.asarray(tmp_Amp)
-        tmp_Ampbar = np.asarray(tmp_Ampbar)
-        self.uproot_data[f"AmpD0"]    = pd.DataFrame(tmp_Amp,   index=indices)
-        self.uproot_data[f"AmpD0bar"] = pd.DataFrame(tmp_Ampbar,index=indices)
+        p1 = np.asarray([
+            self.uproot_data["KS_PE"],
+            self.uproot_data["KS_PX"],
+            self.uproot_data["KS_PY"],
+            self.uproot_data["KS_PZ"],            
+        ]).transpose()
+        p2 = np.asarray([
+            self.uproot_data["pim_PE"],
+            self.uproot_data["pim_PX"],
+            self.uproot_data["pim_PY"],
+            self.uproot_data["pim_PZ"],            
+        ]).transpose()
+        p3 = np.asarray([
+            self.uproot_data["pip_PE"],
+            self.uproot_data["pip_PX"],
+            self.uproot_data["pip_PY"],
+            self.uproot_data["pip_PZ"],            
+        ]).transpose()
+        tmp_Amp    = Kspipi_ampModel.AMP(
+            p1.tolist(),
+            p2.tolist(),
+            p3.tolist()
+        )   # []
+        p1bar, p2bar, p3bar = np.concatenate([p1[:, :1], np.negative(p1[:, 1:])], axis=1), np.concatenate([p2[:, :1], np.negative(p2[:, 1:])], axis=1), np.concatenate([p3[:, :1], np.negative(p3[:, 1:])], axis=1)
+        tmp_Ampbar = Kspipi_ampModel.AMP(
+            p1bar.tolist(),
+            p3bar.tolist(),
+            p2bar.tolist()
+        )   # []
+        # indices    = []
+        # for index, row in self.uproot_data.iterrows():
+        #     indices.append(index)
+        #     # print(index)
+        #     # print(row["zp_p"])
+        #     # print(row["zm_pp"])
+        #     tmp_amps = Kspipi_ampModel.get_amp(
+        #         row["zp_p"] ,
+        #         row["zm_pp"]
+        #     )
+        #     # print(tmp_amps)
+        #     tmp_Amp.append(tmp_amps[0])
+        #     tmp_Ampbar.append(tmp_amps[1])
+        #     pass
+        # tmp_Amp    = np.asarray(tmp_Amp)
+        # tmp_Ampbar = np.asarray(tmp_Ampbar)
+        # self.uproot_data[f"AmpD0"]    = pd.DataFrame(tmp_Amp,   index=indices)
+        # self.uproot_data[f"AmpD0bar"] = pd.DataFrame(tmp_Ampbar,index=indices)
+        self.uproot_data[f"AmpD0"]    = tmp_Amp
+        self.uproot_data[f"AmpD0bar"] = np.negative(tmp_Ampbar)
+        # print("tmp_Ampbar and tmp_Amp")
+        # print("tmp_Ampbar and tmp_Amp")
+        # print("tmp_Ampbar and tmp_Amp")
+        # print("tmp_Ampbar and tmp_Amp")
+        # print("tmp_Ampbar and tmp_Amp")
+        # print(tmp_Ampbar[0])
+        # print(tmp_Amp[0])
+        # print(p1bar.tolist())
+        # print(p3bar.tolist())
+        # print(p2bar.tolist())
         self.uproot_data = self.uproot_data.dropna()
         ############ now some assignments
         self.Bplus_data  = self.uproot_data.query("Bu_ID>0")
@@ -663,17 +721,17 @@ class Ntuple:
         term3 = 2*nevents*clip_log(tf_sum_yields)
         term4 = self.get_gaussian_constraints(gaussian_constraints, list_variables)
         nll   = term1 + term2 + term3 + term4
-        tf.print("CB2DK Kspipi mean      ",list_variables[0][0][1])
-        tf.print("params                 ",params)
-        tf.print("sum_yields             ", sum_yields)
-        tf.print("total_yield           ", total_yield)
-        tf.print("log_poisson_constraint ", log_poisson_constraint)
-        tf.print("                          sum_events ", term1)
-        tf.print(" -          2*log_poisson_constraint ", term2)
-        tf.print(" + 2*nevents*clip_log(tf_sum_yields) ", term3)
-        tf.print(" +              gaussian_constraints ", term4)
-        tf.print(" =  nll :                  ", nll)
-        tf.print(" ")
+        # tf.print("CB2DK Kspipi mean      ",list_variables[0][0][1])
+        # tf.print("params                 ",params)
+        # tf.print("sum_yields             ", sum_yields)
+        # tf.print("total_yield           ", total_yield)
+        # tf.print("log_poisson_constraint ", log_poisson_constraint)
+        # tf.print("                          sum_events ", term1)
+        # tf.print(" -          2*log_poisson_constraint ", term2)
+        # tf.print(" + 2*nevents*clip_log(tf_sum_yields) ", term3)
+        # tf.print(" +              gaussian_constraints ", term4)
+        # tf.print(" =  nll :                  ", nll)
+        # tf.print(" ")
         return nll
     
     def draw_mass_pdfs(self, np_input, variables):
@@ -766,11 +824,7 @@ class Ntuple:
         for comp_pdf in self.dalitz_pdfs[Bsign]:
             isSignalDK   = (comp_pdf.component in SIGNAL_COMPONENTS_DK )
             isSignalDPI  = (comp_pdf.component in SIGNAL_COMPONENTS_DPI)
-            if ( (isSignalDK == True) or (isSignalDPI == True)):
-                total_dalitz_pdf_values += comp_pdf.pdf(ampD0, ampD0bar)
-            else:
-                total_dalitz_pdf_values += comp_pdf.pdf(zp_p, zm_pp)
-                pass
+            total_dalitz_pdf_values += comp_pdf.pdf(ampD0, ampD0bar, zp_p, zm_pp)
             pass
         total_mass_pdf_values = np.zeros(np.shape(Bu_M))
         # total_mass_pdf_values["Bplus"]  = np.zeros(np.shape(Bu_M))
@@ -834,12 +888,15 @@ class Ntuple:
             term2 = - 2*log_poisson_constraint
             term3 = 2*nevents[Bsign]*clip_log(tf_sum_yields)
             nll  += term1 + term2 + term3
+            # tf.print(" ntuple: ", self.tex)
+            # tf.print(f"              shared variables ", list_variables[-1][0][2])
             # tf.print(f"sum_yields             {Bsign} ", tf_sum_yields)
             # tf.print(f"total_yield            {Bsign} ", total_yield)
             # tf.print(f"log_poisson_constraint {Bsign} ", log_poisson_constraint)
             # tf.print("                     term sum_events ", term1)
             # tf.print(" -          2*log_poisson_constraint ", term2)
             # tf.print(" + 2*nevents*clip_log(tf_sum_yields) ", term3)
+            # tf.print("                               = nll ", nll)
             # tf.print(" ")
             pass
         term4 = self.get_gaussian_constraints(gaussian_constraints, list_variables)
@@ -950,3 +1007,6 @@ DICT_VARIABLES_TEX = {
     'h1_PIDK'                    :    Variables("h1_PIDK"                     , r"$h^1_D$ PID($K$)"          , 'linear', None) , 
     'h2_PIDK'                    :    Variables("h2_PIDK"                     , r"$h^2_D$ PID($K$)"          , 'linear', None) ,
 }
+
+zp_p_tex  = DICT_VARIABLES_TEX["zp_p"].tex
+zm_pp_tex = DICT_VARIABLES_TEX["zm_pp"].tex

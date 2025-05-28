@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from tfpcbpggsz.Includes.common_constants import *
+from tfpcbpggsz.ulti import get_xy_xi, deg_to_rad, rad_to_deg
 
 def INFO(string):
     print(" INFO ====== ")
@@ -101,7 +102,7 @@ def clip_log(x, _epsilon=1e-6):
 
 
 # @tf.function
-def Legendre_2_2(zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
+def Legendre_2_2(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     Legendre_zp_1 = zp_p
     Legendre_zp_2 = (3 * np.power(zp_p, 2) - 1) / 2.
     Legendre_zm_1 = zm_pp
@@ -125,8 +126,105 @@ def Legendre_2_2(zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     )
     ### doing this to avoid negative values
     res = tf.math.maximum(res, 0)
-    # print("res:")
+    # print("          ")
+    # print(" IN LEGENDRE_2_2 res:")
+    # print(" IN LEGENDRE_2_2 res:")
+    # print(" IN LEGENDRE_2_2 res:")
     # print(res)
     # print(variables)
     # print(shared_variables)
     return res
+
+
+# @tf.function
+def Legendre_5_5(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
+    Legendre_zp_1 = zp_p
+    Legendre_zp_2 = (3 * np.power(zp_p, 2) - 1) / 2.
+    Legendre_zp_3 = (5 * np.power(zp_p, 3) - 3 * zp_p) / 2.
+    Legendre_zp_4 = (35 * np.power(zp_p, 4) - 30 * np.power(zp_p, 2) + 3) / 8.
+    Legendre_zp_5 = (63 * np.power(zp_p, 5) - 70 * np.power(zp_p, 3) + 15 * zp_p) / 8.
+    Legendre_zm_1 = zm_pp
+    Legendre_zm_2 = (3 * np.power(zm_pp, 2) - 1) / 2.
+    Legendre_zm_3 = (5 * np.power(zm_pp, 3) - 3 * zm_pp) / 2.
+    Legendre_zm_4 = (35 * np.power(zm_pp, 4) - 30 * np.power(zm_pp, 2) + 3) / 8.
+    Legendre_zm_5 = (63 * np.power(zm_pp, 5) - 70 * np.power(zm_pp, 3) + 15 * zm_pp) / 8.
+    res = (variables[0] +
+           Legendre_zp_1*variables[1] +
+           Legendre_zp_2*variables[2] +
+           Legendre_zm_1*variables[3] + 
+           Legendre_zm_2*variables[4] + 
+           Legendre_zp_1*Legendre_zm_1*variables[5] + 
+           Legendre_zp_2*Legendre_zm_1*variables[6] + 
+           Legendre_zp_1*Legendre_zm_2*variables[7] + 
+           Legendre_zp_2*Legendre_zm_2*variables[8] +
+           Legendre_zp_3*variables[9]  +
+           Legendre_zp_4*variables[10] +
+           Legendre_zp_5*variables[11] +
+           Legendre_zm_3*variables[12] +
+           Legendre_zm_4*variables[13] +
+           Legendre_zm_5*variables[14] +
+           Legendre_zp_2*Legendre_zm_4*variables[15] + 
+           Legendre_zp_3*Legendre_zm_2*variables[16] + 
+           Legendre_zp_3*Legendre_zm_4*variables[17] + 
+           Legendre_zp_4*Legendre_zm_2*variables[18] + 
+           Legendre_zp_4*Legendre_zm_4*variables[19] + 
+           Legendre_zp_5*Legendre_zm_2*variables[20] + 
+           Legendre_zp_5*Legendre_zm_4*variables[21])   
+    #### phase space
+    res = tf.where(
+        in_Dalitz_plot_SRD(zp_p, zm_pp) == True,
+        res,
+        0
+    )
+    ### doing this to avoid negative values
+    res = tf.math.maximum(res, 0)
+    # print("          ")
+    # print(" IN LEGENDRE_2_2 res:")
+    # print(" IN LEGENDRE_2_2 res:")
+    # print(" IN LEGENDRE_2_2 res:")
+    # print(res)
+    # print(variables)
+    # print(shared_variables)
+    return res
+
+
+def Flat(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
+    res = np.ones(zp_p.shape)
+    res = np.where(
+        in_Dalitz_plot_SRD(zp_p, zm_pp) == True,
+        res,
+        0
+    )
+    return tf.cast(res, tf.float64)
+
+
+
+def chi2_xy_to_physics_param(xplus=None, xminus=None, yplus=None, yminus=None, xxi=None, yxi=None,
+                             pd_cov=None):
+    # assert(type(xplus) == list) # needs to contain value and error
+    xy_params = np.array([xplus, yplus, xminus, yminus, xxi, yxi])
+    par_names = ["xplus", "yplus", "xminus", "yminus", "xxi", "yxi"]
+    covariance = np.zeros(len(par_names)*len(par_names)).reshape(len(par_names),len(par_names))
+    for i in range(len(par_names)):
+        param_i = par_names[i]
+        for j in range(len(par_names)):
+            param_j = par_names[j]
+            covariance[i][j] = pd_cov[param_i][param_j]
+            pass
+        pass
+    print(covariance)
+    inv_covariance = np.linalg.inv(covariance)
+    def chi2(x):
+        gamma, rb, dB, rb_dpi, dB_dpi = x
+        pred_params = np.array(get_xy_xi(
+            (gamma, rb, dB, rb_dpi, dB_dpi)
+        ))
+        # pred_params : m_xplus, m_yplus, m_xminus, m_yminus, m_xxi, m_yxi 
+        res = 0
+        diff = (pred_params - xy_params)
+        res = np.matmul(inv_covariance, diff)
+        res = np.matmul(diff, res)
+        # for pred_par, meas_par in zip(pred_params, xy_params):
+        #     res += np.power(/meas_par[1],2)
+        return res
+    return chi2
