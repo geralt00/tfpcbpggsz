@@ -410,7 +410,7 @@ class Ntuple:
     def get_truth_matching_cuts(self):
         if (self.source.isMC == False):
             return "(Bu_M > 0)"
-        print("MAP_TRUTH_MATCHING[self.source.name]", MAP_TRUTH_MATCHING[self.source.name])
+        # print("MAP_TRUTH_MATCHING[self.source.name]", MAP_TRUTH_MATCHING[self.source.name])
         return MAP_TRUTH_MATCHING[self.source.name]
 
 
@@ -431,18 +431,18 @@ class Ntuple:
             # print("   mass pdf for ",self.mass_pdfs["both"][i_comp].component)
             # tf.print("i_comp: ",i_comp)
             self.mass_pdfs["both"][i_comp].get_mass_pdf(
-                fixed_variables[self.i_c][i_comp][2], # last index is space
+                fixed_variables[self.i_c][i_comp][4], # last index is space
                 Bsign=None
             )
             pass
         # and then initialise both dalitz and mass separately for Bplus and Bminus
         for Bsign in BSIGNS.keys():
-            print(Bsign)
+            # print(Bsign)
             for i_comp in range(len(self.mass_pdfs[Bsign])):
                 # tf.print("i_comp: ",i_comp)
                 # print("   mass and dalitz pdf for ",self.mass_pdfs[Bsign][i_comp].component)
                 self.mass_pdfs[Bsign][i_comp].get_mass_pdf(
-                    fixed_variables[self.i_c][i_comp][2],
+                    fixed_variables[self.i_c][i_comp][4],
                     Bsign=Bsign
                 )
                 # print(" in get_dalitz_pdfs")
@@ -451,19 +451,24 @@ class Ntuple:
                 # print("  function ", self.dalitz_pdfs[Bsign][i_comp].name)
                 # print(" variables ", fixed_variables[self.i_c][i_comp])
                 # print(" shraed_variables ", fixed_variables[INDEX_SHARED_THROUGH_CHANNELS][0])
+                # print(" fixed var  : ",fixed_variables[self.i_c][i_comp][INDEX_SPACE[Bsign]])
+                # print(" fixed var+1: ",fixed_variables[self.i_c][i_comp][INDEX_SPACE[Bsign]+1])
                 # print(i_comp)
                 self.dalitz_pdfs[Bsign][i_comp].get_dalitz_pdf(
                     self.norm_ampD0[Bsign]   ,
                     self.norm_ampD0bar[Bsign],
                     self.norm_zp_p[Bsign]    ,
                     self.norm_zm_pp[Bsign]   ,
-                    variables        = fixed_variables[self.i_c][i_comp][INDEX_YIELDS[Bsign]],
+                    variables_eff    = fixed_variables[self.i_c][i_comp][INDEX_SPACE[Bsign]],
+                    variables_model  = fixed_variables[self.i_c][i_comp][INDEX_SPACE[Bsign]+1],
                     shared_variables = fixed_variables[INDEX_SHARED_THROUGH_CHANNELS][0]
                     ### the 0 here doesn't mean anything, it refers to the
                     # "component" column of the dictionary, which is irrelevant
                     # for the parameters that are shared through channels.
                     # In the origin dictionary VARDICT, it corresponds to the "parameters"
-                    # column. Then the [2] selects the "mass" entry
+                    # column.
+                    # INDEX_SPACE is defined by VARDICT, where we first have Bplus_eff
+                    # and then Bplus_model for the order of the parameters
                 )
                 pass
             pass
@@ -707,10 +712,10 @@ class Ntuple:
         for i_comp in range(len(self.mass_pdfs)):
             # print("i_comp: ",i_comp)
             ### the last index correspond to the space
-            self.mass_pdfs[i_comp].get_mass_pdf(list_variables[self.i_c][i_comp][2])
+            self.mass_pdfs[i_comp].get_mass_pdf(list_variables[self.i_c][i_comp][4])
             pass
         ### first index is space, second is yield - fixed to be yield_Bplus
-        sum_yields    = sum([comp[2][0] for comp in list_variables[self.i_c]])
+        sum_yields    = sum([comp[4][0] for comp in list_variables[self.i_c]])
         tf_sum_yields = tf.cast(sum_yields,tf.float64)
         poisson = tfp.distributions.Poisson(rate=sum_yields)
         log_poisson_constraint = tf.cast(poisson.log_prob(total_yield),tf.float64)
@@ -755,17 +760,23 @@ class Ntuple:
         self.dalitz_pdfs = {}
         self.dalitz_pdfs["Bplus"]  = []
         self.dalitz_pdfs["Bminus"] = []
+        self.mass_pdfs = {}
+        self.mass_pdfs["Bplus"]  = []
+        self.mass_pdfs["Bminus"] = []
+        self.mass_pdfs["both"] = []
         print("Define Dalitz PDFs")
         for comp in self.components:
+            self.mass_pdfs["both"].append(MassPDF(comp[1], comp[0], "both"))
             for Bsign in BSIGNS.keys():
+                self.mass_pdfs[Bsign].append(MassPDF(comp[1], comp[0], Bsign))
                 isSignalDK   = (comp[0] in SIGNAL_COMPONENTS_DK )
                 isSignalDPI  = (comp[0] in SIGNAL_COMPONENTS_DPI)
                 isSignal     = ((isSignalDK == True) or (isSignalDPI == True))
-                print("")
-                print(comp[0])
-                print("isSignalDK : ", isSignalDK)
-                print("isSignalDPI: ", isSignalDPI)
-                print("isSignal   : ", isSignal)
+                # print("")
+                # print(comp[0])
+                # print("isSignalDK : ", isSignalDK)
+                # print("isSignalDPI: ", isSignalDPI)
+                # print("isSignal   : ", isSignal)
                 self.dalitz_pdfs[Bsign].append(
                     DalitzPDF(
                         comp[2], # function name like "Legendre_2_2" 
@@ -776,16 +787,6 @@ class Ntuple:
                         # I'm not sure yet
                     )
                 )
-                pass
-            pass
-        self.mass_pdfs = {}
-        self.mass_pdfs["Bplus"]  = []
-        self.mass_pdfs["Bminus"] = []
-        self.mass_pdfs["both"] = []
-        for comp in self.components:
-            self.mass_pdfs["both"].append(MassPDF(comp[1], comp[0], "both"))
-            for Bsign in BSIGNS.keys():
-                self.mass_pdfs[Bsign].append(MassPDF(comp[1], comp[0], Bsign))
                 pass
             pass
         self.norm_ampD0    = norm_ampD0
@@ -817,23 +818,23 @@ class Ntuple:
             print(" ")
             print(" ")
             return np.zeros(np.shape(ampD0)), np.zeros(np.shape(ampD0))
-        total_dalitz_pdf_values = np.zeros(np.shape(ampD0))
+        total_pdf_values = np.zeros(np.shape(ampD0))
         # total_dalitz_pdf_values["Bplus"]  = np.zeros(np.shape(ampD0))
         # total_dalitz_pdf_values["Bminus"] = np.zeros(np.shape(ampD0))
         # for Bsign in BSIGNS.keys():
-        for comp_pdf in self.dalitz_pdfs[Bsign]:
-            isSignalDK   = (comp_pdf.component in SIGNAL_COMPONENTS_DK )
-            isSignalDPI  = (comp_pdf.component in SIGNAL_COMPONENTS_DPI)
-            total_dalitz_pdf_values += comp_pdf.pdf(ampD0, ampD0bar, zp_p, zm_pp)
+        for dalitz_pdf, mass_pdf in zip(self.dalitz_pdfs[Bsign], self.mass_pdfs[Bsign]):
+            isSignalDK   = (dalitz_pdf.component in SIGNAL_COMPONENTS_DK )
+            isSignalDPI  = (mass_pdf.component in SIGNAL_COMPONENTS_DPI)
+            total_pdf_values += dalitz_pdf.pdf(ampD0, ampD0bar, zp_p, zm_pp)*mass_pdf.pdf(Bu_M)
             pass
-        total_mass_pdf_values = np.zeros(np.shape(Bu_M))
-        # total_mass_pdf_values["Bplus"]  = np.zeros(np.shape(Bu_M))
-        # total_mass_pdf_values["Bminus"] = np.zeros(np.shape(Bu_M))
-        # for Bsign in BSIGNS.keys():
-        for comp_pdf in self.mass_pdfs[Bsign]:
-            total_mass_pdf_values += comp_pdf.pdf(Bu_M)
-            pass
-        return total_mass_pdf_values, total_dalitz_pdf_values
+        # total_mass_pdf_values = np.zeros(np.shape(Bu_M))
+        # # total_mass_pdf_values["Bplus"]  = np.zeros(np.shape(Bu_M))
+        # # total_mass_pdf_values["Bminus"] = np.zeros(np.shape(Bu_M))
+        # # for Bsign in BSIGNS.keys():
+        # for comp_pdf in self.mass_pdfs[Bsign]:
+        #     total_mass_pdf_values += comp_pdf.pdf(Bu_M)
+        #     pass
+        return total_pdf_values # total_mass_pdf_values, total_dalitz_pdf_values
 
     ##### dalitz * mass pdfs
     # @tf.function
@@ -870,15 +871,15 @@ class Ntuple:
             # This is defined in VARDICT
             index_yields  = INDEX_YIELDS[Bsign]
             ######## the first term is the sum of the product of the two pdfs
-            mass_pdf_values, dalitz_pdf_values = self.get_total_pdf_values(
+            total_pdf_values = self.get_total_pdf_values(
                 Bsign
             )
-            term1 = tf.reduce_sum(-2 * clip_log(mass_pdf_values*dalitz_pdf_values))
+            term1 = tf.reduce_sum(-2 * clip_log(total_pdf_values))
             ### sum the yields of all components and
             # constrain it to the total number of events
             # print(" the yields are:")
-            # print([comp[2][index_yields] for comp in list_variables[self.i_c]])
-            sum_yields    = sum([comp[2][index_yields] for comp in list_variables[self.i_c]])
+            # print([comp[4][index_yields] for comp in list_variables[self.i_c]])
+            sum_yields    = sum([comp[4][index_yields] for comp in list_variables[self.i_c]])
             tf_sum_yields    = tf.cast(sum_yields, tf.float64)
             poisson = tfp.distributions.Poisson(rate=tf_sum_yields)
             log_poisson_constraint = tf.cast(
@@ -889,7 +890,7 @@ class Ntuple:
             term3 = 2*nevents[Bsign]*clip_log(tf_sum_yields)
             nll  += term1 + term2 + term3
             # tf.print(" ntuple: ", self.tex)
-            # tf.print(f"              shared variables ", list_variables[-1][0][2])
+            # tf.print(f"              shared variables ", list_variables[-1][0][4])
             # tf.print(f"sum_yields             {Bsign} ", tf_sum_yields)
             # tf.print(f"total_yield            {Bsign} ", total_yield)
             # tf.print(f"log_poisson_constraint {Bsign} ", log_poisson_constraint)

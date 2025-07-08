@@ -23,6 +23,7 @@ from tfpcbpggsz.Includes.VARDICT_DALITZ import VARDICT, varDict
 from tfpcbpggsz.Includes.common_classes import DICT_VARIABLES_TEX, zp_p_tex  ,zm_pp_tex, Ntuple
 
 from tfpcbpggsz.core import *
+from tfpcbpggsz.dalitz_pdfs import DICT_EFFICIENCY_FUNCTIONS
 from tfpcbpggsz.Includes.functions import *
 from tfpcbpggsz.amp_masses import *
 Kspipi = PyD0ToKspipi2018()
@@ -64,118 +65,96 @@ kwargs_data = {
     "color"     : "black"
 }
 
-parser = argparse.ArgumentParser(
-                    prog='02_Gen_and_Fit_Toys.py',
-                    description='Fit generated events',
-                    epilog='Blabla at bottom')
-parser.add_argument('--NFreeCoeff')      # option that takes a value
-parser.add_argument('-n', '--numbernormalisation')      # option that takes a value
-parser.add_argument('--date')      # option that takes a value
-args = parser.parse_args()
-N_Free_coeff = int(args.NFreeCoeff) # "Legendre_2_2"
-numbernormalisation  = args.numbernormalisation # "Legendre_2_2"
-date  = args.date # "Legendre_2_2"
+numbernormalisation  = 1000000 # args.numbernormalisation # "Legendre_2_2"
 
-
-# Efficiency_shape = "Flat"
-Efficiency_shape_gen = "Legendre_5_5"
-Efficiency_shape_fit = Efficiency_shape_gen
-if (Efficiency_shape_gen not in EFFICIENCY_SHAPES):
-    print("Unknown efficiency ----- exit")
-    exit()
-    pass
-if (Efficiency_shape_fit not in EFFICIENCY_SHAPES):
-    print("Unknown efficiency ----- exit")
-    exit()
-    pass
-
-print(f"Generation efficiency shape is {Efficiency_shape_gen}")
-print(f"Fit efficiency shape is {Efficiency_shape_fit}")
-print(f"  with {N_Free_coeff} free coefficients in the fit")
 # 
-
-########## CONDOR
-with open("job_id.txt") as f:
-    job_id = int(np.loadtxt(f))
-    pass
-plot_dir=f"/shared/scratch/rj23972/safety_net/tfpcbpggsz/canorman_Efficiency/{date}/03_Gen_and_Fit_Toys_FullEff_{N_Free_coeff}FreeCoeff_{numbernormalisation}"
-# plot_dir=f"./2025_02_07/toy_results_{Efficiency_shape}"
-# condor_id=2
-# while os.path.isdir(f'{plot_dir}/{condor_id}'):
-#     condor_id+=1
-#     pass
-# plot_dir = f'{plot_dir}/{condor_id}'
-#########
-
-# ####### NOT CONDOR
-# plot_dir=f"./2025_02_20/toy_results_{Efficiency_shape_gen}_{Efficiency_shape_fit}_FullEff"
-# job_id=1
-# while os.path.isdir(f'{plot_dir}/study_{job_id}'):
-#     job_id+=1
-#     pass
-# ######
-
-plot_dir = f'{plot_dir}/study_{job_id}'
+plot_dir=f"2025_07_04/TOY_EXAMPLE"
 os.makedirs(plot_dir, exist_ok=True)
 os.makedirs(f"{plot_dir}/preFit/",exist_ok=True)
 os.makedirs(f"{plot_dir}/generation/",exist_ok=True)
-if (job_id < 10):
-    shutil.copyfile('03_Gen_and_Fit_Toys_FullEff.py', f'{plot_dir}/03_Gen_and_Fit_Toys_FullEff.py')
-    pass
+shutil.copyfile('TOY_EXAMPLE.py', f'{plot_dir}/TOY_EXAMPLE.py')
 pathname_output = plot_dir
+print(" plot_dir       : ", plot_dir)
+print(" pathname_output: ", pathname_output)
 
 
-time1 = time.time()
-#Generating the B2DK signal 
+# Create the generator object
 pcgen = pcbpggsz_generator()
 
+# copy the big VARDICT dictionary
 fixed_variables = dict(**VARDICT["SDATA"])
+
+# get the mass shape parameters for the generator
 B2DK_mass_variables  = list(fixed_variables["CB2DK_D2KSPIPI_DD"]["DK_Kspipi"]["mass"].values())
 B2Dpi_mass_variables = list(fixed_variables["CB2DPI_D2KSPIPI_DD"]["Dpi_Kspipi"]["mass"].values())
 B2Dpi_misID_mass_variables = list(fixed_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["mass"].values())
 
 
 ####### LOAD THE RESULT OF THE EFFICIENCY FIT
-with open(f"means_results_efficiency_shape.json") as f:
-    means = json.load(f)
+
+### B2DK
+with open(f"Efficiency_shape_B2DK.json") as f:
+    ## this contains the results of a fit of the PHSP MC
+    means_Efficiency_shape_B2DK = json.load(f)
     pass
 
-efficiency_variables = []
-free_efficiency_coeffs_gen = ["c10","c20","c01", "c02", "c11", "c21", "c12", "c22", "c30", "c40", "c50", "c04", "c22", "c24", "c32", "c34", "c42", "c44"]
-if (N_Free_coeff == 0):
-    free_efficiency_coeffs_gen = []
-    pass    
-else:
-    free_efficiency_coeffs_gen = free_efficiency_coeffs_gen[:N_Free_coeff+1]
-    pass
+# initialise empty list
+efficiency_variables_B2DK = []
+# list of coefficients that will be non-zero in the generation efficiency
+free_efficiency_coeffs_gen_B2DK = ["c10","c20","c01", "c02", "c11", "c21", "c12", "c22", "c30"] # , "c40", "c50", "c04", "c22", "c24", "c32", "c34", "c42", "c44"]
 
-for eff_var in DICT_NAME_COEFF[Efficiency_shape_gen]:
-    if (f"{eff_var}" in free_efficiency_coeffs_gen):
-        efficiency_variables.append(means[f"{eff_var}_DK_Kspipi_DD"])
+# fill in the efficiency_variables_B2DK object with fit result if necessary
+for eff_var in DICT_NAME_COEFF["Legendre_5_5"]: # "Flat"
+    if (f"{eff_var}" in free_efficiency_coeffs_gen_B2DK):
+        efficiency_variables_B2DK.append(means_Efficiency_shape_B2DK[f"{eff_var}_DK_Kspipi_DD"])
     else:
-        efficiency_variables.append(fixed_variables["CB2DK_D2KSPIPI_DD"]["DK_Kspipi"]["Bplus_efficiency"][eff_var])
+        efficiency_variables_B2DK.append(fixed_variables["CB2DK_D2KSPIPI_DD"]["DK_Kspipi"]["Bplus_efficiency"][eff_var])
     pass
 
-
-B2DK_Bplus_efficiency_variables    = efficiency_variables
-B2DK_Bminus_efficiency_variables   = efficiency_variables
-B2Dpi_Bminus_efficiency_variables  = efficiency_variables
-B2Dpi_Bplus_efficiency_variables   = efficiency_variables
+B2DK_Bplus_efficiency_variables    = efficiency_variables_B2DK
+B2DK_Bminus_efficiency_variables   = efficiency_variables_B2DK
 
 
-print("B2DK_Bplus_efficiency_variables    :   ", B2DK_Bplus_efficiency_variables   )
-print("B2DK_Bminus_efficiency_variables   :   ", B2DK_Bminus_efficiency_variables  )
-print("B2Dpi_Bminus_efficiency_variables  :   ", B2Dpi_Bminus_efficiency_variables )
-print("B2Dpi_Bplus_efficiency_variables   :   ", B2Dpi_Bplus_efficiency_variables  )
+##### B2Dpi is generated without efficiency effects
+B2Dpi_Bminus_efficiency_variables  = [0.] 
+B2Dpi_Bplus_efficiency_variables   = [0.]
 
-####################### some tools for plotting: 2D grid of invariant Dalitz masses
-BDT_cut = 0.4
-# min_mass = 5200
-min_mass = 5080
-max_mass = 5800
+##### B2Dpi misID
+with open(f"Efficiency_shape_B2Dpi_misID.json") as f:
+    means_Efficiency_shape_B2Dpi_misID = json.load(f)
+    pass
+
+efficiency_variables_Dpi_misID = []
+# here, by setting this to an empty list, it effectively generates a flat efficiency
+free_efficiency_coeffs_gen_B2Dpi_misID = [] # "c10", "c20", "c01", "c02", "c11", "c21", "c12", "c22", "c30"] # , "c40", "c50", "c04", "c22", "c24", "c32", "c34", "c42", "c44"]
+
+for eff_var in DICT_NAME_COEFF["Legendre_5_5"]:
+    if (f"{eff_var}" in free_efficiency_coeffs_gen_B2Dpi_misID):
+        efficiency_variables_Dpi_misID.append(means_Efficiency_shape_B2Dpi_misID[f"{eff_var}_Dpi_Kspipi_misID_DD_Bplus"])
+    else:
+        efficiency_variables_Dpi_misID.append(fixed_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bplus_efficiency"][eff_var])
+    pass
+
+B2Dpi_misID_Bminus_efficiency_variables  = efficiency_variables_Dpi_misID
+B2Dpi_misID_Bplus_efficiency_variables   = efficiency_variables_Dpi_misID
+
+#################
+print("B2DK_Bplus_efficiency_variables           :   ", B2DK_Bplus_efficiency_variables         )
+print("B2DK_Bminus_efficiency_variables          :   ", B2DK_Bminus_efficiency_variables        )
+print("B2Dpi_Bminus_efficiency_variables         :   ", B2Dpi_Bminus_efficiency_variables       )
+print("B2Dpi_Bplus_efficiency_variables          :   ", B2Dpi_Bplus_efficiency_variables        )
+print("B2Dpi_misID_Bminus_efficiency_variables   :   ", B2Dpi_misID_Bminus_efficiency_variables )
+print("B2Dpi_misID_Bplus_efficiency_variables    :   ", B2Dpi_misID_Bplus_efficiency_variables  )
+#################
+
+####################### some tools for plotting
+# mass
+min_mass = 5239
+max_mass = 5309
 Bmass_vec = np.arange(min_mass, max_mass, 1)
 tf_Bmass_vec = tf.cast(Bmass_vec, tf.float64)
-####
+B_mass_range = [min_mass, max_mass]
+#### dalitz
 min_dalitz = 0.4
 max_dalitz = 3.0
 nbins=100
@@ -183,27 +162,22 @@ m_Kspip_range = [min_dalitz, max_dalitz]
 num_mass_values = 1000.
 Dalitz_mass_vec = np.arange(min_dalitz, max_dalitz, (max_dalitz-min_dalitz)/num_mass_values )
 tf_Dalitz_mass_vec = tf.cast(Dalitz_mass_vec, tf.float64)
-####
-BR_B2DK  = 3.63e-4
-BR_B2Dpi = 4.68e-3
-str_BDT_cut = "(BDT_output > "+str(BDT_cut)+")"
 #### scaling for comparison histogram vs pdfs
 mass_scaling   = (max_mass - min_mass) / float(nbins)
 dalitz_scaling = (m_Kspip_range[1]-m_Kspip_range[0]) / float(nbins)
-######## 2D grid
+######## 2D grid for plotting 
 Dalitz_Kspip_mat, Dalitz_Kspim_mat = np.meshgrid(Dalitz_mass_vec,Dalitz_mass_vec)
-# Dalitz_Kspip_mat = tf.cast(Dalitz_Kspip_mat, tf.float64)
-# Dalitz_Kspim_mat = tf.cast(Dalitz_Kspim_mat, tf.float64)
 ## SRD variables
 RD_var = func_var_rotated(Dalitz_Kspip_mat, Dalitz_Kspim_mat, QMI_zpmax_Kspi, QMI_zpmin_Kspi, QMI_zmmax_Kspi, QMI_zmmin_Kspi)
 SRD_var = func_var_rotated_stretched(RD_var)
 zp_p  = SRD_var[0]
 zm_pp = SRD_var[1]
+srd_range = [-1,1]
 # compute the amplitudes of this 2D mesh
 ampD0    = np.zeros(zp_p.shape , dtype=complex)
 ampD0bar = np.zeros(zm_pp.shape, dtype=complex)
 for row in range(zp_p.shape[0]):
-    if (row%100==0): print("Processed ", row)
+    # if (row%100==0): print("Processed ", row)
     for col in range(zp_p.shape[1]):
         tmp_amps = Kspipi.get_amp(
             zp_p[row][col] ,
@@ -216,57 +190,61 @@ for row in range(zp_p.shape[0]):
 
 
 
-
-###
-B_mass_range = [5080, 5800]
-srd_range = [-1,1]
-
-############## START THE FIT
+############## DEFINE THE COMPONENTS IN THE TOY
 components = {
-    "CB2DK_D2KSPIPI_DD": [
-        ["DK_Kspipi", "Cruijff+Gaussian"  , Efficiency_shape_fit],
-        # ["Dpi_Kspipi_misID", "SumCBShape" , "Legendre_2_2"]
+    "CB2DK_D2KSPIPI_DD": [ # the channel
+        ["DK_Kspipi", "Cruijff+Gaussian"  , "Flat"], # name of the component, mass shape, and efficiency function
+        ["Dpi_Kspipi_misID", "SumCBShape" , "Legendre_5_5"]
     ],
     "CB2DPI_D2KSPIPI_DD": [
-        ["Dpi_Kspipi", "Cruijff+Gaussian" , Efficiency_shape_fit]
+        ["Dpi_Kspipi", "Cruijff+Gaussian" , "Flat"]
     ],
 }
-components_tex = {
+components_tex = { # for convenience
     "DK_Kspipi" : r"$B^{\pm} \rightarrow D K^{\pm}$",
     "Dpi_Kspipi": r"$B^{\pm} \rightarrow D \pi^{\pm}$",
     "Dpi_Kspipi_misID": r"$B^{\pm} \rightarrow D \pi^{\pm}_{\pi\rightarrow K}$"
 }
 
+# list of the channels that will be included in these toys
 list_channels = ["CB2DK_D2KSPIPI_DD", "CB2DPI_D2KSPIPI_DD"]
 
-############
-yields = { # bper B sign
-    "DK_Kspipi_DD"        : 6266, # 1000, # 10,  #  
-    "Dpi_Kspipi_DD"       : 89941,# 1000, # 10,  #  
-    "Dpi_Kspipi_DD_misID" : 10  , #  1500, # 
+# name of the mass variables for each channel
+variable_to_fit = {
+    "CB2DK_D2KSPIPI_DD" : "Bu_constD0KSPV_M",
+    "CB2DPI_D2KSPIPI_DD": "Bu_constD0KSPV_swapBachToPi_M",
 }
 
-# GAMMA    = 90
-# RB_DK    = 1
-# DELTA_DK = 90
+############
+yields = { # per B sign
+    "DK_Kspipi_DD"        : 6266 , # 1000, # 10,  #  
+    "Dpi_Kspipi_DD"       : 89941, # 1000, # 10,  #  
+    "Dpi_Kspipi_DD_misID" : 516  , # 
+}
+
+# generation parameters
 generation_parameters = {
     "CB2DK_D2KSPIPI_DD": {
         "DK_Kspipi": [
-            yields["DK_Kspipi_DD"]    ,
-            "Cruijff+Gaussian"        ,
-            "B2Dh_D2Kspipi"           ,
-            B2DK_mass_variables       ,
-            [GAMMA, RB_DK, DELTAB_DK] ,
-            B2DK_Bplus_efficiency_variables ,
-            B2DK_Bminus_efficiency_variables
+            yields["DK_Kspipi_DD"]    ,       # yield
+            "Cruijff+Gaussian"        ,       # mass shape
+            "B2Dh_D2Kspipi"           ,       # useless
+            B2DK_mass_variables       ,       # mass variables
+            [GAMMA, RB_DK, DELTAB_DK] ,       # inputs
+            B2DK_Bplus_efficiency_variables , # Dalitz efficiencies Bplus
+            B2DK_Bminus_efficiency_variables, # Dalitz efficiencies Bminus
+            "Legendre_5_5"                    # name of the efficiency function
         ],
-        # "Dpi_Kspipi_misID": [
-        #     yields["Dpi_Kspipi_DD_misID"]    ,
-        #     "SumCBShape"              ,
-        #     "B2Dh_D2Kspipi"           ,
-        #     B2Dpi_misID_mass_variables       ,
-        #     [GAMMA, RB_DPI, DELTAB_DPI] ,
-        # ]
+        "Dpi_Kspipi_misID": [
+            yields["Dpi_Kspipi_DD_misID"]    ,
+            "SumCBShape"              ,
+            "B2Dh_D2Kspipi"           ,
+            B2Dpi_misID_mass_variables ,
+            [GAMMA, RB_DPI, DELTAB_DPI],
+            B2Dpi_misID_Bplus_efficiency_variables ,
+            B2Dpi_misID_Bminus_efficiency_variables,
+            "Legendre_5_5"
+        ]
     },
     "CB2DPI_D2KSPIPI_DD": {
         "Dpi_Kspipi": [
@@ -276,11 +254,13 @@ generation_parameters = {
             B2Dpi_mass_variables     ,
             [GAMMA, RB_DPI, DELTAB_DPI]    ,
             B2Dpi_Bplus_efficiency_variables ,
-            B2Dpi_Bminus_efficiency_variables
+            B2Dpi_Bminus_efficiency_variables,
+            "Flat"
         ],
     },
 }
 
+# dictionaries that contain the generated events
 ret_Bp_DK, ret_Bp_DK_mass = {}, {}
 ret_Bm_DK, ret_Bm_DK_mass = {}, {}
 p1_p_DK,p2_p_DK,p3_p_DK = {}, {}, {}
@@ -292,23 +272,10 @@ m13_m_DK = {}
 srd_p_DK = {}
 srd_m_DK = {}
 
-
-############################ TRANSFORM THE TOYS INTO "DATA-LIKE" NTUPLES
-basic_list_var = ["Bu_ID", "zp_p", "zm_pp", "m_Kspip", "m_Kspim"]
-for particle in ["KS","pim","pip"]:
-    for mom in ["PE", "PX", "PY", "PZ"]:
-        basic_list_var += [f"{particle}_{mom}"]
-        pass
-    pass
-
-variable_to_fit = {
-    "CB2DK_D2KSPIPI_DD" : "Bu_constD0KSPV_M",
-    "CB2DPI_D2KSPIPI_DD": "Bu_constD0KSPV_swapBachToPi_M",
-}
-
-
+# start the generation per channel
 for channel in list_channels:
     print("Start generating events for channel ", channel)
+    # initialise dictionaries
     ret_Bp_DK[channel], ret_Bp_DK_mass[channel] = {}, {}
     ret_Bm_DK[channel], ret_Bm_DK_mass[channel] = {}, {}
     p1_p_DK[channel],p2_p_DK[channel],p3_p_DK[channel] = {}, {}, {}
@@ -319,7 +286,7 @@ for channel in list_channels:
     m13_m_DK[channel] = {}
     srd_p_DK[channel] = {}
     srd_m_DK[channel] = {}
-    for comp in components[channel]: # generation_parameters[channel].keys():
+    for comp in components[channel]: # loop over the components in each channel
         gen_comp = comp[0]
         print("     component: ", gen_comp)
         print("                  ",generation_parameters[channel][gen_comp][0], " Bplus")
@@ -334,7 +301,7 @@ for channel in list_channels:
             B_mass_range    = B_mass_range,
             mass_shape_name = generation_parameters[channel][gen_comp][1],
             mass_variables  = generation_parameters[channel][gen_comp][3],
-            efficiency_function  = Efficiency_shape_gen,
+            efficiency_function  = generation_parameters[channel][gen_comp][7],
             efficiency_variables = generation_parameters[channel][gen_comp][5],
         )
         print("                  ",generation_parameters[channel][gen_comp][0], " Bminus")
@@ -349,7 +316,7 @@ for channel in list_channels:
             B_mass_range    = B_mass_range,
             mass_shape_name = generation_parameters[channel][gen_comp][1],
             mass_variables  = generation_parameters[channel][gen_comp][3],
-            efficiency_function  = Efficiency_shape_gen,
+            efficiency_function  = generation_parameters[channel][gen_comp][7],
             efficiency_variables = generation_parameters[channel][gen_comp][6],
         )
         p1_p_DK[channel][gen_comp],p2_p_DK[channel][gen_comp],p3_p_DK[channel][gen_comp] = ret_Bp_DK[channel][gen_comp] # Ks, pi-, pi+
@@ -363,7 +330,30 @@ for channel in list_channels:
         pass
     pass
 
+# some plots
+for channel in list_channels:
+    for comp in components[channel]: # loop over the components in each channel
+        gen_comp = comp[0]
+        plt.scatter(m13_p_DK[channel][gen_comp], m12_p_DK[channel][gen_comp], label=rf"$B^+$, {gen_comp}",
+                    marker="o",
+                    s=1,
+                    color="black")
+        plt.xlabel(r"$m(K_S\pi^+)^2$ [GeV/$c^2$]")
+        plt.ylabel(r"$m(K_S\pi^-)^2$ [GeV/$c^2$]")
+        plt.savefig(f"{plot_dir}/generation/{channel}_Bplus_{gen_comp}.png")
+        plt.close("all")
+        plt.scatter(m13_m_DK[channel][gen_comp], m12_m_DK[channel][gen_comp], label=rf"$B^-$, {gen_comp}",
+                    marker="o",
+                    s=1,
+                    color="black")
+        plt.xlabel(r"$m(K_S\pi^+)^2$ [GeV/$c^2$]")
+        plt.ylabel(r"$m(K_S\pi^-)^2$ [GeV/$c^2$]")
+        plt.savefig(f"{plot_dir}/generation/{channel}_Bminus_{gen_comp}.png")
+        plt.close("all")
+        pass
+    pass
 
+# organise the generated toys the same way the real data is organised before feeding it to the fitter
 toy_data = {}
 for channel in list_channels:
     toy_data[channel] = {
@@ -443,203 +433,113 @@ for channel in list_channels:
     pass
 
 
-
+# save the toy in the same format as the real data
 uproot_data = {}
 print(" =============    STORE TOY AT")
-print(f"{pathname_output}/outfile_{job_id}.root")
-outfile = up.recreate(f"{pathname_output}/outfile_{job_id}.root")
+print(f"{pathname_output}/outfile.root")
+outfile = up.recreate(f"{pathname_output}/outfile.root")
 for channel in list_channels:
     uproot_data[channel] = {}
-    # for key in toy_data[channel].keys():
-    #     print(len(toy_data[channel][key]))
     uproot_data[channel]  = pd.DataFrame.from_dict(toy_data[channel])
     outfile[channel]  = uproot_data[channel]
     pass
 
 
 
-print("Some gen level plots")
-for channel in list_channels:
-    mplhep.histplot(
-        np.histogram(
-            uproot_data[channel].query("Bu_ID>0")[variable_to_fit[channel]],
-            bins=nbins,
-            range=B_mass_range
-        ),
-        label="Bplus"
-    )
-    mplhep.histplot(
-        np.histogram(
-            uproot_data[channel].query("Bu_ID<0")[variable_to_fit[channel]],
-            bins=nbins,
-            range=B_mass_range
-        ),
-    label="Bminus"
-    )
-    plt.title(f"generation {channel}")
-    plt.legend()
-    plt.xlabel(f"invariant mass")
-    plt.tight_layout()
-    if (job_id < 10):
-        plt.savefig(f"{plot_dir}/generation/{channel}_invariant_mass.png")
-        pass
-    plt.close("all")
-    ###### Bplus srd
-    mplhep.hist2dplot(
-        np.histogram2d(
-            uproot_data[channel].query("Bu_ID>0")["zp_p" ],
-            uproot_data[channel].query("Bu_ID>0")["zm_pp"],
-            bins=[nbins,nbins],
-            range= [srd_range, srd_range])
-    )
-    plt.title(f"generation {channel}")
-    plt.xlabel(zp_p_tex)
-    plt.ylabel(zm_pp_tex)
-    plt.tight_layout()
-    if (job_id < 10):
-        plt.savefig(f"{plot_dir}/generation/{channel}_Bplus_srd_generation.png")
-        pass
-    plt.close("all")
-    ###### Bminus srd    
-    mplhep.hist2dplot(
-        np.histogram2d(
-            uproot_data[channel].query("Bu_ID<0")["zp_p" ],
-            uproot_data[channel].query("Bu_ID<0")["zm_pp"],
-            bins=[nbins,nbins],
-            range= [srd_range, srd_range])
-    )
-    plt.title(f"generation {channel}")
-    plt.xlabel(zp_p_tex)
-    plt.ylabel(zm_pp_tex)
-    plt.tight_layout()
-    if (job_id < 10):
-        plt.savefig(f"{plot_dir}/generation/{channel}_Bminus_srd_generation.png")
-        pass
-    plt.close("all")
-    ###### Bplus dalitz    
-    mplhep.hist2dplot(
-        np.histogram2d(
-            uproot_data[channel].query("Bu_ID>0")["m_Kspip" ],
-            uproot_data[channel].query("Bu_ID>0")["m_Kspim"],
-            bins=[nbins,nbins],
-            range= [m_Kspip_range,m_Kspip_range])
-    )
-    plt.title(f"generation {channel}")
-    plt.xlabel("Ks pi+")
-    plt.ylabel("Ks pi-")
-    plt.tight_layout()
-    if (job_id < 10):
-        plt.savefig(f"{plot_dir}/generation/{channel}_Bplus_dalitz_generation.png")
-        pass
-    plt.close("all")
-    ###### Bminus dalitz    
-    mplhep.hist2dplot(
-        np.histogram2d(
-            uproot_data[channel].query("Bu_ID<0")["m_Kspip" ],
-            uproot_data[channel].query("Bu_ID<0")["m_Kspim"],
-            bins=[nbins,nbins],
-            range= [m_Kspip_range,m_Kspip_range])
-    )
-    plt.title(f"generation {channel}")
-    plt.xlabel("Ks pi+")
-    plt.ylabel("Ks pi-")
-    plt.tight_layout()
-    if (job_id < 10):
-        plt.savefig(f"{plot_dir}/generation/{channel}_Bminus_dalitz_generation.png")
-        pass
-    plt.close("all")
-    pass
+############# GENERATE NORMALISATION
+# this is done per channel (two components in the same channel will share the same normalisation sample)
 
-############# NORMALISATION
-
+######## CB2DK
 #PHSP
 yield_normalisation = int(numbernormalisation)
-phsp = PhaseSpaceGenerator().generate
-phsp_p, phsp_m = phsp(yield_normalisation), phsp(yield_normalisation)
 
-phsp_p1, phsp_p2, phsp_p3 = phsp_p
-phsp_m1, phsp_m2, phsp_m3 = phsp_m
-
-phsp_m12_p = get_mass(phsp_p1,phsp_p2)
-phsp_m13_p = get_mass(phsp_p1,phsp_p3)
-phsp_m12_m = get_mass(phsp_m1,phsp_m2)
-phsp_m13_m = get_mass(phsp_m1,phsp_m3)
-
-phsp_srd_p = phsp_to_srd(phsp_m12_p,phsp_m13_p)
-phsp_srd_m = phsp_to_srd(phsp_m12_m,phsp_m13_m)
-
-amp_phsp_p, ampbar_phsp_p = pcgen.amp(phsp_p), pcgen.ampbar(phsp_p)
-amp_phsp_m, ampbar_phsp_m = pcgen.amp(phsp_m), pcgen.ampbar(phsp_m)
-
-toy_phsp_DK = {
-    "ampD0" : {
-        "Bplus"  : amp_phsp_p,
-        "Bminus" : amp_phsp_m,
-    },
-    "ampD0bar" : {
-        "Bplus"  : ampbar_phsp_p,
-        "Bminus" : ampbar_phsp_m,
-    },
-    "zp_p" : {
-        "Bplus"  : phsp_srd_p[0],
-        "Bminus" : phsp_srd_m[0],
-    },
-    "zm_pp" : {
-        "Bplus"  : phsp_srd_p[1],
-        "Bminus" : phsp_srd_m[1],
-    },
+normalisation_parameters = {
+    "CB2DK_D2KSPIPI_DD": [
+        yield_normalisation,
+        B2DK_Bplus_efficiency_variables , # efficiency parameters Bplus
+        B2DK_Bminus_efficiency_variables, # efficiency parameters Bminus
+        "Legendre_5_5",                   # name of the efficiency function
+    ],
+    "CB2DPI_D2KSPIPI_DD": [
+        yield_normalisation,
+        B2Dpi_Bplus_efficiency_variables ,
+        B2Dpi_Bminus_efficiency_variables,
+        "Flat" # "Flat" implies no efficiency 
+    ],
 }
 
-toy_phsp_Dpi = {
-    "ampD0" : {
-        "Bplus"  : amp_phsp_p,
-        "Bminus" : amp_phsp_m,
-    },
-    "ampD0bar" : {
-        "Bplus"  : ampbar_phsp_p,
-        "Bminus" : ampbar_phsp_m,
-    },
-    "zp_p" : {
-        "Bplus"  : phsp_srd_p[0],
-        "Bminus" : phsp_srd_m[0],
-    },
-    "zm_pp" : {
-        "Bplus"  : phsp_srd_p[1],
-        "Bminus" : phsp_srd_m[1],
-    },
-}
+phsp_Bp, phsp_Bp_mass = {}, {}
+phsp_Bm, phsp_Bm_mass = {}, {}
+phsp_p1_p,phsp_p2_p,phsp_p3_p = {}, {}, {}
+phsp_p1_m,phsp_p2_m,phsp_p3_m = {}, {}, {}
+phsp_m12_p = {}
+phsp_m13_p = {}
+phsp_m12_m = {}
+phsp_m13_m = {}
+phsp_srd_p = {}
+phsp_srd_m = {}
+amp_phsp_p, ampbar_phsp_p = {}, {}
+amp_phsp_m, ampbar_phsp_m = {}, {}
+toy_phsp = {}
+for channel in list_channels:
+    print("Start generating normlisation events for channel ", channel)
+    phsp_Bp[channel] = pcgen.generate(
+        yield_normalisation,
+        type="phsp",
+        efficiency_function  = normalisation_parameters[channel][3],
+        efficiency_variables = normalisation_parameters[channel][1],
+    )
+    phsp_Bm[channel] = pcgen.generate(
+        yield_normalisation,
+        type="phsp",
+        efficiency_function  = normalisation_parameters[channel][3],
+        efficiency_variables = normalisation_parameters[channel][2],
+    )
+    # isolate the four momenta of each particle (KS, pip, pim)
+    phsp_p1_p[channel],phsp_p2_p[channel],phsp_p3_p[channel] = phsp_Bp[channel] # Ks, pi-, pi+
+    phsp_p1_m[channel],phsp_p2_m[channel],phsp_p3_m[channel] = phsp_Bm[channel] # Ks, pi-, pi+
+    # compute the invariant masses
+    phsp_m12_p[channel] = get_mass(phsp_p1_p[channel],phsp_p2_p[channel])
+    phsp_m13_p[channel] = get_mass(phsp_p1_p[channel],phsp_p3_p[channel])
+    phsp_m12_m[channel] = get_mass(phsp_p1_m[channel],phsp_p2_m[channel])
+    phsp_m13_m[channel] = get_mass(phsp_p1_m[channel],phsp_p3_m[channel])
+    # srd variables
+    phsp_srd_p[channel] = phsp_to_srd(phsp_m12_p[channel],phsp_m13_p[channel])
+    phsp_srd_m[channel] = phsp_to_srd(phsp_m12_m[channel],phsp_m13_m[channel])
+    amp_phsp_p[channel], ampbar_phsp_p[channel] = pcgen.amp(phsp_Bp[channel]), pcgen.ampbar(phsp_Bp[channel])
+    amp_phsp_m[channel], ampbar_phsp_m[channel] = pcgen.amp(phsp_Bm[channel]), pcgen.ampbar(phsp_Bm[channel])
 
-    
-# mplhep.hist2dplot(
-#     np.histogram2d(
-#         toy_phsp_DK["zp_p" ]["Bplus"],
-#         toy_phsp_DK["zm_pp"]["Bplus"],
-#         bins=[nbins,nbins],
-#         range= [srd_range, srd_range])
-# )
-# plt.title(r"$B^{+} \rightarrow [K_S\pi^+\pi^-]_D K^{+}$")
-# plt.xlabel(zp_p_tex)
-# plt.ylabel(zm_pp_tex)
-# plt.tight_layout()
-# plt.savefig(f"{plot_dir}/Bplus_PHSP_srd_generation.png")
-# plt.close("all")
-
-# mplhep.hist2dplot(
-#     np.histogram2d(
-#         toy_phsp_DK["zp_p" ]["Bminus"],
-#         toy_phsp_DK["zm_pp"]["Bminus"],
-#         bins=[nbins,nbins],
-#         range= [srd_range, srd_range])
-# )
-# plt.title(r"$B^{-} \rightarrow [K_S\pi^+\pi^-]_D K^{-}$")
-# plt.xlabel(zp_p_tex)
-# plt.ylabel(zm_pp_tex)
-# plt.tight_layout()
-# plt.savefig(f"{plot_dir}/Bminus_PHSP_srd_generation.png")
-# plt.close("all")
+    # organise the normalisation samples the same way the real MC samples are
+    toy_phsp[channel] = {
+        "ampD0" : {
+            "Bplus"  : amp_phsp_p[channel],
+            "Bminus" : amp_phsp_m[channel],
+        },
+        "ampD0bar" : {
+            "Bplus"  : ampbar_phsp_p[channel],
+            "Bminus" : ampbar_phsp_m[channel],
+        },
+        "zp_p" : {
+            "Bplus"  : phsp_srd_p[channel][0],
+            "Bminus" : phsp_srd_m[channel][0],
+        },
+        "zm_pp" : {
+            "Bplus"  : phsp_srd_p[channel][1],
+            "Bminus" : phsp_srd_m[channel][1],
+        },
+    }
+    pass
 
 
-####### 
+toy_phsp_DK  = toy_phsp["CB2DK_D2KSPIPI_DD"]
+toy_phsp_Dpi = toy_phsp["CB2DPI_D2KSPIPI_DD"]
+
+
+####### START THE FITTING SECTION
+
+# From the big VARDICT directory, reads only the channels and components that we want to include
+# This is actually quite important because it determines the order in which the channels and components
+#     appear in the big table.
 input_variables = {}
 for channel in list_channels:
     input_variables[channel]       = {} ## loop over channel
@@ -649,28 +549,11 @@ for channel in list_channels:
         pass
     pass
 
+# This one HAS to be there
 input_variables["SHARED_THROUGH_CHANNELS"] = VARDICT["SDATA"]["SHARED_THROUGH_CHANNELS"]
 
 
-
-ntuples = {}
-for channel in list_channels:
-    ntuples[channel]  = Ntuple(
-        "MC_Bu_D0K_KSpipi_TightCut_LooserCuts_fixArrow",channel,"YRUN2", "MagAll"
-    )
-    index_channel = list(input_variables.keys()).index(channel)
-    ntuples[channel].initialise_fit(components[channel], index_channel)
-    list_var = [ntuples[channel].variable_to_fit] + basic_list_var
-    ntuples[channel].store_events(
-        f"{pathname_output}/outfile_{job_id}.root:{channel}",
-        list_var,
-        None,
-        Kspipi_up
-    )
-    pass
-
-###########
-######## define starting values of the variables in the fit
+# define input values of the variables in the fit
 inputs = {
     "gamma" : deg_to_rad(GAMMA), "rb" : RB_DK, "dB" : deg_to_rad(DELTAB_DK),
     "rb_dpi": RB_DPI, "dB_dpi": deg_to_rad(DELTAB_DPI)
@@ -679,6 +562,67 @@ inputs["xplus"], inputs["yplus"], inputs["xminus"], inputs["yminus"], inputs["xx
     (inputs["gamma"], inputs["rb"], inputs["dB"], inputs["rb_dpi"], inputs["dB_dpi"])
 )
 
+
+ 
+# The misID B2DPi shape is fixed from the result of the fit
+# 2025_06_30/03_Fit_DPi_shape_with_Efficiency/8_N_Free_coeff/study_-5/means_results.json
+with open(f"B2Dpi_misID_shape_parameters.json") as f: 
+    means_Fit_B2Dpi_misID_shape = json.load(f)
+    pass
+
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bplus_model"]["xplus" ]  = means_Fit_B2Dpi_misID_shape["xplus_Dpi_misID"]
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bminus_model"]["xplus" ] = means_Fit_B2Dpi_misID_shape["xplus_Dpi_misID"]
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bplus_model"]["yplus" ]  = means_Fit_B2Dpi_misID_shape["yplus_Dpi_misID"]
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bminus_model"]["yplus" ] = means_Fit_B2Dpi_misID_shape["yplus_Dpi_misID"]
+
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bplus_model"]["xminus" ]  = means_Fit_B2Dpi_misID_shape["xminus_Dpi_misID"]
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bminus_model"]["xminus" ] = means_Fit_B2Dpi_misID_shape["xminus_Dpi_misID"]
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bplus_model"]["yminus" ]  = means_Fit_B2Dpi_misID_shape["yminus_Dpi_misID"]
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bminus_model"]["yminus" ] = means_Fit_B2Dpi_misID_shape["yminus_Dpi_misID"]
+
+for var in ["c10", "c20", "c01", "c02", "c11", "c21", "c12", "c22", "c30"]:
+    input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bplus_efficiency"][var]  = means_Fit_B2Dpi_misID_shape[f"{var}_Dpi_Kspipi_misID_DD"]
+    input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["Bminus_efficiency"][var] = means_Fit_B2Dpi_misID_shape[f"{var}_Dpi_Kspipi_misID_DD"]
+    pass
+    
+# misID B2Dpi yield
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["mass"]["yield_Bplus" ] = yields["Dpi_Kspipi_DD_misID"]
+input_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["mass"]["yield_Bminus"] = yields["Dpi_Kspipi_DD_misID"]
+
+
+############ initialise ntuples for fitting
+# variables 
+basic_list_var = ["Bu_ID", "zp_p", "zm_pp", "m_Kspip", "m_Kspim"]
+for particle in ["KS","pim","pip"]:
+    for mom in ["PE", "PX", "PY", "PZ"]:
+        basic_list_var += [f"{particle}_{mom}"]
+        pass
+    pass
+
+# ntuples objects
+ntuples = {}
+for channel in list_channels:
+    ntuples[channel]  = Ntuple(
+        "MC_Bu_D0K_KSpipi_TightCut_LooserCuts_fixArrow",channel,"YRUN2", "MagAll"
+    )
+    # again, an important caveat: we see here the variable "index_channel" that is given to the
+    # initialise_fit method. This index channel is read from the input_variables dictionary.
+    # This ensures that, when changing "input_variables" from a dictionary to a table,
+    # the index used in the table for each channel does indeed match from the original dictionary.
+    index_channel = list(input_variables.keys()).index(channel)
+    ntuples[channel].initialise_fit(components[channel], index_channel)
+    list_var = [ntuples[channel].variable_to_fit] + basic_list_var
+    # this is the method that reads the data that is gonna be fitted, here we read the toy that we previously generated
+    ntuples[channel].store_events(
+        f"{pathname_output}/outfile.root:{channel}", # f"/shared/scratch/rj23972/safety_net/tfpcbpggsz/canorman_B2DPI_misID/2025_06_16/01_No_Efficiency_noMisID/study_-2/outfile_-2.root:{channel}", # f"/software/rj23972/safety_net/tfpcbpggsz/canorman_Efficency/2025_05_28/TEST_FITTER/REFERENCE_FITTER/outfile_{job_id}.root:{channel}", 
+        list_var,
+        None,
+        Kspipi_up
+    )
+    pass
+
+
+# starting values of the fitted parameters
 start_values = {
     "yield_Bplus_DK"  :                          yields["DK_Kspipi_DD"],
     "yield_Bminus_DK" :                          yields["DK_Kspipi_DD"],
@@ -690,16 +634,16 @@ start_values = {
     "signal_width_Dpi":                           varDict['sigma_dk_DD']+50,
     # "yield_Bplus_Dpi_misID"  :                      400.,
     # "yield_Bminus_Dpi_misID" :                      400.,
-    "xplus"                                        : inputs["xplus" ], #  0.50,
-    "yplus"                                        : inputs["yplus" ], # -0.00,
-    "xminus"                                       : inputs["xminus"], #  0.50,
-    "yminus"                                       : inputs["yminus"], # -0.00,
-    "xxi"                                          : inputs["xxi"   ], #  0.50,
-    "yxi"                                          : inputs["yxi"   ], # -0.00,
+    "xplus"                                        :   0.50, # inputs["xplus" ], #
+    "yplus"                                        :  -0.00, # inputs["yplus" ], #
+    "xminus"                                       :   0.50, # inputs["xminus"], #
+    "yminus"                                       :  -0.00, # inputs["yminus"], #
+    "xxi"                                          :   0.50, # inputs["xxi"   ], #
+    "yxi"                                          :  -0.00, # inputs["yxi"   ], #
     # "c01_DK_Kspipi_DD_Bplus"                       : 0., # -0.00,
 }
 
-####### define limits 
+# define limits 
 limit_values = {
     "yield_Bplus_DK"  :                            [0, 2*yields["DK_Kspipi_DD"]],
     "yield_Bminus_DK" :                            [0, 2*yields["DK_Kspipi_DD"]],
@@ -720,7 +664,7 @@ limit_values = {
     # "c01_DK_Kspipi_DD_Bplus"                       : [-10.,10.],
 }
 
-###### define which free fit parameters is applied to which "real" variables
+# define which free fit parameters is applied to which "real" variables
 dict_shared_parameters = {
     "yield_Bplus_DK"  :  [
         ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "yield_Bplus"]
@@ -782,32 +726,9 @@ dict_shared_parameters = {
     # ],
 }
 
-free_efficiency_coeffs_fit = ["c10","c20","c01", "c02", "c11", "c21", "c12", "c22", "c30", "c40", "c50", "c04", "c22", "c24", "c32", "c34", "c42", "c44"]
-if (N_Free_coeff == 0):
-    free_efficiency_coeffs_fit = []
-    pass    
-else:
-    free_efficiency_coeffs_fit = free_efficiency_coeffs_fit[:N_Free_coeff+1]
-    pass
+free_efficiency_coeffs_fit = []
 
-# 
-for coeff in free_efficiency_coeffs_fit:
-    start_values[f"{coeff}_DK_Kspipi_DD_Bplus"] =  0. # -0.00,
-    limit_values[f"{coeff}_DK_Kspipi_DD_Bplus"] =  [-10.,10.]
-    dict_shared_parameters[f"{coeff}_DK_Kspipi_DD_Bplus"] =   [
-        ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "Bplus_efficiency", f"{coeff}"],
-        ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "Bplus_efficiency", f"{coeff}"],
-        ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "Bminus_efficiency", f"{coeff}"],
-        ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "Bminus_efficiency", f"{coeff}"],
-    ]
-    pass
-    
-
-
-####### OF COURSE THIS IS WRONG
-### WE'LL UPDATE THIS ONCE WE HAVE FINAL NUMERS
-ratio_Dpi_misID_to_Dpi = 0. # float(yields["Dpi_Kspipi_DD_misID"]) / float(yields["Dpi_Kspipi_DD"])
-
+# multiplicative constraints, for example yield_1 = yield_2 * eff_1/eff_2, with yield_2 a free parameters of the fit
 dict_constrained_parameters = [
     ## constrain misID DPI from goodID in DK
     # [ ["CB2DK_D2KSPIPI_DD", "Dpi_Kspipi_misID" , "mass", "yield_Bplus"], ["CB2DPI_D2KSPIPI_DD" , "Dpi_Kspipi" , "mass", "yield_Bplus",  ratio_Dpi_misID_to_Dpi] ],
@@ -816,7 +737,8 @@ dict_constrained_parameters = [
 dict_gaussian_constraints   = []
 
 
-
+# the object that combines all of the above ingredients (especially all the "ntuple object"
+# for each channel
 NLL = NLLComputation(
     start_values,
     limit_values,
@@ -828,8 +750,10 @@ NLL = NLLComputation(
     ntuples
 )
 
+# name of the parameters to fit, this is extracted from the "start_values" dictionary
 parameters_to_fit = NLL.parameters_to_fit
 
+# extract the multi-D table (not dictionary !) for plotting purposes
 preFit_list_variables = ntuples["CB2DK_D2KSPIPI_DD"].get_list_variables(
     NLL.fixed_variables,
     params=list(start_values.values()),
@@ -843,7 +767,7 @@ preFit_list_variables = ntuples["CB2DPI_D2KSPIPI_DD"].get_list_variables(
     constrained_parameters=NLL.constrained_parameters
 )
 
-
+# defines the normalisation sample for each channel
 ntuples["CB2DK_D2KSPIPI_DD"].define_dalitz_pdfs(
     toy_phsp_DK["ampD0"], toy_phsp_DK["ampD0bar"], toy_phsp_DK["zp_p"], toy_phsp_DK["zm_pp"]
 )
@@ -852,30 +776,37 @@ ntuples["CB2DPI_D2KSPIPI_DD"].define_dalitz_pdfs(
 )
 
 
-# ### get the efficiency KDE for plotting purposes
-# from scipy import stats
-# positions = np.vstack([Dalitz_Kspip_mat.ravel(), Dalitz_Kspim_mat.ravel()])
-# values = np.vstack([phsp_m13_p[:100000], phsp_m12_p[:100000]])
-# kernel = stats.gaussian_kde(values)
-# print("This will take a bit of time depending on the number of normalisation events.")
-# print(" Less than a minute for 100k events.")
-# Z = np.reshape(kernel(positions).T, Dalitz_Kspip_mat.shape)
+# for plotting only: because we normalise the events with non-flat events, we need
+# to multiply the PDFs entering the likelihood by the MC efficiency.
+normalisation_params = {
+    "CB2DK_D2KSPIPI_DD": {
+        "Function": "Legendre_5_5",  # name of the function # "Flat"
+        "Parameters": {
+            "Bplus" :  B2DK_Bplus_efficiency_variables , # parameters
+            "Bminus":  B2DK_Bminus_efficiency_variables, # parameters
+        }
+    },
+    "CB2DPI_D2KSPIPI_DD": {
+        "Function": "Flat",
+        "Parameters": {
+            "Bplus" :  B2Dpi_Bplus_efficiency_variables ,
+            "Bminus":  B2Dpi_Bminus_efficiency_variables,
+        }
+    },
+}
 
-# fig, ax = plt.subplots()
-# ax.imshow(np.rot90(Z), cmap=plt.cm.gist_earth_r,
-#           extent=[0.4, 3., 0.4, 3.0])
-# ax.plot(phsp_m13_p[:100000], phsp_m12_p[:100000], 'k.', markersize=2)
-# ax.set_xlim([0.4, 3.])
-# ax.set_ylim([0.4, 3.])
-# plt.savefig(f"{plot_dir}/efficiency.png")
-# plt.close("all")
-
-
-
-def draw_dalitz_pdf(ntuple, ampD0, ampD0bar, zp_p, zm_pp, variables=None):
+def draw_dalitz_pdf(ntuple, ampD0, ampD0bar, zp_p, zm_pp, variables=None, normalisation_params=None):
     """
     this function is only for plotting purposes. It computes the pdfs 
     for each component and the sum.
+    The "variables" argument is optional if the ntuples object already has a ntuple.list_variables object.
+    Otherwise, it requires the complete multi-D table as input.
+    ampD0, ampD0bar, zp_p, zm_pp are 2D grids containing the points where we want to compute 
+    the PDFs.
+
+    It returns "pdfs_values", a dictionary that contain the PDFs computed at each point 
+    of the provided grids, one PDF for each component in this ntuple, and the total PDF
+    called "total_pdf".
     """
     if (variables == None):
         variables = ntuple.list_variables
@@ -894,28 +825,31 @@ def draw_dalitz_pdf(ntuple, ampD0, ampD0bar, zp_p, zm_pp, variables=None):
         pdfs_values[Bsign]["total_pdf"] = tf.cast(np.zeros(
             np.shape(ampD0)
         ).astype(np.float64), tf.float64)
-        # print(Bsign)
-        ## loop over the components of the ntuple
-        for i in range(len(ntuple.dalitz_pdfs[Bsign])):
+        if (normalisation_params==None):
+            normalisation_eff = 1.
+            pass
+        else:
+            _norm_fun = DICT_EFFICIENCY_FUNCTIONS[normalisation_params["Function"]]
+            normalisation_eff = _norm_fun(ampD0, ampD0bar, zp_p, zm_pp, BSIGNS[Bsign],
+                                          variables=normalisation_params["Parameters"][Bsign])
+            pass
+        for i in range(len(ntuple.dalitz_pdfs[Bsign])): # loop over the components of the ntuple
             comp_pdf = ntuple.dalitz_pdfs[Bsign][i]
-            isSignalDK   = (comp_pdf.component in SIGNAL_COMPONENTS_DK )
-            isSignalDPI  = (comp_pdf.component in SIGNAL_COMPONENTS_DPI)
-            ## if comp is DK or DPI, the pdf is a function of the amplitudes
-            # print(comp_pdf.component)
             tmp_pdf_values = comp_pdf.pdf(ampD0, ampD0bar, zp_p, zm_pp)
-            # print(np.max(tmp_pdf_values))
-            #### multiply each pdf by its yield
-            # index_yields  = INDEX_YIELDS[Bsign]
-            # comp_yield    = variables[ntuple.i_c][i][2][index_yields]
-            tmp_pdf_values = tmp_pdf_values # *Z/np.mean(Z)
-            # print(np.mean(Z))
-            tmp_pdf_values = tmp_pdf_values*dalitz_scaling*dalitz_scaling # *comp_yield
+            # multiply each pdf by the efficiency
+            tmp_pdf_values = tmp_pdf_values * normalisation_eff
+            # multiply each pdf by a scaling factor (twice because 2D)
+            tmp_pdf_values = tmp_pdf_values*dalitz_scaling*dalitz_scaling
             pdfs_values[Bsign][comp_pdf.component]     = tmp_pdf_values
-            pdfs_values[Bsign]["total_pdf"]           += tmp_pdf_values
+            # before adding the components together, we multiply each one by its total yield
+            index_yields  = INDEX_YIELDS[Bsign]
+            comp_yield    = variables[ntuple.i_c][i][4][index_yields]
+            pdfs_values[Bsign]["total_pdf"]           += tmp_pdf_values * comp_yield
             pass # loop comps
         pass # loop signs
     return pdfs_values
 
+# store the 2D pdf for each channel
 dalitz_pdfs_values = {}
 for channel in list_channels:
     #### compute the pdfs
@@ -925,7 +859,8 @@ for channel in list_channels:
         ampD0bar,
         zp_p    ,
         zm_pp   ,
-        variables=preFit_list_variables
+        variables=preFit_list_variables,
+        normalisation_params=normalisation_params[channel]
     )
     pass
 
@@ -948,13 +883,8 @@ for channel in list_channels:
             plt.ylabel("Kspim")
             plt.title(f"{channel} {Bsign}")
             cbar = plt.colorbar(cs)
-            # cs.cmap.set_over('red')
-            # cs.cmap.set_under('white')
-            # cs.changed()
             plt.tight_layout()
-            if (job_id < 10):
-                plt.savefig(f"{plot_dir}/preFit/{channel}_{Bsign}_{comp}.png")
-                pass
+            plt.savefig(f"{plot_dir}/preFit/{channel}_{Bsign}_{comp}.png")
             plt.close("all")
             pass
         pass
@@ -965,32 +895,29 @@ def draw_projection_pdf(ntuple, pdfs_values, variables = None):
     """
     This function integrates separately over the two dimensions
     to get both projections of the Dalitz pdfs.
+
+    Returns Kspip_projection and Kspim_projection, 
+    containing the projections in the Kspip and Kspim directions
+    for sign of the B, and each component, as well as the total PDF
+    under "total_pdf"
     """
-    if (variables == None):
-        variables = ntuple.list_variables
-        pass
-    else:
-        ntuple.initialise_fixed_pdfs(variables)
-        pass
+    variables = ntuple.list_variables
     Kspip_projection = {}
     Kspim_projection = {}
     for Bsign in BSIGNS.keys():
+        # initialise the dictionaries
         Kspip_projection[Bsign] = {}
         Kspim_projection[Bsign] = {}
-        #### the two indices correspond to x and y axis
-        # i.e. z+ and z- or m(Kspip) and m(Kspim)
         Kspip_projection[Bsign]["total_pdf"] = np.zeros(
             pdfs_values[Bsign]["total_pdf"].shape[0]
         ).astype(np.float64)
         Kspim_projection[Bsign]["total_pdf"] = np.zeros(
             pdfs_values[Bsign]["total_pdf"].shape[0]
         ).astype(np.float64)
-        # print(Bsign)
-        for i in range(len(ntuple.dalitz_pdfs[Bsign])):
+        for i in range(len(ntuple.dalitz_pdfs[Bsign])): # loop over the components
             index_yields  = INDEX_YIELDS[Bsign]
-            comp_yield    = variables[ntuple.i_c][i][4][index_yields]
-            comp_pdf = ntuple.dalitz_pdfs[Bsign][i]
-            # print(comp_pdf.component)
+            ### this 4 is the index of the "mass" entry in the "space" direction
+            comp_pdf   = ntuple.dalitz_pdfs[Bsign][i]
             if(pdfs_values[Bsign][comp_pdf.component].shape == []):
                 print("This component is empty ---- skipping")
                 continue
@@ -1002,34 +929,37 @@ def draw_projection_pdf(ntuple, pdfs_values, variables = None):
             ).astype(np.float64)
             tmp_numpy_pdfs = pdfs_values[Bsign][comp_pdf.component].numpy()
             for i_Kspi in range(Kspip_projection[Bsign][comp_pdf.component].shape[0]):
+                # loop over each point in the direction we want to project to,
+                # and compute the projection by "MC-integrating" in the other direction
+                # Kspip
                 Kspip_projection[Bsign][comp_pdf.component][i_Kspi] = float(tf.reduce_mean(
-                        tmp_numpy_pdfs.transpose()[i_Kspi]
-                )) # *float(nbins)
-                #### Kspim
+                    tmp_numpy_pdfs.transpose()[i_Kspi]
+                ))
+                # Kspim
                 Kspim_projection[Bsign][comp_pdf.component][i_Kspi] = float(tf.reduce_mean(
                     tmp_numpy_pdfs[i_Kspi]
-                )) # *float(nbins)
-                # Kspim_projection[Bsign]["total_pdf"][i_Kspi] += float(np.mean(
-                #     tmp_numpy_pdfs[i_Kspi]
-                # )) # *float(nbins)
-                # if (Kspip_projection[Bsign][comp_pdf.component][i_Kspip] > 0):
-                #     print(Kspip_projection[Bsign][comp_pdf.component][i_Kspip])
+                ))
                 pass # loop axes
+            # normalise both projections to the correct yields
+            comp_yield = variables[ntuple.i_c][i][4][index_yields]
             Kspip_projection[Bsign][comp_pdf.component] = comp_yield*norm_distribution(
                 Dalitz_mass_vec,
                 Kspip_projection[Bsign][comp_pdf.component]
-            ) # *float(nbins)
+            )
             Kspip_projection[Bsign]["total_pdf"] += Kspip_projection[Bsign][comp_pdf.component]
             Kspim_projection[Bsign][comp_pdf.component] = comp_yield*norm_distribution(
                 Dalitz_mass_vec,
                 Kspim_projection[Bsign][comp_pdf.component]
-            ) # *float(nbins)
+            )
             Kspim_projection[Bsign]["total_pdf"] += Kspim_projection[Bsign][comp_pdf.component]
             pass # loop comps
         pass # loop signs
     return Kspip_projection, Kspim_projection
 
 def get_pull_projections(data, Kspip_proj = None, Kspim_proj = None):
+    """
+    Compute the pulls for each projection.
+    """
     histo_pulls = {}
     proj  = {
         "Kspip" : Kspip_proj,
@@ -1092,7 +1022,11 @@ for channel in list_channels:
         pass
     pass
 
+
 def plot_projections(_data, _Kspi_projection, _pulls, _list_variables, fit_step="preFit/"):
+    """
+    Simply plot the projections and the pulls
+    """
     if (fit_step not in ["preFit/", ""]):
         print("Fit step is wrong---- abort")
         return
@@ -1143,9 +1077,7 @@ def plot_projections(_data, _Kspi_projection, _pulls, _list_variables, fit_step=
             ax[1].set_ylim([-5,5])
             plt.tight_layout()
             plt.subplots_adjust(hspace=0.1)
-            if (job_id < 10):
-                plt.savefig(f"{plot_dir}/{fit_step}{channel}_{Bsign}_total_pdf_Kspip_projection.png")
-                pass
+            plt.savefig(f"{plot_dir}/{fit_step}{channel}_{Bsign}_total_pdf_Kspip_projection.png")
             plt.close("all")
             ################### Kspim
             fig, ax = plt.subplots(2,gridspec_kw={'height_ratios': [6, 1]}, figsize=(11,11))
@@ -1189,9 +1121,7 @@ def plot_projections(_data, _Kspi_projection, _pulls, _list_variables, fit_step=
             ax[1].set_ylim([-5,5])
             plt.tight_layout()
             plt.subplots_adjust(hspace=0.1)
-            if (job_id < 10):
-                plt.savefig(f"{plot_dir}/{fit_step}{channel}_{Bsign}_total_pdf_Kspim_projection.png")
-                pass
+            plt.savefig(f"{plot_dir}/{fit_step}{channel}_{Bsign}_total_pdf_Kspim_projection.png")
             plt.close("all")
             pass
         pass
@@ -1232,65 +1162,37 @@ for channel in list_channels:
         plt.ylabel(f"Events / ({round(mass_scaling)} MeV)")
         plt.legend()
         plt.tight_layout()
-        if (job_id < 10):
-            plt.savefig(f"{plot_dir}/preFit/{channel}_{Bsign}_mass_distribution.png")
-            pass
+        plt.savefig(f"{plot_dir}/preFit/{channel}_{Bsign}_mass_distribution.png")
         plt.close("all")
         pass
     pass
 
 
-#######
+# the actual nll function to feed to migrad
 @tf.function
 def nll(x):
     return NLL.get_total_nll(x) # , tensor_to_fit)
 
-
-dict_norm_ampD0    = {
-    "CB2DK_D2KSPIPI_DD" :  toy_phsp_DK["ampD0"],
-    "CB2DPI_D2KSPIPI_DD" :  toy_phsp_Dpi["ampD0"],
-}
-dict_norm_ampD0bar = {
-    "CB2DK_D2KSPIPI_DD" :  toy_phsp_DK["ampD0bar"],
-    "CB2DPI_D2KSPIPI_DD" :  toy_phsp_Dpi["ampD0bar"],
-}
-dict_norm_zp_p = {
-    "CB2DK_D2KSPIPI_DD" :  toy_phsp_DK["zp_p"],
-    "CB2DPI_D2KSPIPI_DD" :  toy_phsp_Dpi["zp_p"],
-}
-dict_norm_zm_pp = {
-    "CB2DK_D2KSPIPI_DD" :  toy_phsp_DK["zm_pp"],
-    "CB2DPI_D2KSPIPI_DD" :  toy_phsp_Dpi["zm_pp"],
-}
-
-
+# some tests to confirm wa cen compute what we want
+# it also builds the tensorflow graph
 x = tf.cast(list(start_values.values()),tf.float64)
 print("start computing")
 print("test nll(x) : ", nll(x))
 
-test_values = dict(**start_values)
-test_values["xplus"]  = test_values["xplus"]*1000.
-test_values["xminus"] = test_values["xminus"]*1000.
-test_values["yplus"]  = test_values["yplus"]*1000.
-test_values["yminus"] = test_values["yminus"]*1000.
-x = tf.cast(list(test_values.values()),tf.float64)
-print("start computing")
-print("test nll(x) : ", nll(x))
-
+# minimise !
 import iminuit
 m = iminuit.Minuit(nll, x, name=parameters_to_fit)
 m.limits = list(limit_values.values())
 mg = m.migrad()
 
 
-
+# the results
 print(mg)
 means  = mg.values
 errors = mg.errors
 hesse  = mg.hesse()
 cov    = hesse.covariance
 corr   = cov.correlation()
-## i have to loop over the entries if this dict to set the pandas df myself
 corr_array = np.zeros(len(parameters_to_fit)*len(parameters_to_fit)).reshape(len(parameters_to_fit),len(parameters_to_fit))
 cov_array = np.zeros(len(parameters_to_fit)*len(parameters_to_fit)).reshape(len(parameters_to_fit),len(parameters_to_fit))
 for i in range(len(parameters_to_fit)):
@@ -1304,6 +1206,7 @@ for i in range(len(means)):
     print(f'{parameters_to_fit[i]:<50}', ": ", means[i] ," +- ", errors[i])
     pass
 
+# minimisation to find get gamma, deltaB and rB
 chi2_function =  chi2_xy_to_physics_param(xplus      = means["xplus" ], 
                                           yplus      = means["yplus" ], 
                                           yminus     = means["yminus"], 
@@ -1311,12 +1214,10 @@ chi2_function =  chi2_xy_to_physics_param(xplus      = means["xplus" ],
                                           xxi        = means["xxi"   ], 
                                           yxi        = means["yxi"   ],
                                           pd_cov     = pd_cov)
-
-# chi2_function(x_phys)
 physics_param = ["gamma", "rb", "dB", "rb_dpi", "dB_dpi"]
 x_phys = [1,1,1,1,1]
 m_phys = iminuit.Minuit(chi2_function, x_phys, name=physics_param)
-m_phys.limits = list([ [0, 2*np.pi],
+m_phys.limits = list([ [0, np.pi],
                        [0, 1.],
                        [0, 2*np.pi],
                        [0, 1.],
@@ -1324,7 +1225,7 @@ m_phys.limits = list([ [0, 2*np.pi],
                       ])
 mg_phys = m_phys.migrad()
 
-# result_phys = opt.minimize(chi2_function, x_phys)
+# results
 print(mg_phys)
 means_phys  = mg_phys.values
 errors_phys = mg_phys.errors
@@ -1338,20 +1239,15 @@ for par in ["gamma", "dB", "dB_dpi"]:
 
 print("Means   ", means_phys)
 
-# print("Means   ", means)
-# print("Errors  ", errors)
 means_results = dict(zip(parameters_to_fit,means))
 errors_results = dict(zip(parameters_to_fit,errors))
 means_results.update(dict(zip(physics_param, means_phys)))
 errors_results.update(dict(zip(physics_param, errors_phys)))
 
 print(json.dumps(means_results,indent=4))
-print(json.dumps(errors_results,indent=4))
+print(json.dumps(errors_results,indent=4))    
 
-
-    
-    
-
+# save the results if both fit converged
 if ((mg_phys.valid==True) and (mg.valid==True)):
     with open(f"{plot_dir}/means_results.json", "w") as f:
         json.dump(means_results, f, indent=4)
@@ -1361,22 +1257,25 @@ if ((mg_phys.valid==True) and (mg.valid==True)):
         json.dump(errors_results, f, indent=4)
         pass
 
-    print(" =============    STORE COVARIANCE MATRIX AT")
-    print(f"{plot_dir}/covariance.pkl")
-    pd_cov.to_pickle(f"{plot_dir}/covariance.pkl")
-    
     pass
 
+# plot covariance
 import seaborn as sns
 fig = plt.figure(figsize=(30, 24))  
 sns.heatmap(pd_cov, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
 plt.tight_layout()
-if (job_id < 10):
-    plt.savefig(f"{plot_dir}/covariance.png")
-    pass
+plt.savefig(f"{plot_dir}/covariance.png")
 plt.close("all")
 
+# plot correlation
+import seaborn as sns
+fig = plt.figure(figsize=(30, 24))  
+sns.heatmap(pd_corr, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
+plt.tight_layout()
+plt.savefig(f"{plot_dir}/correlation.png")
+plt.close("all")
 
+# get the table of variables post Fit
 postFit_list_variables = ntuples["CB2DK_D2KSPIPI_DD"].get_list_variables(
     NLL.fixed_variables,
     params=means,
@@ -1395,22 +1294,19 @@ postFit_list_variables = ntuples["CB2DPI_D2KSPIPI_DD"].get_list_variables(
 #### compute the pdfs
 postFit_dalitz_pdfs_values = {}
 for channel in list_channels:
-    # print(1)
+    # get the 2D PDFs
     postFit_dalitz_pdfs_values[channel] = draw_dalitz_pdf(
         ntuples[channel],
         ampD0   ,
         ampD0bar,
         zp_p    ,
         zm_pp   ,
-        variables=postFit_list_variables
+        variables=postFit_list_variables,
+        normalisation_params=normalisation_params[channel]
     )
-    # print(2)
     ### plotting these pdfs
     for Bsign in postFit_dalitz_pdfs_values[channel].keys():
-        # print(3)
         for comp in postFit_dalitz_pdfs_values[channel][Bsign].keys():
-            # print(4)
-            # postFit_dalitz_pdfs_values[channel][Bsign][comp] *= Z
             try:
                 cs = plt.contourf(
                     Dalitz_Kspip_mat,
@@ -1429,9 +1325,7 @@ for channel in list_channels:
             # cs.cmap.set_under('white')
             # cs.changed()
             plt.tight_layout()
-            if (job_id < 10):
-                plt.savefig(f"{plot_dir}/{channel}_{Bsign}_{comp}.png")
-                pass
+            plt.savefig(f"{plot_dir}/{channel}_{Bsign}_{comp}.png")
             plt.close("all")
             pass
         pass
@@ -1439,7 +1333,7 @@ for channel in list_channels:
 
 
 
-########## get the projections
+# get the projections
 postFit_Kspi_projection = {}
 postFit_pulls           = {}
 for channel in list_channels:
@@ -1458,10 +1352,11 @@ for channel in list_channels:
         pass
     pass
 
+# plot the projections
 plot_projections(B_data, postFit_Kspi_projection, postFit_pulls, postFit_list_variables, fit_step="")
 
 
-####### and now the mass pdfs
+# and the mass pdf
 postFit_mass_pdfs_values = {}
 for channel in list_channels:
     postFit_mass_pdfs_values[channel] = ntuples[channel].draw_mass_pdfs(
@@ -1492,26 +1387,61 @@ for channel in list_channels:
         plt.ylabel(f"Events / ({round(mass_scaling)} MeV)")
         plt.title(f"{channel} {Bsign}")
         plt.tight_layout()
-        if (job_id < 10):
-            plt.savefig(f"{plot_dir}/{channel}_{Bsign}_mass_distribution.png")
-            pass
+        plt.savefig(f"{plot_dir}/{channel}_{Bsign}_mass_distribution.png")
         plt.close("all")
         pass
     pass
 
 
-if ("scratch" in plot_dir):
-    os.remove(f"{pathname_output}/outfile_{job_id}.root")
+# useful: it plots separately each generated component with its fitted PDF
+for channel in list_channels:
+    for i in range(len(components[channel])): # generation_parameters[channel].keys():
+        comp = components[channel][i]
+        gen_comp = comp[0]
+        mplhep.histplot(
+            np.histogram(m13_p_DK[channel][gen_comp], bins=nbins, range=m_Kspip_range),
+            label=ntuples[channel].channel.tex,
+            **kwargs_data
+        )
+        comp_pdf = ntuples[channel].dalitz_pdfs["Bplus"][i]
+        index_yields  = INDEX_YIELDS["Bplus"]
+        if (postFit_list_variables[ntuples[channel].i_c][i][4][index_yields] == 0): continue
+        plt.fill_between(
+            Dalitz_mass_vec,
+            dalitz_scaling*postFit_Kspi_projection[channel][0]["Bplus"][comp_pdf.component],
+            alpha=0.5,
+            label=comp_pdf.component
+        )
+        plt.xlabel(r"$m(K_S\pi^+)^2$ [GeV/$c^2$]")
+        plt.ylabel(r"$m(K_S\pi^-)^2$ [GeV/$c^2$]")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f"{plot_dir}/{channel}_Bplus_{gen_comp}.png")
+        plt.close("all")
+        mplhep.histplot(
+            np.histogram(m13_m_DK[channel][gen_comp], bins=nbins, range=m_Kspip_range),
+            label=ntuples[channel].channel.tex,
+            **kwargs_data
+            # , density=True
+        )
+        comp_pdf = ntuples[channel].dalitz_pdfs["Bminus"][i]
+        index_yields  = INDEX_YIELDS["Bminus"]
+        if (postFit_list_variables[ntuples[channel].i_c][i][4][index_yields] == 0): continue
+        plt.fill_between(
+            Dalitz_mass_vec,
+            dalitz_scaling*postFit_Kspi_projection[channel][0]["Bminus"][comp_pdf.component],
+            alpha=0.5,
+            label=comp_pdf.component
+        )
+        plt.xlabel(r"$m(K_S\pi^+)^2$ [GeV/$c^2$]")
+        plt.ylabel(r"$m(K_S\pi^-)^2$ [GeV/$c^2$]")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f"{plot_dir}/{channel}_Bminus_{gen_comp}.png")
+        plt.close("all")
+        pass
     pass
 
 
 
-# tmp_data = B_data["CB2DK_D2KSPIPI_DD"]["Bplus"]
-# plt.scatter(
-#     tmp_data["m_Kspim"],
-#     tmp_data["m_Kspip"],
-#     c=np.conj(tmp_data["AmpD0"])*tmp_data["AmpD0"]
-# )
-# plt.xlabel("Kspim")
-# plt.ylabel("Kspip")
-# plt.savefig("Bplus_ampD0.png")
+##################

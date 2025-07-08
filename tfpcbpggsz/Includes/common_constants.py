@@ -122,6 +122,10 @@ INDEX_YIELDS = {
     "Bplus"  : 0,
     "Bminus" : 1
 }
+INDEX_SPACE = {
+    "Bplus"  : 0, # this refers to the index of the space in VARDICT
+    "Bminus" : 2
+}
 
 
 #### efficiency shapes

@@ -137,21 +137,37 @@ class pcbpggsz_generator:
             self.efficiency_function  = kwargs['efficiency_function']
             self.efficiency_variables = kwargs['efficiency_variables']
             try:
-                self.generate_B_mass = kwargs['generate_B_mass'],
-                self.B_mass_range    = kwargs['B_mass_range'],
-                self.mass_shape_name = kwargs['mass_shape_name']
-                self.mass_variables  = kwargs['mass_variables']
-                self.mass_shape      = None
+                generate_B_mass = kwargs['generate_B_mass'],
+                B_mass_range    = kwargs['B_mass_range'],
+                mass_shape_name = kwargs['mass_shape_name']
+                mass_variables  = kwargs['mass_variables']
+                mass_shape      = None
             except KeyError:
-                self.generate_B_mass = None
-                self.B_mass_range    = None
-                self.mass_shape_name = None
-                self.mass_variables  = None
-                self.mass_shape      = None
+                generate_B_mass = False
+                B_mass_range    = None
+                mass_shape_name = None
+                mass_variables  = None
+                mass_shape      = None
                 pass
             pass
-            
 
+        elif type=="phsp":
+            self.efficiency_function  = kwargs['efficiency_function']
+            self.efficiency_variables = kwargs['efficiency_variables']
+            generate_B_mass = False
+            B_mass_range    = None
+            mass_shape_name = None
+            mass_variables  = None
+            mass_shape      = None
+            pass
+
+        # print(generate_B_mass)
+        # print(B_mass_range   )
+        # print(mass_shape_name)
+        # print(mass_variables )
+        # print(mass_shape     )
+
+        
         if kwargs.get('max_N') is not None:
             max_N = kwargs['max_N']
         
@@ -166,19 +182,19 @@ class pcbpggsz_generator:
 
 
         if type != 'cp_mixed':
-            if (self.generate_B_mass is not None):
-                self.def_mass_PDF = MassPDF(self.mass_shape_name, self.type)
-                self.def_mass_PDF.get_mass_pdf(self.mass_variables)
-                self.mass_shape   = self.def_mass_PDF.pdf
+            if (generate_B_mass):
+                def_mass_PDF = MassPDF(mass_shape_name, self.type)
+                def_mass_PDF.get_mass_pdf(mass_variables)
+                mass_shape   = def_mass_PDF.pdf
 
                 ret, status, ret_mass = multi_sampling(
                     phsp,
                     self.prod_fun,
                     N,
                     force=True,
-                    generate_B_mass = self.generate_B_mass[0],
-                    B_mass_range    = self.B_mass_range[0],
-                    mass_shape      = self.mass_shape
+                    generate_B_mass = generate_B_mass[0],
+                    B_mass_range    = B_mass_range[0],
+                    mass_shape      = mass_shape
                 )
                 return ret, ret_mass
             
@@ -186,10 +202,7 @@ class pcbpggsz_generator:
                 phsp,
                 self.prod_fun,
                 N,
-                force=True,
-                generate_B_mass = self.generate_B_mass,
-                B_mass_range    = self.B_mass_range,
-                mass_shape      = self.mass_shape
+                force=True
             )
 
             return ret

@@ -371,7 +371,7 @@ VARDICT = {
         {
             "DK_Kspipi": # Cruijff+Gaussian 0
             {
-                "Bplus" : { # these are the efficiency coefficients # c_zp_zm
+                "Bplus_efficiency" : { # these are the efficiency coefficients # c_zp_zm
                     "c00" : 1.,
                     "c10" : 0.,
                     "c20" : 0.,
@@ -395,7 +395,10 @@ VARDICT = {
                     "c52" : 0., 
                     "c54" : 0., 
                 },
-                "Bminus" : { # these are the efficiency coefficients # c_zp_zm
+                "Bplus_model" : { # these are the parameters for the shape
+                    "c00" : 1.,
+                },
+                "Bminus_efficiency" : { # these are the efficiency coefficients # c_zp_zm
                     "c00" : 1.,
                     "c10" : 0.,
                     "c20" : 0.,
@@ -419,6 +422,9 @@ VARDICT = {
                     "c52" : 0., 
                     "c54" : 0., 
                 },                
+                "Bminus_model" : { # these are the parameters for the shape
+                    "c00" : 1.,
+                },
                 "mass": {
                     "yield_Bplus" : 7150./2.,
                     "yield_Bminus": 7150./2.,
@@ -435,7 +441,7 @@ VARDICT = {
             },            
             "Dpi_Kspipi_misID": #SumCBShape 1
             {
-                "Bplus" : {
+                "Bplus_efficiency" : {
                     "c00" : 1.,
                     "c10" : 0.,
                     "c20" : 0.,
@@ -459,7 +465,14 @@ VARDICT = {
                     "c52" : 0., 
                     "c54" : 0., 
                 },
-                "Bminus" : {
+                "Bplus_model" : { # these are the parameters for the shape
+                    "ratio_BR_DK_to_Dpi": 0.07,
+                    "xplus"  : 1.,
+                    "yplus"  : 1.,
+                    "xminus" : 1.,
+                    "yminus" : 1.,
+                },
+                "Bminus_efficiency" : {
                     "c00" : 1.,
                     "c10" : 0.,
                     "c20" : 0.,
@@ -483,6 +496,13 @@ VARDICT = {
                     "c52" : 0., 
                     "c54" : 0., 
                 },                
+                "Bminus_model" : { # these are the parameters for the shape
+                    "ratio_BR_DK_to_Dpi": 0.07,
+                    "xplus"  : 1.,
+                    "yplus"  : 1.,
+                    "xminus" : 1.,
+                    "yminus" : 1.,
+                },
                 "mass" : {
                     "yield_Bplus" : 3000./2.,
                     "yield_Bminus": 3000./2.,
@@ -497,238 +517,13 @@ VARDICT = {
                     "frac1" : varDict['DD_d2kspp_dpi_to_dk_misID_frac1'],
                     "frac2" : varDict['DD_d2kspp_dpi_to_dk_misID_frac2'],
                 },
-            },            
-            "Dst0K_D0pi0_Kspipi": #HORNSdini 2
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 750.,
-                    "yield_Bminus": 0., # 750.,
-                    'a'              : varDict['low_a_Bu_Dstar0h_D0pi0_dk'], 
-                    'b'              : varDict['low_b_Bu_Dstar0h_D0pi0_dk'], 
-                    'csi'            : varDict['low_csi_pi'],                
-                    'shift'          : varDict['low_global_shift'],         
-                    'sigma'          : varDict['low_sigma_pi_DD']/varDict['low_sigma_pi_over_k_ratio'],
-                    'ratio_sigma'    : varDict['low_ratio_pi'],             
-                    'fraction_sigma' : varDict['low_f_pi']                  
-                },
-            },            
-            "DstpK_D0pip_Kspipi": #HORNSdini 3
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 750.,
-                    "yield_Bminus": 0., # 750.,
-                    'a'              : varDict['low_a_Bd_Dstarph_D0pi_dk'], 
-                    'b'              : varDict['low_b_Bd_Dstarph_D0pi_dk'], 
-                    'csi'            : varDict['low_csi_pi'],                
-                    'shift'          : varDict['low_global_shift'],         
-                    'sigma'          : varDict['low_sigma_pi_DD']/varDict['low_sigma_pi_over_k_ratio'],           
-                    'ratio_sigma'    : varDict['low_ratio_pi'],             
-                    'fraction_sigma' : varDict['low_f_pi']                  
-                },
-            },            
-            "Dst0pi_D0pi0_Kspipi_misID_PartReco": #HORNSdini_misID 4
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass": {
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    "a"  :  varDict['low_a_Bu_Dstar0h_D0pi0_dk'],
-                    "b"  :  varDict['low_b_Bu_Dstar0h_D0pi0_dk'],
-                    "csi":  varDict['low_csi_pi'],               
-                    "m1" :  varDict['m1pi_DD'],                  
-                    "s1" :  varDict['s1pi_DD'],                  
-                    "m2" :  varDict['m2pi_DD'],                  
-                    "s2" :  varDict['s2pi_DD'],                  
-                    "m3" :  varDict['m3pi_DD'],                  
-                    "s3" :  varDict['s3pi_DD'],                  
-                    "m4" :  varDict['m4pi_DD'],                  
-                    "s4" :  varDict['s4pi_DD'],                  
-                    "f1" :  varDict['f1pi_DD'],                  
-                    "f2" :  varDict['f2pi_DD'],                  
-                    "f3" :  varDict['f3pi_DD'],
-                },
-            },            
-            "Dstppi_D0pip_Kspipi_misID_PartReco": #HORNSdini_misID 5
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 750.,
-                    "yield_Bminus": 0., # 750.,
-                    "a"  : varDict['low_a_Bd_Dstarph_D0pi_dk'],
-                    "b"  : varDict['low_b_Bd_Dstarph_D0pi_dk'],
-                    "csi": varDict['low_csi_pi'],              
-                    "m1" : varDict['m1pi_DD'],                 
-                    "s1" : varDict['s1pi_DD'],                 
-                    "m2" : varDict['m2pi_DD'],                 
-                    "s2" : varDict['s2pi_DD'],                 
-                    "m3" : varDict['m3pi_DD'],                 
-                    "s3" : varDict['s3pi_DD'],                 
-                    "m4" : varDict['m4pi_DD'],                 
-                    "s4" : varDict['s4pi_DD'],                 
-                    "f1" : varDict['f1pi_DD'],                 
-                    "f2" : varDict['f2pi_DD'],                 
-                    "f3" : varDict['f3pi_DD'],
-                },
-            },            
-            "Dst0K_D0gamma_Kspipi": #HILLdini 6
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 2200.,
-                    "yield_Bminus": 0., # 2200.,
-                    "a"             : varDict["low_a_Bu_Dstar0h_D0gamma_dk"],
-                    "b"             : varDict["low_b_Bu_Dstar0h_D0gamma_dk"],
-                    "csi"           : varDict["low_csi_gamma"],
-                    "shift"         : varDict["low_global_shift"],
-                    "sigma"         : varDict['low_sigma_gamma']/varDict['low_sigma_pi_over_k_ratio_gamma'],
-                    "ratio_sigma"   : varDict["low_ratio_gamma"],
-                    "fraction_sigma": varDict["low_f_gamma"]                
-                },
-            },
-            "Dst0pi_D0gamma_Kspipi_misID_PartReco": #HILLdini_misID 7
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 0,
-                    "yield_Bminus": 0., # 0,
-                    "a":  varDict['low_a_Bu_Dstar0h_D0gamma_dk'],
-                    "b":  varDict['low_b_Bu_Dstar0h_D0gamma_dk'],
-                    "csi":varDict['low_csi_gamma'],              
-                    "m1": varDict['m1ga'],                       
-                    "s1": varDict['s1ga'],                       
-                    "m2": varDict['m2ga'],                       
-                    "s2": varDict['s2ga'],                       
-                    "m3": varDict['m3ga'],                       
-                    "s3": varDict['s3ga'],                       
-                    "m4": varDict['m4ga'],                       
-                    "s4": varDict['s4ga'],                       
-                    "f1": varDict['f1ga'],                       
-                    "f2": varDict['f2ga'],                       
-                    "f3": varDict['f3ga'],                               
-                },
-            },
-            "DKpi_Kspipi": # HORNSdini+Gaussian 8
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 0,
-                    "yield_Bminus": 0., # 0,
-                    "a"             : varDict["low_a_B2DKpi"],
-                    "b"             : varDict["low_b_B2DKpi"],
-                    "csi"           : varDict["low_csi_B2DKpi"],
-                    "shift"         : varDict["low_global_shift"],
-                    "sigma"         : varDict["low_sigma_B2DKpi"],
-                    "ratio_sigma"   : varDict["low_ratio_B2DKpi"],
-                    "fraction_sigma": varDict["low_f_B2DKpi"],
-                    "frac_HORNSdini": varDict['low_frac_B2DKpi'],
-                    "mean_gauss"    : varDict['low_mu_B2DKpi'],
-                    "sigma_gauss"   : varDict['low_sigma_gaus_B2DKpi'],
-                },
-            },
-            "Dpipi_Kspipi_misID_PartReco": # HORNSdini_misID 9
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass": { 
-                    "yield_Bplus" : 0., # 0,
-                    "yield_Bminus": 0., # 0,
-                    "a":  varDict['low_a_B2Dpipi_misID'], 
-                    "b":  varDict['low_b_B2Dpipi_misID'], 
-                    "csi":varDict['low_csi_B2Dpipi'],     
-                    "m1": varDict['low_m1_B2Dpipi_misID'],
-                    "s1": varDict['low_s1_B2Dpipi_misID'],
-                    "m2": varDict['low_m2_B2Dpipi_misID'],
-                    "s2": varDict['low_s2_B2Dpipi_misID'],
-                    "m3": varDict['low_m3_B2Dpipi_misID'],
-                    "s3": varDict['low_s3_B2Dpipi_misID'],
-                    "m4": varDict['low_m4_B2Dpipi_misID'],
-                    "s4": varDict['low_s4_B2Dpipi_misID'],
-                    "f1": varDict['low_f1_B2Dpipi_misID'],
-                    "f2": varDict['low_f2_B2Dpipi_misID'],
-                    "f3": varDict['low_f3_B2Dpipi_misID'],
-                },
-            },
-            "Bs2DKpi_Kspipi_PartReco": # HORNSdini 10
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    "a"             : varDict['low_a_Bs2DKpi'],    
-                    "b"             : varDict['low_b_Bs2DKpi'],    
-                    "csi"           : varDict['low_csi_Bs2DKpi'],  
-                    "shift"         : varDict['low_global_shift'], 
-                    "sigma"         : varDict['low_sigma_Bs2DKpi'],
-                    "ratio_sigma"   : varDict['low_ratio_Bs2DKpi'],
-                    "fraction_sigma": varDict['low_f_Bs2DKpi'],
-                },
-            },
-            "Combinatorial": # Exponential 11
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 5000.,
-                    "yield_Bminus": 5000.,
-                    "c"             : varDict['comb_const_dk_d2kspp_DD'],
-                },
             },
         },        
         "CB2DPI_D2KSPIPI_DD":
         {
             "Dpi_Kspipi": # Cruijff+Gaussian 0 
             {
-                "Bplus" : {
+                "Bplus_efficiency" : {
                     "c00" : 1.,
                     "c10" : 0.,
                     "c20" : 0.,
@@ -752,7 +547,10 @@ VARDICT = {
                     "c52" : 0., 
                     "c54" : 0., 
                 },
-                "Bminus" : {
+                "Bplus_model" : { # these are the parameters for the shape
+                    "c00"  : 1.,
+                },
+                "Bminus_efficiency" : {
                     "c00" : 1.,
                     "c10" : 0.,
                     "c20" : 0.,
@@ -776,6 +574,9 @@ VARDICT = {
                     "c52" : 0., 
                     "c54" : 0., 
                 },                
+                "Bminus_model" : { # these are the parameters for the shape
+                    "c00"  : 1.,
+                },
                 "mass" : {
                     "yield_Bplus" : 75000.,
                     "yield_Bminus": 75000.,
@@ -790,212 +591,18 @@ VARDICT = {
                     "gauss_sigma" : varDict['sigma_dpi_DD'],    
                 },
             },            
-            "DK_Kspipi_misID": #CBShape 1
-            {
-                "Bplus" : {
-                },
-                "Bminus" : {
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    "mean" : varDict['DD_dk_to_dpi_misID_mean1'],
-                    "sigma": varDict['DD_dk_to_dpi_misID_width1'],
-                    "alpha": varDict['DD_dk_to_dpi_misID_alpha1'],
-                    "n"    : varDict['DD_dk_to_dpi_misID_n1'],
-                },
-            },            
-            "Dst0pi_D0pi0_Kspipi": #HORNSdini 2
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 34000.,
-                    "yield_Bminus": 0., # 34000.,
-                    'a'              : varDict['low_a_Bu_Dstar0h_D0pi0_dpi'], 
-                    'b'              : varDict['low_b_Bu_Dstar0h_D0pi0_dpi'], 
-                    'csi'            : varDict['low_csi_pi'],                
-                    'shift'          : varDict['low_global_shift'],         
-                    'sigma'          : varDict['low_sigma_pi_DD'],
-                    'ratio_sigma'    : varDict['low_ratio_pi'],             
-                    'fraction_sigma' : varDict['low_f_pi']                  
-                },
-            },            
-            "Dstppi_D0pip_Kspipi": #HORNSdini 3
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    'a'              : varDict['low_a_Bd_Dstarph_D0pi_dpi'], 
-                    'b'              : varDict['low_b_Bd_Dstarph_D0pi_dpi'], 
-                    'csi'            : varDict['low_csi_pi'],                
-                    'shift'          : varDict['low_global_shift'],         
-                    'sigma'          : varDict['low_sigma_pi_DD'],
-                    'ratio_sigma'    : varDict['low_ratio_pi'],             
-                    'fraction_sigma' : varDict['low_f_pi']                  
-                },
-            },            
-            "Dst0K_D0pi0_Kspipi_misID_PartReco": #HORNSdini_misID 4
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    "a"  :  varDict['low_a_Bu_Dstar0h_D0pi0_dpi'],
-                    "b"  :  varDict['low_b_Bu_Dstar0h_D0pi0_dpi'],
-                    "csi":  varDict['low_csi_pi'],               
-                    "m1" :  varDict['m1pi_pi_DD'],                  
-                    "s1" :  varDict['s1pi_pi_DD'],                  
-                    "m2" :  varDict['m2pi_pi_DD'],                  
-                    "s2" :  varDict['s2pi_pi_DD'],                  
-                    "m3" :  varDict['m3pi_pi_DD'],                  
-                    "s3" :  varDict['s3pi_pi_DD'],                  
-                    "m4" :  varDict['m4pi_pi_DD'],                  
-                    "s4" :  varDict['s4pi_pi_DD'],                  
-                    "f1" :  varDict['f1pi_pi_DD'],                  
-                    "f2" :  varDict['f2pi_pi_DD'],                  
-                    "f3" :  varDict['f3pi_pi_DD'],
-                },
-            },            
-            "DstpK_D0pip_Kspipi_misID_PartReco": #HORNSdini_misID 5
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : { 
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    "a"  : varDict['low_a_Bd_Dstarph_D0pi_dpi'],
-                    "b"  : varDict['low_b_Bd_Dstarph_D0pi_dpi'],
-                    "csi": varDict['low_csi_pi'],              
-                    "m1" : varDict['m1pi_pi_DD'],                 
-                    "s1" : varDict['s1pi_pi_DD'],                 
-                    "m2" : varDict['m2pi_pi_DD'],                 
-                    "s2" : varDict['s2pi_pi_DD'],                 
-                    "m3" : varDict['m3pi_pi_DD'],                 
-                    "s3" : varDict['s3pi_pi_DD'],                 
-                    "m4" : varDict['m4pi_pi_DD'],                 
-                    "s4" : varDict['s4pi_pi_DD'],                 
-                    "f1" : varDict['f1pi_pi_DD'],                 
-                    "f2" : varDict['f2pi_pi_DD'],                 
-                    "f3" : varDict['f3pi_pi_DD'],
-                },
-            },            
-            "Dst0pi_D0gamma_Kspipi": #HILLdini 6
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0., # 17000.,
-                    "yield_Bminus": 0., # 17000.,
-                    "a"             : varDict["low_a_Bu_Dstar0h_D0gamma_dpi"],
-                    "b"             : varDict["low_b_Bu_Dstar0h_D0gamma_dpi"],
-                    "csi"           : varDict["low_csi_gamma"],
-                    "shift"         : varDict["low_global_shift"],
-                    "sigma"         : varDict['low_sigma_gamma'],
-                    "ratio_sigma"   : varDict["low_ratio_gamma"],
-                    "fraction_sigma": varDict["low_f_gamma"]                
-                },
-            },
-            "Dst0K_D0gamma_Kspipi_misID_PartReco": #HILLdini_misID 7
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    "a":  varDict['low_a_Bu_Dstar0h_D0gamma_dpi'],
-                    "b":  varDict['low_b_Bu_Dstar0h_D0gamma_dpi'],
-                    "csi":varDict['low_csi_gamma'],              
-                    "m1": varDict['m1ga_pi'],                       
-                    "s1": varDict['s1ga_pi'],                       
-                    "m2": varDict['m2ga_pi'],                       
-                    "s2": varDict['s2ga_pi'],                       
-                    "m3": varDict['m3ga_pi'],                       
-                    "s3": varDict['s3ga_pi'],                       
-                    "m4": varDict['m4ga_pi'],                       
-                    "s4": varDict['s4ga_pi'],                       
-                    "f1": varDict['f1ga_pi'],                       
-                    "f2": varDict['f2ga_pi'],                       
-                    "f3": varDict['f3ga_pi'],                               
-                },
-            },            
-            "Dpipi_Kspipi": # HORNSdini+HORNSdini 8
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 0,
-                    "yield_Bminus": 0,
-                    "a1"             : varDict['low_a_I_B2Dpipi'],    
-                    "b1"             : varDict['low_b_I_B2Dpipi'],    
-                    "csi1"           : varDict['low_csi_B2Dpipi'],    
-                    "shift1"         : varDict['low_global_shift'],   
-                    "sigma1"         : varDict['low_sigma_I_B2Dpipi'],
-                    "ratio_sigma1"   : varDict['low_ratio_B2Dpipi'],  
-                    "fraction_sigma1": varDict['low_f_B2Dpipi'],   
-                    "frac_HORNSdini1": varDict['low_frac_B2Dpipi'],
-                    "a2"             : varDict['low_a_II_B2Dpipi'],    
-                    "b2"             : varDict['low_b_II_B2Dpipi'],    
-                    "csi2"           : varDict['low_csi_B2Dpipi'],    
-                    "shift2"         : varDict['low_global_shift'],   
-                    "sigma2"         : varDict['low_sigma_II_B2Dpipi'],
-                    "ratio_sigma2"   : varDict['low_ratio_B2Dpipi'],  
-                    "fraction_sigma2": varDict['low_f_B2Dpipi'],
-                },
-            },
-            "Combinatorial": # Exponential 9
-            {
-                "Bplus" : {
-                    "c00" : 1.,
-                },
-                "Bminus" : {
-                    "c00" : 1.,
-                },                
-                "mass" : {
-                    "yield_Bplus" : 12500.,
-                    "yield_Bminus": 12500.,
-                    "c"             : varDict['comb_const_dpi_d2kspp_DD'],
-                },
-            },
         },  
         "SHARED_THROUGH_CHANNELS":
         {
             "parameters":
             {
-                "Bplus" : {
+                "Bplus_efficiency" : {
                 },
-                "Bminus" : {
+                "Bplus_model" : {
+                },
+                "Bminus_efficiency" : {
+                },                
+                "Bminus_model" : {
                 },                
                 "mass" : {
                     "ratio_BR_DK_to_Dpi": 0.07,
@@ -1009,123 +616,5 @@ VARDICT = {
             }
         }
     },
-    "COMBINATORIAL_BACKGROUND_DK":
-    {
-        "CB2DK_D2KSPIPI_DD":
-        {
-            "Combinatorial": # Cruijff+Gaussian 0
-            {
-                "Bplus" : { # c_zp_zm
-                    "c00": 1.,
-                    "c10": 0.,
-                    "c20": 0.,
-                    "c01": 0.,
-                    "c02": 0.,
-                    "c11": 0.,
-                    "c21": 0.,
-                    "c12": 0.,
-                    "c22": 0.,                    
-                },
-                "Bminus" : {
-                    "c00": 1.,
-                    "c10": 0.,
-                    "c20": 0.,
-                    "c01": 0.,
-                    "c02": 0.,
-                    "c11": 0.,
-                    "c21": 0.,
-                    "c12": 0.,
-                    "c22": 0.,                    
-                },
-                "mass" : {
-                    "yield_Bplus" : 5000.,
-                    "yield_Bminus": 5000.,
-                    "c"           : varDict['comb_const_dk_d2kspp_DD'],
-                },
-            },
-        },
-        "SHARED_THROUGH_CHANNELS":
-        {
-            "parameters":
-            {
-                "Bplus" : {
-                },
-                "Bminus" : {
-                },
-                "mass" : {
-                    "ratio_BR_DK_to_Dpi": 0.07,
-                    "xplus"             : 0.00,
-                    "yplus"             : 0.00,
-                    "xminus"            : 0.00,
-                    "yminus"            : 0.00,
-                    "xxi"               : 0.00,
-                    "yxi"               : 0.00,
-                },
-            }
-        }
-    },
-    "MC_Bu_D0K_KSpipi_TightCut_LooserCuts_fixArrow":
-    {
-        "CB2DK_D2KSPIPI_DD" :
-        {
-            "DK_Kspipi_PHSP": # Cruijff+Gaussian 0
-            {
-                "Bplus" : {
-                    "c00": 1.,
-                    "c10": 0.,
-                    "c20": 0.,
-                    "c01": 0.,
-                    "c02": 0.,
-                    "c11": 0.,
-                    "c21": 0.,
-                    "c12": 0.,
-                    "c22": 0.,                    
-                },
-                "Bminus" : {
-                    "c00": 1.,
-                    "c10": 0.,
-                    "c20": 0.,
-                    "c01": 0.,
-                    "c02": 0.,
-                    "c11": 0.,
-                    "c21": 0.,
-                    "c12": 0.,
-                    "c22": 0.,                    
-                },
-                "mass": {
-                    "yield_Bplus" : 7150./2.,
-                    "yield_Bminus": 7150./2.,
-                    "cruij_m0"    : varDict['signal_mean'],
-                    "cruij_sigmaL": varDict['sigma_dk_DD'],
-                    "cruij_sigmaR": varDict['sigma_dk_DD'],
-                    "cruij_alphaL": varDict['DD_dk_Cruijff_alpha_L'],
-                    "cruij_alphaR": varDict['DD_dk_Cruijff_alpha_R'],
-                    "cruij_beta"  : varDict['Cruijff_beta'],
-                    "cruij_frac"  : varDict['DD_dk_Cruijff_frac'],
-                    "gauss_mean"  : varDict['signal_mean'],
-                    "gauss_sigma" : varDict['sigma_dk_DD'],
-                },
-            },
-        },
-        "SHARED_THROUGH_CHANNELS":
-        {
-            "parameters":
-            {
-                "Bplus" : {
-                },
-                "Bminus" : {
-                },
-                "mass" : {
-                    "ratio_BR_DK_to_Dpi": 0.07,
-                    "xplus"             : 0.00,
-                    "yplus"             : 0.00,
-                    "xminus"            : 0.00,
-                    "yminus"            : 0.00,
-                    "xxi"               : 0.00,
-                    "yxi"               : 0.00,
-                },
-            }
-        }
-    }
 }
 

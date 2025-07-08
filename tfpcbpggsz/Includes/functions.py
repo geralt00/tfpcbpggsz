@@ -212,7 +212,7 @@ def chi2_xy_to_physics_param(xplus=None, xminus=None, yplus=None, yminus=None, x
             covariance[i][j] = pd_cov[param_i][param_j]
             pass
         pass
-    print(covariance)
+    # print(covariance)
     inv_covariance = np.linalg.inv(covariance)
     def chi2(x):
         gamma, rb, dB, rb_dpi, dB_dpi = x

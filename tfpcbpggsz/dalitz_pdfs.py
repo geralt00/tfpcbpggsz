@@ -43,11 +43,24 @@ class DalitzPDF:
         # function   = Flat
         model      = Flat
         efficiency = Flat
-        if   (self.component == "DK_Kspipi" or self.component == "DK_Kspipi_misID"):
+        if   (self.component == "DK_Kspipi"):
             model = prob_totalAmplitudeSquared_XY
-        elif (self.component == "Dpi_Kspipi_misID" or self.component == "Dpi_Kspipi"):
+            pass
+        elif (self.component == "Dpi_Kspipi"):
             model = prob_totalAmplitudeSquared_DPi_XY
             pass
+        elif (self.component == "Dpi_Kspipi_misID"):
+            ### unshared_variables is necesary because the "normal" function
+            # uses the shared_variables input.
+            # For the misID DPi, we are not using the same values
+            # but some mock input determined from MC, that are given as input in
+            # VARDICT under "Bplus_model" and "Bminus_model".
+            model = prob_totalAmplitudeSquared_XY_unshared_variables
+            pass
+        elif (self.component == "Dpi_Kspipi_misID_PHSP"):
+            model = Flat
+            pass
+            
         efficiency = DICT_EFFICIENCY_FUNCTIONS[self.name]
         ### note: it's called efficiency here, but for backgrounds it is really
         # the model. It's just more practical to call it that way
@@ -60,7 +73,7 @@ class DalitzPDF:
         #     pass
         return model, efficiency
 
-    def get_normalisation(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, variables=None, shared_variables=None):
+    def get_normalisation(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, variables_eff=None, variables_model=None, shared_variables=None):
         N_normalisation = len(norm_ampD0)
         if ( not (N_normalisation == len(norm_ampD0bar) ) ):
             print("ERROR ----------------------- in B2DK_Kspipi_norm")
@@ -72,10 +85,10 @@ class DalitzPDF:
         # we need to add this amplitude here
         gen_amplitude = 1.
         ####
-        model = self.functions[0](norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
+        model = self.functions[0](norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, self.Bsign, variables=variables_model, shared_variables=shared_variables)
         # print("model")
         # print(model)
-        efficiency = self.functions[1](norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
+        efficiency = self.functions[1](norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, self.Bsign, variables=variables_eff, shared_variables=shared_variables)
         ampSq = model * efficiency
         # print("shared_variables:")
         # print(shared_variables)
@@ -96,17 +109,18 @@ class DalitzPDF:
 
 
     # @tf.function
-    def get_dalitz_pdf(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, variables=None, shared_variables=None):
+    def get_dalitz_pdf(self, norm_ampD0, norm_ampD0bar, norm_zp_p, norm_zm_pp, variables_eff=None, variables_model=None, shared_variables=None):
         # print(" PRINTING some stuff !")
         # print(self.name)
         # print(self.component)
         # print(self.Bsign)
         self.norm_constant = self.get_normalisation(
-            norm_ampD0         ,
-            norm_ampD0bar      ,
-            norm_zp_p          ,
-            norm_zm_pp         ,
-            variables=variables,
+            norm_ampD0            ,
+            norm_ampD0bar         ,
+            norm_zp_p             ,
+            norm_zm_pp            ,
+            variables_eff  =variables_eff  ,
+            variables_model=variables_model,
             shared_variables=shared_variables
         )
         # print("norm_constant")
@@ -120,8 +134,8 @@ class DalitzPDF:
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
         def pdf(ampD0, ampD0bar, zp_p, zm_pp):
-            model = self.functions[0](ampD0, ampD0bar, zp_p, zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
-            efficiency = self.functions[1](ampD0, ampD0bar, zp_p, zm_pp, self.Bsign, variables=variables, shared_variables=shared_variables)
+            model = self.functions[0](ampD0, ampD0bar, zp_p, zm_pp, self.Bsign, variables=variables_model, shared_variables=shared_variables)
+            efficiency = self.functions[1](ampD0, ampD0bar, zp_p, zm_pp, self.Bsign, variables=variables_eff, shared_variables=shared_variables)
             # tf.print("efficiency: ", efficiency)
             # tf.print("model     : ", model)
             ret_pdf = model*efficiency / self.norm_constant

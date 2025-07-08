@@ -170,8 +170,9 @@ def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables
     """
 
     ##### the phase-correction will be stored in
-    # shared_variables[0] for Bplus and shared_variables[1] for Bminus
-    # the CP observables are in shared_variables[2]
+    # shared_variables[INDEX_SPACE[Bsign]+1]
+    # the CP observables are in shared_variables[4]
+    # with the index [4] corresponding to the space dimension of VARDICT
     
     phase = DeltadeltaD(ampD0, ampD0bar)
     if 'model_name' in kwargs:
@@ -183,22 +184,34 @@ def prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables
     absA = tf.cast(tf.abs(ampD0), tf.float64)
     absAbar = tf.cast(tf.abs(ampD0bar), tf.float64)
 
-    # print("xPlus : ", shared_variables[2][1])
-    # print("yPlus : ", shared_variables[2][2])
-    # print("xMinus: ", shared_variables[2][3])
-    # print("yMinus: ", shared_variables[2][4])
+    # if (variables == None):
+    #     tf.print(" B2Dpi misID")
+    #     tf.print("xPlus : ", shared_variables[4][1])
+    #     tf.print("yPlus : ", shared_variables[4][2])
+    #     tf.print("xMinus: ", shared_variables[4][3])
+    #     tf.print("yMinus: ", shared_variables[4][4])
+    #     tf.print("  ")
+    #     pass
+    # else:
+    #     tf.print(" B2DK")
+    #     tf.print("xPlus : ", shared_variables[4][1])
+    #     tf.print("yPlus : ", shared_variables[4][2])
+    #     tf.print("xMinus: ", shared_variables[4][3])
+    #     tf.print("yMinus: ", shared_variables[4][4])
+    #     tf.print("  ")
+    #     pass
     
     if Bsign == 1:
-        xPlus = tf.cast(shared_variables[2][1], tf.float64)
-        yPlus = tf.cast(shared_variables[2][2], tf.float64)
+        xPlus = tf.cast(shared_variables[4][1], tf.float64)
+        yPlus = tf.cast(shared_variables[4][2], tf.float64)
         rB2 = tf.cast(xPlus**2 + yPlus**2, tf.float64)
         # tf.print("xPlus: ", xPlus)
         # tf.print("yPlus: ", yPlus)
         return tf.cast((absA**2 * rB2  + absAbar **2  + 2.0 * (absA * absAbar) * (xPlus * tf.cos(phase) - yPlus * tf.sin(phase))),tf.float64)
     
     elif Bsign == -1:
-        xMinus = tf.cast(shared_variables[2][3], tf.float64)
-        yMinus = tf.cast(shared_variables[2][4], tf.float64)
+        xMinus = tf.cast(shared_variables[4][3], tf.float64)
+        yMinus = tf.cast(shared_variables[4][4], tf.float64)
         rB2 = tf.cast(xMinus**2 + yMinus**2, tf.float64)
 
         return tf.cast((absA**2  + absAbar **2 * rB2 + 2.0 * (absA * absAbar) * (xMinus * tf.cos(phase) + yMinus * tf.sin(phase))), tf.float64)
@@ -296,16 +309,24 @@ def prob_totalAmplitudeSquared_DPi_XY(ampD0, ampD0bar, zp_p, zm_pp, Bsign, varia
         float64: the amplitude squared
     """
 
+    # tf.print(" B2Dpi")
+    # tf.print("xPlus : ", shared_variables[4][1])
+    # tf.print("yPlus : ", shared_variables[4][2])
+    # tf.print("xMinus: ", shared_variables[4][3])
+    # tf.print("yMinus: ", shared_variables[4][4])
+    # tf.print("  ")
+
+    
     phase = DeltadeltaD(ampD0, ampD0bar)
     absA = tf.cast(tf.abs(ampD0), tf.float64)
     absAbar = tf.cast(tf.abs(ampD0bar), tf.float64)
 
-    xXi = tf.cast(shared_variables[2][5], tf.float64)
-    yXi = tf.cast(shared_variables[2][6], tf.float64)
+    xXi = tf.cast(shared_variables[4][5], tf.float64)
+    yXi = tf.cast(shared_variables[4][6], tf.float64)
 
     if Bsign == 1:
-        xPlus = tf.cast(shared_variables[2][1], tf.float64)
-        yPlus = tf.cast(shared_variables[2][2], tf.float64)
+        xPlus = tf.cast(shared_variables[4][1], tf.float64)
+        yPlus = tf.cast(shared_variables[4][2], tf.float64)
         xPlus_DPi = tf.cast(xPlus * xXi - yPlus * yXi, tf.float64)
         yPlus_DPi = tf.cast(yPlus * xXi + xPlus * yXi, tf.float64)
         rB2 = tf.cast(xPlus_DPi**2 + yPlus_DPi**2, tf.float64)
@@ -313,14 +334,27 @@ def prob_totalAmplitudeSquared_DPi_XY(ampD0, ampD0bar, zp_p, zm_pp, Bsign, varia
         return tf.cast((absA**2 * rB2  + absAbar **2  + 2.0 * (absA * absAbar) * (xPlus_DPi * tf.cos(phase) - yPlus_DPi * tf.sin(phase))),tf.float64)
     
     elif Bsign == -1:
-        xMinus = tf.cast(shared_variables[2][3], tf.float64)
-        yMinus = tf.cast(shared_variables[2][4], tf.float64)
+        xMinus = tf.cast(shared_variables[4][3], tf.float64)
+        yMinus = tf.cast(shared_variables[4][4], tf.float64)
         xMinus_DPi = tf.cast(xMinus * xXi - yMinus * yXi, tf.float64)
         yMinus_DPi = tf.cast(yMinus * xXi + xMinus * yXi, tf.float64)
         rB2 = tf.cast(xMinus_DPi**2 + yMinus_DPi**2, tf.float64)
 
 
         return tf.cast((absA**2  + absAbar **2 * rB2 + 2.0 * (absA * absAbar) * (xMinus_DPi * tf.cos(phase) + yMinus_DPi * tf.sin(phase))),tf.float64)
+
+
+def prob_totalAmplitudeSquared_XY_unshared_variables(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
+    """
+    Function to calculate the amplitude squared for the B2Dpi misID decay from mock values of the CP observables determined from MC.
+    """
+    # these [variables, ...] add elements at the start of the list because
+    # the prob_blabla_XY functions takes as input the list of "spaces"
+    # variables, and grabs the CP parameters in the 5th entry of
+    # this list (the "mass" space). It doesn't really matter what we put for the
+    # 3 first elements, I just put "variables" for consistency.
+    mock_shared_variables = [variables, variables, variables, variables, variables]
+    return prob_totalAmplitudeSquared_XY(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=mock_shared_variables)
 
 
 def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], eff2=[]):
@@ -1317,10 +1351,10 @@ class NLLComputation:
         shared_parameters = [] # list_variables
         for i in range(len(self.parameters_to_fit)):
             par_name = self.parameters_to_fit[i]
-            print(par_name)
+            # print(par_name)
             shared_parameters.append([])# each parameter is applied to a list of different "real" variables
             list_sharing_parameters = self.dict_shared_parameters[par_name]
-            print(list_sharing_parameters)
+            # print(list_sharing_parameters)
             for var in list_sharing_parameters:
                 i_channel   = list(self.dict_fixed_variables.keys()).index(var[0])
                 i_component = list(self.dict_fixed_variables[var[0]].keys()).index(var[1])
@@ -1328,13 +1362,13 @@ class NLLComputation:
                 i_variable  = list(self.dict_fixed_variables[var[0]][var[1]][var[2]].keys()).index(var[3])
                 shared_parameters[i].append([i_channel, i_component, i_space, i_variable])
                 pass
-            print(shared_parameters[i])
+            # print(shared_parameters[i])
             pass
-        print("            ")
-        print("            ")
-        print("            ")
-        print("            ")
-        print("            ")
+        # print("            ")
+        # print("            ")
+        # print("            ")
+        # print("            ")
+        # print("            ")
         return shared_parameters
 
 
@@ -1346,7 +1380,7 @@ class NLLComputation:
             constrained_parameters.append([])
             to_const = self.dict_constrained_parameters[i][0]
             const    = self.dict_constrained_parameters[i][1]
-            print(to_const, " is constrained to ", const)
+            # print(to_const, " is constrained to ", const)
             to_const_channel   = list(self.dict_fixed_variables.keys()).index(to_const[0])
             to_const_component = list(self.dict_fixed_variables[to_const[0]].keys()).index(to_const[1])
             to_const_space     = list(self.dict_fixed_variables[to_const[0]][to_const[1]].keys()).index(to_const[2])
@@ -1378,7 +1412,7 @@ class NLLComputation:
             gaussian_constraints.append([])
             to_const = self.dict_gaussian_constraints[i][0]
             const    = self.dict_gaussian_constraints[i][1]
-            print(to_const, " is gaussian constrained to ", const)
+            # print(to_const, " is gaussian constrained to ", const)
             to_const_channel   = list(self.dict_fixed_variables.keys()).index(to_const[0])
             to_const_component = list(self.dict_fixed_variables[to_const[0]].keys()).index(to_const[1])
             to_const_space     = list(self.dict_fixed_variables[to_const[0]][to_const[1]].keys()).index(to_const[2])
@@ -1425,7 +1459,7 @@ class NLLComputation:
             pass
         ########### make the list square so that we can tensor it
         self.len_channelDim   = self.number_of_channels
-        self.len_spaces = 3 # mass, Bplus and Bminus
+        self.len_spaces = 5 # Bplus_efficiency, Bplus_model, Bminus_efficiency, Bminus_model, mass
         self.len_componentDim = max([len(fixed_variables[i]) for i in range(self.len_channelDim)])
         tmp_list = []
         for i in range(self.len_channelDim):
@@ -1525,7 +1559,7 @@ class NLLComputation:
         ## does not change the result of the fit
         if (res == False):
             ERROR(" ---------- SANITY CHECKS NOT PASSED --- CHECK")
-            exit()
+            return
         else:
             print(" On a encore eu d'la chance !")
             pass

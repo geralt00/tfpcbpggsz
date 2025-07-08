@@ -1,0 +1,17 @@
+{
+    "yield_Bplus_Dpi_misID": 50000.063862934454,
+    "yield_Bminus_Dpi_misID": 49999.88219671703,
+    "xplus_Dpi_misID": 0.01396825653588275,
+    "yplus_Dpi_misID": -0.0013021741302826997,
+    "xminus_Dpi_misID": 0.007087988349365371,
+    "yminus_Dpi_misID": -0.006294089914454251,
+    "c10_Dpi_Kspipi_misID_DD": 0.2024767065221351,
+    "c20_Dpi_Kspipi_misID_DD": 0.44991301513553944,
+    "c01_Dpi_Kspipi_misID_DD": -0.00378245385997931,
+    "c02_Dpi_Kspipi_misID_DD": 0.5685436050456948,
+    "c11_Dpi_Kspipi_misID_DD": 0.04800067633362987,
+    "c21_Dpi_Kspipi_misID_DD": 0.049698918155667536,
+    "c12_Dpi_Kspipi_misID_DD": 0.05550308666181051,
+    "c22_Dpi_Kspipi_misID_DD": 0.5606528422797054,
+    "c30_Dpi_Kspipi_misID_DD": 0.10829769124970201
+}
