@@ -141,6 +141,8 @@ class pcbpggsz_generator:
                 B_mass_range    = kwargs['B_mass_range'],
                 mass_shape_name = kwargs['mass_shape_name']
                 mass_variables  = kwargs['mass_variables']
+                mass_variables[0] = 1. # set the yields to something that is not 0
+                mass_variables[1] = 1. # set the yields to something that is not 0
                 mass_shape      = None
             except KeyError:
                 generate_B_mass = False

@@ -4,7 +4,7 @@ import numpy as np
 from tfpcbpggsz.masspdfs import *
 from tfpcbpggsz.phasecorrection import * 
 from tfpcbpggsz.generator.data import data_mask
-from tfpcbpggsz.Includes.functions import INFO, ERROR
+from tfpcbpggsz.Includes.functions import INFO, ERROR, get_gaussian_constraints
 
 #Common functions
 _PI = tf.constant(np.pi, dtype=tf.float64)
@@ -1356,10 +1356,17 @@ class NLLComputation:
             list_sharing_parameters = self.dict_shared_parameters[par_name]
             # print(list_sharing_parameters)
             for var in list_sharing_parameters:
+                # print(" var              ",var       )
+                # print(self.dict_fixed_variables)
                 i_channel   = list(self.dict_fixed_variables.keys()).index(var[0])
                 i_component = list(self.dict_fixed_variables[var[0]].keys()).index(var[1])
                 i_space     = list(self.dict_fixed_variables[var[0]][var[1]].keys()).index(var[2])
                 i_variable  = list(self.dict_fixed_variables[var[0]][var[1]][var[2]].keys()).index(var[3])
+                # print(" i_channel              ",i_channel     )
+                # print(" i_component            ",i_component     )
+                # print(" i_space                ",i_space         )
+                # print(" i_variable             ",i_variable      )
+                # print("              "      )
                 shared_parameters[i].append([i_channel, i_component, i_space, i_variable])
                 pass
             # print(shared_parameters[i])
@@ -1449,6 +1456,8 @@ class NLLComputation:
                     # print("space")
                     # print(space)
                     fixed_variables[-1][-1].append([])
+                    # print(self.dict_fixed_variables[channel][component][space])
+                    # print("    ")
                     for variables_values in self.dict_fixed_variables[channel][component][space].values():
                         fixed_variables[-1][-1][-1].append(variables_values)
                         pass
@@ -1569,28 +1578,71 @@ class NLLComputation:
     def get_total_mass_nll(self,x):
         total_nll = 0
         for _channel in self.list_channels:
-            total_nll += self.ntuples[_channel].get_mass_nll(
-                x,
-                self.fixed_variables,
-                self.shared_parameters,
-                self.constrained_parameters,
-                gaussian_constraints=self.gaussian_constraints
-            )
+            list_variables = self.ntuples[_channel].get_list_variables(self.fixed_variables,
+                                                                       params=x,
+                                                                       shared_parameters=self.shared_parameters,
+                                                                       constrained_parameters=self.constrained_parameters
+                                                                       )
+            index_yields  = INDEX_YIELDS["Bplus"]
+            sum_yields    = sum([comp[4][index_yields] for comp in list_variables[self.ntuples[_channel].i_c]])
+            tf_sum_yields    = tf.cast(sum_yields, tf.float64)
+            self.ntuples[_channel].initialise_fixed_mass_pdfs(list_variables)
+            tf_list_variables = tf.cast(list_variables, tf.float64)
+            # tf_gauss_constraints  = tf.cast(self.gaussian_constraints, tf.float64)
+            total_nll += self.ntuples[_channel].get_mass_nll(tf_list_variables,
+                                                             tf_sum_yields,
+                                                             )
             pass
+        # finally we add the gaussian constraints. it doesn't matter which _channel is used
+        total_nll  += get_gaussian_constraints(self.gaussian_constraints, list_variables)
         return total_nll
+
+    # @tf.function
+    # def get_total_nll(self,x):
+    #     total_nll = 0
+    #     for _channel in self.list_channels:
+    #         total_nll += self.ntuples[_channel].get_total_nll(
+    #             x,
+    #             self.fixed_variables,
+    #             self.shared_parameters,
+    #             self.constrained_parameters,
+    #             gaussian_constraints=self.gaussian_constraints
+    #         )
+    #         pass
+    #     return total_nll
 
     @tf.function
     def get_total_nll(self,x):
         total_nll = 0
         for _channel in self.list_channels:
-            total_nll += self.ntuples[_channel].get_total_nll(
-                x,
-                self.fixed_variables,
-                self.shared_parameters,
-                self.constrained_parameters,
-                gaussian_constraints=self.gaussian_constraints
-            )
+            list_variables = self.ntuples[_channel].get_list_variables(self.fixed_variables,
+                                                                       params=x,
+                                                                       shared_parameters=self.shared_parameters,
+                                                                       constrained_parameters=self.constrained_parameters
+                                                                       )
+            # tf_list_variables = tf.cast(list_variables, tf.float64)
+            self.ntuples[_channel].initialise_fixed_pdfs(list_variables)
+            for Bsign in BSIGNS.keys():
+                # print(_channel, Bsign)
+                index_yields  = INDEX_YIELDS[Bsign]
+                sum_yields    = sum([comp[4][index_yields] for comp in list_variables[self.ntuples[_channel].i_c]])
+                tf_sum_yields    = tf.cast(sum_yields, tf.float64)
+                total_nll += self.ntuples[_channel].get_total_nll(tf_sum_yields,
+                                                                  Bsign=Bsign # self.gaussian_constraints
+                                                                  )
+                # print("total_nll  ", total_nll)
+                # print("sum_yields ", sum_yields)
+                # print("x          ", x)
+                # print("   ")
+                # print("   ")
+                # print("   ")
+                # print("   ")
+                # print("   ")
+                pass
             pass
+        # finally we add the gaussian constraints. it doesn't matter which _channel is used.
+        # this means that it could be made prettier
+        total_nll += get_gaussian_constraints(self.gaussian_constraints, list_variables)
         return total_nll
 
 

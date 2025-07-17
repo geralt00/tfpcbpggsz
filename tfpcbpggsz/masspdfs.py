@@ -579,25 +579,25 @@ class MassPDF():
         # print(self.name)
         # print(self.component)
         # print(variables)
-        if (Bsign==None):
-            # print("Bsign not specified ------ summing B+ and B- samples")
-            ######### explaining what's happening here:
-            # we don't sum the two yields because they are just a single
-            # parameter in the fit. That means that the free parameter is
-            # called "{component}_yield_Bplus", but the actual result
-            # will be the total yield
-            comp_yield = variables[INDEX_YIELDS["Bplus"]] + variables[INDEX_YIELDS["Bminus"]]
-        else:
-            # print(Bsign)
-            # print(INDEX_YIELDS[Bsign])
-            comp_yield = variables[INDEX_YIELDS[Bsign]]
-            pass
+        # if (Bsign==None):
+        #     # print("Bsign not specified ------ summing B+ and B- samples")
+        #     ######### explaining what's happening here:
+        #     # we don't sum the two yields because they are just a single
+        #     # parameter in the fit. That means that the free parameter is
+        #     # called "{component}_yield_Bplus", but the actual result
+        #     # will be the total yield
+        #     comp_yield = variables[INDEX_YIELDS["Bplus"]] + variables[INDEX_YIELDS["Bminus"]]
+        # else:
+        #     # print(Bsign)
+        #     # print(INDEX_YIELDS[Bsign])
+        #     comp_yield = variables[INDEX_YIELDS[Bsign]]
+        #     pass
         pdf = lambda Bu_M: self.function(Bu_M, variables)
+        # print(" comp_yield: ",comp_yield)
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
         # print(" between pdf and norm_pdf !")
-        # print(" between pdf and norm_pdf !")
-        res = lambda Bu_M: comp_yield*norm_pdf(Bu_M,pdf)
+        res = lambda Bu_M: norm_pdf(Bu_M,pdf) # comp_yield*
         # print(" after norm_pdf !")
         # print(" after norm_pdf !")
         # print(" after norm_pdf !")

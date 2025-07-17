@@ -16,6 +16,18 @@ def ERROR(string):
     print(" ")
     return
 
+
+
+############## constraints
+def get_gaussian_constraints(gaussian_constraints, list_variables):
+    res = 0
+    for i_const in gaussian_constraints:
+        delta_x = list_variables[i_const[0][0]][i_const[0][1]][i_const[0][2]][i_const[0][3]]-list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]][i_const[1][3]]*i_const[1][4]
+        sigma   = list_variables[i_const[1][0]][i_const[1][1]][i_const[1][2]][i_const[1][3]]*i_const[1][5]
+        res    += delta_x*delta_x / (sigma*sigma)
+        pass
+    return res
+
 def invariant_mass(h1_PE, h1_PX, h1_PY, h1_PZ, h2_PE, h2_PX, h2_PY, h2_PZ, sqrt = False):
     energy = np.power( (h1_PE+h2_PE) ,2)
     mom    = -np.power((h1_PX+h2_PX),2)-np.power((h1_PY+h2_PY),2)-np.power((h1_PZ+h2_PZ),2);
@@ -48,12 +60,12 @@ def func_var_rotated_stretched(var_rotated):
 
 
 def Dalitz_upper_limit(skpip): # in GeV !!
-    res = (0.394465 + 1.8821*skpip - 0.5* np.power(skpip,2) + 1.86484* np.sqrt(0.044744 - 0.485412*skpip + 1.13203*np.power(skpip,2) - 0.541203*np.power(skpip,3) + 0.0718881*np.power(skpip,4) ) ) / skpip
+    res = (0.394465 + 1.8821*skpip - 0.5* tf.math.pow(skpip,2) + 1.86484* tf.math.sqrt(0.044744 - 0.485412*skpip + 1.13203*tf.math.pow(skpip,2) - 0.541203*tf.math.pow(skpip,3) + 0.0718881*tf.math.pow(skpip,4) ) ) / skpip
     return res
 
 
 def Dalitz_lower_limit(skpip): # in GeV !!
-    res =  (0.394465 + 1.8821*skpip - 0.5* np.power(skpip,2) - 1.86484* np.sqrt(0.044744 - 0.485412*skpip + 1.13203*np.power(skpip,2) - 0.541203*np.power(skpip,3) + 0.0718881*np.power(skpip,4) ) ) / skpip
+    res =  (0.394465 + 1.8821*skpip - 0.5* tf.math.pow(skpip,2) - 1.86484* tf.math.sqrt(0.044744 - 0.485412*skpip + 1.13203*tf.math.pow(skpip,2) - 0.541203*tf.math.pow(skpip,3) + 0.0718881*tf.math.pow(skpip,4) ) ) / skpip
     return res
 
 # def in_Dalitz_plot(skpip, skpim): 
@@ -70,7 +82,7 @@ def Dalitz_lower_limit(skpip): # in GeV !!
 def in_Dalitz_plot(skpip, skpim):
     UP  = Dalitz_upper_limit(skpip)
     LOW = Dalitz_lower_limit(skpip)
-    res = np.where(
+    res = tf.where(
         (LOW<skpim) & (skpim<UP) & (QMI_smin_Kspi<skpip) & (skpip<QMI_smax_Kspi),
         True,
         False
@@ -96,7 +108,7 @@ def clip_log(x, _epsilon=1e-6):
 
     delta_x = x - _epsilon
     b_f = (
-       np.log(_epsilon) + delta_x / _epsilon - (delta_x / _epsilon) ** 2 / 2.0
+       tf.math.log(_epsilon) + delta_x / _epsilon - (delta_x / _epsilon) ** 2 / 2.0
     )
     return tf.where(x > _epsilon, b_t, b_f)
 
@@ -104,9 +116,9 @@ def clip_log(x, _epsilon=1e-6):
 # @tf.function
 def Legendre_2_2(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     Legendre_zp_1 = zp_p
-    Legendre_zp_2 = (3 * np.power(zp_p, 2) - 1) / 2.
+    Legendre_zp_2 = (3 * tf.math.power(zp_p, 2) - 1) / 2.
     Legendre_zm_1 = zm_pp
-    Legendre_zm_2 = (3 * np.power(zm_pp, 2) - 1) / 2.
+    Legendre_zm_2 = (3 * tf.math.power(zm_pp, 2) - 1) / 2.
     res = (
         variables[0] +
         Legendre_zp_1*variables[1] +
@@ -139,15 +151,15 @@ def Legendre_2_2(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_var
 # @tf.function
 def Legendre_5_5(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     Legendre_zp_1 = zp_p
-    Legendre_zp_2 = (3 * np.power(zp_p, 2) - 1) / 2.
-    Legendre_zp_3 = (5 * np.power(zp_p, 3) - 3 * zp_p) / 2.
-    Legendre_zp_4 = (35 * np.power(zp_p, 4) - 30 * np.power(zp_p, 2) + 3) / 8.
-    Legendre_zp_5 = (63 * np.power(zp_p, 5) - 70 * np.power(zp_p, 3) + 15 * zp_p) / 8.
+    Legendre_zp_2 = (3 * tf.math.pow(zp_p, 2) - 1) / 2.
+    Legendre_zp_3 = (5 * tf.math.pow(zp_p, 3) - 3 * zp_p) / 2.
+    Legendre_zp_4 = (35 * tf.math.pow(zp_p, 4) - 30 * tf.math.pow(zp_p, 2) + 3) / 8.
+    Legendre_zp_5 = (63 * tf.math.pow(zp_p, 5) - 70 * tf.math.pow(zp_p, 3) + 15 * zp_p) / 8.
     Legendre_zm_1 = zm_pp
-    Legendre_zm_2 = (3 * np.power(zm_pp, 2) - 1) / 2.
-    Legendre_zm_3 = (5 * np.power(zm_pp, 3) - 3 * zm_pp) / 2.
-    Legendre_zm_4 = (35 * np.power(zm_pp, 4) - 30 * np.power(zm_pp, 2) + 3) / 8.
-    Legendre_zm_5 = (63 * np.power(zm_pp, 5) - 70 * np.power(zm_pp, 3) + 15 * zm_pp) / 8.
+    Legendre_zm_2 = (3 * tf.math.pow(zm_pp, 2) - 1) / 2.
+    Legendre_zm_3 = (5 * tf.math.pow(zm_pp, 3) - 3 * zm_pp) / 2.
+    Legendre_zm_4 = (35 * tf.math.pow(zm_pp, 4) - 30 * tf.math.pow(zm_pp, 2) + 3) / 8.
+    Legendre_zm_5 = (63 * tf.math.pow(zm_pp, 5) - 70 * tf.math.pow(zm_pp, 3) + 15 * zm_pp) / 8.
     res = (variables[0] +
            Legendre_zp_1*variables[1] +
            Legendre_zp_2*variables[2] +
@@ -189,8 +201,8 @@ def Legendre_5_5(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_var
 
 
 def Flat(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
-    res = np.ones(zp_p.shape)
-    res = np.where(
+    res = tf.ones(zp_p.shape)
+    res = tf.where(
         in_Dalitz_plot_SRD(zp_p, zm_pp) == True,
         res,
         0

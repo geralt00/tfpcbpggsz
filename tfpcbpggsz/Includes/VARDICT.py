@@ -418,7 +418,7 @@ VARDICT = {
                 'b'              : varDict['low_b_Bd_Dstarph_D0pi_dk'], 
                 'csi'            : varDict['low_csi_pi'],                
                 'shift'          : varDict['low_global_shift'],         
-                'sigma'          : varDict['low_sigma_pi_DD']/varDict['low_sigma_pi_over_k_ratio'],           
+                'sigma'          : varDict['low_sigma_pi_DD']/varDict['low_sigma_pi_over_k_ratio'],
                 'ratio_sigma'    : varDict['low_ratio_pi'],             
                 'fraction_sigma' : varDict['low_f_pi']                  
             },            

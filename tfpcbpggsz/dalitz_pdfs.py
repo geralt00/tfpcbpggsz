@@ -46,6 +46,9 @@ class DalitzPDF:
         if   (self.component == "DK_Kspipi"):
             model = prob_totalAmplitudeSquared_XY
             pass
+        elif   (self.component == "DK_Kspipi_PHSP"):
+            model = Flat
+            pass
         elif (self.component == "Dpi_Kspipi"):
             model = prob_totalAmplitudeSquared_DPi_XY
             pass

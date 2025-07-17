@@ -68,7 +68,7 @@ kwargs_data = {
 numbernormalisation  = 1000000 # args.numbernormalisation # "Legendre_2_2"
 
 # 
-plot_dir=f"2025_07_04/TOY_EXAMPLE_BASIC"
+plot_dir=f"2025_07_16/TOY_EXAMPLE_BASIC"
 os.makedirs(plot_dir, exist_ok=True)
 os.makedirs(f"{plot_dir}/preFit/",exist_ok=True)
 os.makedirs(f"{plot_dir}/generation/",exist_ok=True)
@@ -89,6 +89,8 @@ B2DK_mass_variables  = list(fixed_variables["CB2DK_D2KSPIPI_DD"]["DK_Kspipi"]["m
 B2Dpi_mass_variables = list(fixed_variables["CB2DPI_D2KSPIPI_DD"]["Dpi_Kspipi"]["mass"].values())
 B2Dpi_misID_mass_variables = list(fixed_variables["CB2DK_D2KSPIPI_DD"]["Dpi_Kspipi_misID"]["mass"].values())
 
+
+print(B2DK_mass_variables)
 
 ####### LOAD THE RESULT OF THE EFFICIENCY FIT
 
@@ -545,8 +547,8 @@ for channel in list_channels:
 
 # starting values of the fitted parameters
 start_values = {
-    "yield_Bplus_DK"  :                          yields["DK_Kspipi_DD"],
-    "yield_Bminus_DK" :                          yields["DK_Kspipi_DD"],
+    "yield_Bplus_DK"  :                          yields["DK_Kspipi_DD"]/1000,
+    "yield_Bminus_DK" :                          yields["DK_Kspipi_DD"]/1000,
     "signal_mean_DK":                            varDict['signal_mean']+50,
     "signal_width_DK":                           varDict['sigma_dk_DD']+50,
     "yield_Bplus_Dpi"  :                          yields["Dpi_Kspipi_DD"],
@@ -1090,7 +1092,7 @@ for channel in list_channels:
 
 
 # the actual nll function to feed to migrad
-@tf.function
+# @tf.function
 def nll(x):
     return NLL.get_total_nll(x) # , tensor_to_fit)
 
@@ -1112,6 +1114,7 @@ print(mg)
 means  = mg.values
 errors = mg.errors
 hesse  = mg.hesse()
+print(hesse)
 cov    = hesse.covariance
 corr   = cov.correlation()
 corr_array = np.zeros(len(parameters_to_fit)*len(parameters_to_fit)).reshape(len(parameters_to_fit),len(parameters_to_fit))

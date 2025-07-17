@@ -426,8 +426,8 @@ VARDICT = {
                     "c00" : 1.,
                 },
                 "mass": {
-                    "yield_Bplus" : 7150./2.,
-                    "yield_Bminus": 7150./2.,
+                    "yield_Bplus" : 0.,
+                    "yield_Bminus": 0.,
                     "cruij_m0"    : varDict['signal_mean'],
                     "cruij_sigmaL": varDict['sigma_dk_DD'],
                     "cruij_sigmaR": varDict['sigma_dk_DD'],
@@ -504,8 +504,8 @@ VARDICT = {
                     "yminus" : 1.,
                 },
                 "mass" : {
-                    "yield_Bplus" : 3000./2.,
-                    "yield_Bminus": 3000./2.,
+                    "yield_Bplus" : 0.,
+                    "yield_Bminus": 0.,
                     "mean1" : varDict['DD_d2kspp_dpi_to_dk_misID_mean1'],
                     "sigma1": varDict['DD_d2kspp_dpi_to_dk_misID_width1'],
                     "alpha1": varDict['DD_d2kspp_dpi_to_dk_misID_alpha1'],
@@ -578,8 +578,8 @@ VARDICT = {
                     "c00"  : 1.,
                 },
                 "mass" : {
-                    "yield_Bplus" : 75000.,
-                    "yield_Bminus": 75000.,
+                    "yield_Bplus" : 0.,
+                    "yield_Bminus": 0.,
                     "cruij_m0"    : varDict['signal_mean'],
                     "cruij_sigmaL": varDict['sigma_dpi_DD'],
                     "cruij_sigmaR": varDict['sigma_dpi_DD'],
@@ -591,30 +591,404 @@ VARDICT = {
                     "gauss_sigma" : varDict['sigma_dpi_DD'],    
                 },
             },            
-        },  
-        "SHARED_THROUGH_CHANNELS":
-        {
-            "parameters":
-            {
-                "Bplus_efficiency" : {
-                },
-                "Bplus_model" : {
-                },
-                "Bminus_efficiency" : {
-                },                
-                "Bminus_model" : {
-                },                
-                "mass" : {
-                    "ratio_BR_DK_to_Dpi": 0.07,
-                    "xplus"             : 0.00,
-                    "yplus"             : 0.00,
-                    "xminus"            : 0.00,
-                    "yminus"            : 0.00,
-                    "xxi"               : 0.00,
-                    "yxi"               : 0.00,
-                },
-            }
-        }
-    },
+        },
+    }
 }
 
+#########
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DK_Kspipi_PHSP"] = VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DK_Kspipi"]
+
+
+#### adding background components
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi"]["mass"] = {#HORNSdini 2
+    "yield_Bplus" : 0., # 750.,
+    "yield_Bminus": 0., # 750.,
+    'a'              : varDict['low_a_Bu_Dstar0h_D0pi0_dk'], 
+    'b'              : varDict['low_b_Bu_Dstar0h_D0pi0_dk'], 
+    'csi'            : varDict['low_csi_pi'],                
+    'shift'          : varDict['low_global_shift'],         
+    'sigma'          : varDict['low_sigma_pi_DD']/varDict['low_sigma_pi_over_k_ratio'],
+    'ratio_sigma'    : varDict['low_ratio_pi'],             
+    'fraction_sigma' : varDict['low_f_pi']                  
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi"]["mass"] = {#HORNSdini 2
+    "yield_Bplus" : 0., # 750.,
+    "yield_Bminus": 0., # 750.,
+    'a'              : varDict['low_a_Bd_Dstarph_D0pi_dk'], 
+    'b'              : varDict['low_b_Bd_Dstarph_D0pi_dk'], 
+    'csi'            : varDict['low_csi_pi'],                
+    'shift'          : varDict['low_global_shift'],         
+    'sigma'          : varDict['low_sigma_pi_DD']/varDict['low_sigma_pi_over_k_ratio'],
+    'ratio_sigma'    : varDict['low_ratio_pi'],             
+    'fraction_sigma' : varDict['low_f_pi']                  
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi_misID_PartReco"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi_misID_PartReco"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi_misID_PartReco"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi_misID_PartReco"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi_misID_PartReco"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi_misID_PartReco"]["mass"] = {#HORNSdini_misID 4
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "a"  :  varDict['low_a_Bu_Dstar0h_D0pi0_dk'],
+    "b"  :  varDict['low_b_Bu_Dstar0h_D0pi0_dk'],
+    "csi":  varDict['low_csi_pi'],               
+    "m1" :  varDict['m1pi_DD'],                  
+    "s1" :  varDict['s1pi_DD'],                  
+    "m2" :  varDict['m2pi_DD'],                  
+    "s2" :  varDict['s2pi_DD'],                  
+    "m3" :  varDict['m3pi_DD'],                  
+    "s3" :  varDict['s3pi_DD'],                  
+    "m4" :  varDict['m4pi_DD'],                  
+    "s4" :  varDict['s4pi_DD'],                  
+    "f1" :  varDict['f1pi_DD'],                  
+    "f2" :  varDict['f2pi_DD'],                  
+    "f3" :  varDict['f3pi_DD'],
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi_misID_PartReco"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi_misID_PartReco"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi_misID_PartReco"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi_misID_PartReco"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi_misID_PartReco"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi_misID_PartReco"]["mass"] = {#HORNSdini_misID 5
+    "yield_Bplus" : 0., # 750.,
+    "yield_Bminus": 0., # 750.,
+    "a"  : varDict['low_a_Bd_Dstarph_D0pi_dk'],
+    "b"  : varDict['low_b_Bd_Dstarph_D0pi_dk'],
+    "csi": varDict['low_csi_pi'],              
+    "m1" : varDict['m1pi_DD'],                 
+    "s1" : varDict['s1pi_DD'],                 
+    "m2" : varDict['m2pi_DD'],                 
+    "s2" : varDict['s2pi_DD'],                 
+    "m3" : varDict['m3pi_DD'],                 
+    "s3" : varDict['s3pi_DD'],                 
+    "m4" : varDict['m4pi_DD'],                 
+    "s4" : varDict['s4pi_DD'],                 
+    "f1" : varDict['f1pi_DD'],                 
+    "f2" : varDict['f2pi_DD'],                 
+    "f3" : varDict['f3pi_DD'],
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi"]["mass"] = {#HILLdini 6
+    "yield_Bplus" : 0., # 2200.,
+    "yield_Bminus": 0., # 2200.,
+    "a"             : varDict["low_a_Bu_Dstar0h_D0gamma_dk"],
+    "b"             : varDict["low_b_Bu_Dstar0h_D0gamma_dk"],
+    "csi"           : varDict["low_csi_gamma"],
+    "shift"         : varDict["low_global_shift"],
+    "sigma"         : varDict['low_sigma_gamma']/varDict['low_sigma_pi_over_k_ratio_gamma'],
+    "ratio_sigma"   : varDict["low_ratio_gamma"],
+    "fraction_sigma": varDict["low_f_gamma"]                
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi_misID_PartReco"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi_misID_PartReco"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi_misID_PartReco"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi_misID_PartReco"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi_misID_PartReco"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi_misID_PartReco"]["mass"] = { #HILLdini_misID 7
+    "yield_Bplus" : 0., # 0,
+    "yield_Bminus": 0., # 0,
+    "a":  varDict['low_a_Bu_Dstar0h_D0gamma_dk'],
+    "b":  varDict['low_b_Bu_Dstar0h_D0gamma_dk'],
+    "csi":varDict['low_csi_gamma'],              
+    "m1": varDict['m1ga'],                       
+    "s1": varDict['s1ga'],                       
+    "m2": varDict['m2ga'],                       
+    "s2": varDict['s2ga'],                       
+    "m3": varDict['m3ga'],                       
+    "s3": varDict['s3ga'],                       
+    "m4": varDict['m4ga'],                       
+    "s4": varDict['s4ga'],                       
+    "f1": varDict['f1ga'],                       
+    "f2": varDict['f2ga'],                       
+    "f3": varDict['f3ga'],                               
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DKpi_Kspipi"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DKpi_Kspipi"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DKpi_Kspipi"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DKpi_Kspipi"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DKpi_Kspipi"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["DKpi_Kspipi"]["mass"] = { #HORNSdini+Gaussian 8
+    "yield_Bplus" : 0., # 0,
+    "yield_Bminus": 0., # 0,
+    "a"             : varDict["low_a_B2DKpi"],
+    "b"             : varDict["low_b_B2DKpi"],
+    "csi"           : varDict["low_csi_B2DKpi"],
+    "shift"         : varDict["low_global_shift"],
+    "sigma"         : varDict["low_sigma_B2DKpi"],
+    "ratio_sigma"   : varDict["low_ratio_B2DKpi"],
+    "fraction_sigma": varDict["low_f_B2DKpi"],
+    "frac_HORNSdini": varDict['low_frac_B2DKpi'],
+    "mean_gauss"    : varDict['low_mu_B2DKpi'],
+    "sigma_gauss"   : varDict['low_sigma_gaus_B2DKpi'],
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dpipi_Kspipi_misID_PartReco"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dpipi_Kspipi_misID_PartReco"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dpipi_Kspipi_misID_PartReco"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dpipi_Kspipi_misID_PartReco"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dpipi_Kspipi_misID_PartReco"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Dpipi_Kspipi_misID_PartReco"]["mass"] = { #HORNSdini_misID 9
+    "yield_Bplus" : 0., # 0,
+    "yield_Bminus": 0., # 0,
+    "a":  varDict['low_a_B2Dpipi_misID'], 
+    "b":  varDict['low_b_B2Dpipi_misID'], 
+    "csi":varDict['low_csi_B2Dpipi'],     
+    "m1": varDict['low_m1_B2Dpipi_misID'],
+    "s1": varDict['low_s1_B2Dpipi_misID'],
+    "m2": varDict['low_m2_B2Dpipi_misID'],
+    "s2": varDict['low_s2_B2Dpipi_misID'],
+    "m3": varDict['low_m3_B2Dpipi_misID'],
+    "s3": varDict['low_s3_B2Dpipi_misID'],
+    "m4": varDict['low_m4_B2Dpipi_misID'],
+    "s4": varDict['low_s4_B2Dpipi_misID'],
+    "f1": varDict['low_f1_B2Dpipi_misID'],
+    "f2": varDict['low_f2_B2Dpipi_misID'],
+    "f3": varDict['low_f3_B2Dpipi_misID'],
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Bs2DKpi_Kspipi_PartReco"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Bs2DKpi_Kspipi_PartReco"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Bs2DKpi_Kspipi_PartReco"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Bs2DKpi_Kspipi_PartReco"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Bs2DKpi_Kspipi_PartReco"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Bs2DKpi_Kspipi_PartReco"]["mass"] = { #HORNSdini 10
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "a"             : varDict['low_a_Bs2DKpi'],    
+    "b"             : varDict['low_b_Bs2DKpi'],    
+    "csi"           : varDict['low_csi_Bs2DKpi'],  
+    "shift"         : varDict['low_global_shift'], 
+    "sigma"         : varDict['low_sigma_Bs2DKpi'],
+    "ratio_sigma"   : varDict['low_ratio_Bs2DKpi'],
+    "fraction_sigma": varDict['low_f_Bs2DKpi'],
+}
+
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Combinatorial"] = {}
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Combinatorial"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Combinatorial"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Combinatorial"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Combinatorial"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DK_D2KSPIPI_DD"]["Combinatorial"]["mass"] = { #Exponential 11
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "c"             : varDict['comb_const_dpi_d2kspp_DD'],
+}
+
+
+############## DPI
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DK_Kspipi_misID"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DK_Kspipi_misID"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DK_Kspipi_misID"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DK_Kspipi_misID"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DK_Kspipi_misID"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DK_Kspipi_misID"]["mass"] = { #CBShape 1
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "mean" : varDict['DD_dk_to_dpi_misID_mean1'],
+    "sigma": varDict['DD_dk_to_dpi_misID_width1'],
+    "alpha": varDict['DD_dk_to_dpi_misID_alpha1'],
+    "n"    : varDict['DD_dk_to_dpi_misID_n1'],
+}
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0pi0_Kspipi"]["mass"] = { #HORNSdini 2
+    "yield_Bplus" : 0., # 34000.,
+    "yield_Bminus": 0., # 34000.,
+    'a'              : varDict['low_a_Bu_Dstar0h_D0pi0_dpi'], 
+    'b'              : varDict['low_b_Bu_Dstar0h_D0pi0_dpi'], 
+    'csi'            : varDict['low_csi_pi'],                
+    'shift'          : varDict['low_global_shift'],         
+    'sigma'          : varDict['low_sigma_pi_DD'],
+    'ratio_sigma'    : varDict['low_ratio_pi'],             
+    'fraction_sigma' : varDict['low_f_pi']                  
+}
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dstppi_D0pip_Kspipi"]["mass"] = { #HORNSdini 3
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    'a'              : varDict['low_a_Bd_Dstarph_D0pi_dpi'], 
+    'b'              : varDict['low_b_Bd_Dstarph_D0pi_dpi'], 
+    'csi'            : varDict['low_csi_pi'],                
+    'shift'          : varDict['low_global_shift'],         
+    'sigma'          : varDict['low_sigma_pi_DD'],
+    'ratio_sigma'    : varDict['low_ratio_pi'],             
+    'fraction_sigma' : varDict['low_f_pi']                  
+}
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi_misID_PartReco"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi_misID_PartReco"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi_misID_PartReco"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi_misID_PartReco"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi_misID_PartReco"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0pi0_Kspipi_misID_PartReco"]["mass"] = { #HORNSdini_misID 4
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "a"  :  varDict['low_a_Bu_Dstar0h_D0pi0_dpi'],
+    "b"  :  varDict['low_b_Bu_Dstar0h_D0pi0_dpi'],
+    "csi":  varDict['low_csi_pi'],               
+    "m1" :  varDict['m1pi_pi_DD'],                  
+    "s1" :  varDict['s1pi_pi_DD'],                  
+    "m2" :  varDict['m2pi_pi_DD'],                  
+    "s2" :  varDict['s2pi_pi_DD'],                  
+    "m3" :  varDict['m3pi_pi_DD'],                  
+    "s3" :  varDict['s3pi_pi_DD'],                  
+    "m4" :  varDict['m4pi_pi_DD'],                  
+    "s4" :  varDict['s4pi_pi_DD'],                  
+    "f1" :  varDict['f1pi_pi_DD'],                  
+    "f2" :  varDict['f2pi_pi_DD'],                  
+    "f3" :  varDict['f3pi_pi_DD'],
+}
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi_misID_PartReco"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi_misID_PartReco"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi_misID_PartReco"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi_misID_PartReco"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi_misID_PartReco"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["DstpK_D0pip_Kspipi_misID_PartReco"]["mass"] = { #HORNSdini_misID 5
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "a"  : varDict['low_a_Bd_Dstarph_D0pi_dpi'],
+    "b"  : varDict['low_b_Bd_Dstarph_D0pi_dpi'],
+    "csi": varDict['low_csi_pi'],              
+    "m1" : varDict['m1pi_pi_DD'],                 
+    "s1" : varDict['s1pi_pi_DD'],                 
+    "m2" : varDict['m2pi_pi_DD'],                 
+    "s2" : varDict['s2pi_pi_DD'],                 
+    "m3" : varDict['m3pi_pi_DD'],                 
+    "s3" : varDict['s3pi_pi_DD'],                 
+    "m4" : varDict['m4pi_pi_DD'],                 
+    "s4" : varDict['s4pi_pi_DD'],                 
+    "f1" : varDict['f1pi_pi_DD'],                 
+    "f2" : varDict['f2pi_pi_DD'],                 
+    "f3" : varDict['f3pi_pi_DD'],
+}
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0pi_D0gamma_Kspipi"]["mass"] = { #HILLdini 6
+    "yield_Bplus" : 0., # 17000.,
+    "yield_Bminus": 0., # 17000.,
+    "a"             : varDict["low_a_Bu_Dstar0h_D0gamma_dpi"],
+    "b"             : varDict["low_b_Bu_Dstar0h_D0gamma_dpi"],
+    "csi"           : varDict["low_csi_gamma"],
+    "shift"         : varDict["low_global_shift"],
+    "sigma"         : varDict['low_sigma_gamma'],
+    "ratio_sigma"   : varDict["low_ratio_gamma"],
+    "fraction_sigma": varDict["low_f_gamma"]                
+}
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi_misID_PartReco"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi_misID_PartReco"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi_misID_PartReco"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi_misID_PartReco"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi_misID_PartReco"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dst0K_D0gamma_Kspipi_misID_PartReco"]["mass"] = { #HILLdini_misID 7
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "a":  varDict['low_a_Bu_Dstar0h_D0gamma_dpi'],
+    "b":  varDict['low_b_Bu_Dstar0h_D0gamma_dpi'],
+    "csi":varDict['low_csi_gamma'],              
+    "m1": varDict['m1ga_pi'],                       
+    "s1": varDict['s1ga_pi'],                       
+    "m2": varDict['m2ga_pi'],                       
+    "s2": varDict['s2ga_pi'],                       
+    "m3": varDict['m3ga_pi'],                       
+    "s3": varDict['s3ga_pi'],                       
+    "m4": varDict['m4ga_pi'],                       
+    "s4": varDict['s4ga_pi'],                       
+    "f1": varDict['f1ga_pi'],                       
+    "f2": varDict['f2ga_pi'],                       
+    "f3": varDict['f3ga_pi'],                               
+}
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dpipi_Kspipi"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dpipi_Kspipi"]["Bplus_efficiency"]  = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dpipi_Kspipi"]["Bplus_model"]       = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dpipi_Kspipi"]["Bminus_efficiency"] = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dpipi_Kspipi"]["Bminus_model"]      = {}       #HORNSdini 2
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Dpipi_Kspipi"]["mass"] = { #HORNSdini+HORNSdini 8
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "a1"             : varDict['low_a_I_B2Dpipi'],    
+    "b1"             : varDict['low_b_I_B2Dpipi'],    
+    "csi1"           : varDict['low_csi_B2Dpipi'],    
+    "shift1"         : varDict['low_global_shift'],   
+    "sigma1"         : varDict['low_sigma_I_B2Dpipi'],
+    "ratio_sigma1"   : varDict['low_ratio_B2Dpipi'],  
+    "fraction_sigma1": varDict['low_f_B2Dpipi'],   
+    "frac_HORNSdini1": varDict['low_frac_B2Dpipi'],
+    "a2"             : varDict['low_a_II_B2Dpipi'],    
+    "b2"             : varDict['low_b_II_B2Dpipi'],    
+    "csi2"           : varDict['low_csi_B2Dpipi'],    
+    "shift2"         : varDict['low_global_shift'],   
+    "sigma2"         : varDict['low_sigma_II_B2Dpipi'],
+    "ratio_sigma2"   : varDict['low_ratio_B2Dpipi'],  
+    "fraction_sigma2": varDict['low_f_B2Dpipi'],
+}
+
+
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Combinatorial"] = {}
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Combinatorial"]["Bplus_efficiency"]  = {} 
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Combinatorial"]["Bplus_model"]       = {} 
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Combinatorial"]["Bminus_efficiency"] = {} 
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Combinatorial"]["Bminus_model"]      = {} 
+VARDICT["SDATA"]["CB2DPI_D2KSPIPI_DD"]["Combinatorial"]["mass"] = { #Exponential 9
+    "yield_Bplus" : 0,
+    "yield_Bminus": 0,
+    "c"             : varDict['comb_const_dpi_d2kspp_DD'],
+}
+
+################# SHARED THROUGH CHANNELS
+VARDICT["SDATA"]["SHARED_THROUGH_CHANNELS"] = {}
+VARDICT["SDATA"]["SHARED_THROUGH_CHANNELS"]["parameters"] = {
+    "Bplus_efficiency" : {
+    },
+    "Bplus_model" : {
+    },
+    "Bminus_efficiency" : {
+    },                
+    "Bminus_model" : {
+    },                
+    "mass" : {
+        "ratio_BR_DK_to_Dpi": 0.07,
+        "xplus"             : 0.00,
+        "yplus"             : 0.00,
+        "xminus"            : 0.00,
+        "yminus"            : 0.00,
+        "xxi"               : 0.00,
+        "yxi"               : 0.00,
+    },
+}
