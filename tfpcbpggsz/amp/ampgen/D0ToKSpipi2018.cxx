@@ -12,7 +12,7 @@ D0ToKSpipi2018::~D0ToKSpipi2018() {}
 
 void D0ToKSpipi2018::init(){
 
-    cout << "D0ToKSpipi2018 (tenfor) (July 31 2024) ==> Initialization !" << endl;
+    cout << "D0ToKSpipi2018 (ampgen version) (July 17 2025) ==> Initialization !" << endl;
 }
 
   std::vector<std::complex<double> >
