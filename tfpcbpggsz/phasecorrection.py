@@ -1,6 +1,5 @@
 import numpy as np
 from tfpcbpggsz.tensorflow_wrapper import tf
-from tfpcbpggsz.ulti import get_mass, phsp_to_srd
 
 
 class PhaseCorrection:

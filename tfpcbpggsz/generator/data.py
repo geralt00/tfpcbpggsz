@@ -502,21 +502,34 @@ def data_mask(data, select):
     """
     #check the shape of data, if data is a 1-d array, which means there is always one dimension should have the same shape as select.
     #We will need to see if the shape is working for the data.
-    data_arr = np.array(data)
     ret = None
-    if data_arr.ndim == 1:
-        if data_arr.shape[0] != select.shape[0]:
-            raise ValueError(
-                "The shape of data {} is not compatible with the shape of select {}".format(
-                    data_arr.shape, select.shape
+    if isinstance(data, tf.Tensor):
+        if data.shape.ndims == 1:
+            if data.shape[0] != select.shape[0]:
+                raise ValueError(
+                    "The shape of data {} is not compatible with the shape of select {}".format(
+                        data.shape, select.shape
+                    )
                 )
-            )
-        if data_arr.shape[0] == select.shape[0]:
-            ret = data_arr[select]
+            return tf.boolean_mask(data, select)
+        else:
+            return tf.boolean_mask(data, select, axis=0)
     else:
-        ret = data_arr[:, select]
+        data_arr = np.array(data)
 
-    return ret
+        if data_arr.ndim == 1:
+            if data_arr.shape[0] != select.shape[0]:
+                raise ValueError(
+                    "The shape of data {} is not compatible with the shape of select {}".format(
+                        data_arr.shape, select.shape
+                    )
+                )
+            if data_arr.shape[0] == select.shape[0]:
+                ret = data_arr[select]
+        else:
+            ret = data_arr[:, select]
+
+        return ret
 
 
 def data_cut(data, expr, var_map=None):
