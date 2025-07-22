@@ -1,11 +1,30 @@
 from tfpcbpggsz.tensorflow_wrapper import tf
+from tfpcbpggsz.ulti import amp_mask
 import numpy as np
 from tfpcbpggsz.masspdfs import *
 from tfpcbpggsz.phasecorrection import * 
-
+from tfpcbpggsz.generator.data import data_mask
 
 #Common functions
 _PI = tf.constant(np.pi, dtype=tf.float64)
+def DeltadeltaD_old(A, Abar):
+    """
+    Function to calculate the phase difference between the amplitude and the conjugate amplitude
+    
+    Args:
+        A (Amplitude): the amplitude from sample
+        Abar (Amplitude Bar): the conjugate amplitude from sample
+
+    Returns:
+        float64: phase difference between the amplitude and the conjugate amplitude
+    """
+    var_a = tf.math.angle(A*tf.math.conj(Abar)) + _PI
+    var_b = tf.where(var_a > _PI, var_a - 2*_PI, var_a)
+    var = tf.where(var_b < -_PI, var_b + 2*_PI, var_b)
+
+    return var
+
+
 def DeltadeltaD(A, Abar):
     """
     Function to calculate the phase difference between the amplitude and the conjugate amplitude
@@ -17,11 +36,14 @@ def DeltadeltaD(A, Abar):
     Returns:
         float64: phase difference between the amplitude and the conjugate amplitude
     """
-    var_a = tf.math.angle(A*np.conj(Abar))+ _PI
+    var_a = tf.math.angle(A*tf.math.conj(Abar))
     var_b = tf.where(var_a > _PI, var_a - 2*_PI, var_a)
     var = tf.where(var_b < -_PI, var_b + 2*_PI, var_b)
 
     return var
+
+
+
 
 def name_convert(decay_str='b2dk_LL_p'):
     """
@@ -50,10 +72,10 @@ def dalitz_transform(x_valid, y_valid):
     rotatedSymCoord = (y_valid + x_valid)/2  #z_+
     rotatedAntiSymCoord = (y_valid - x_valid)/2 #z_-
 
-    m1_ = 2.23407421671132946
-    c1_ = -3.1171885586526695
-    m2_ = 0.8051636393861085
-    c2_ = -9.54231895051727e-05
+    m1_ = 2.23289
+    c1_ = -3.11554092
+    m2_ = 0.40229469*2
+    c2_ = 0
 
     stretchedSymCoord = m1_ * rotatedSymCoord + c1_
     stretchedAntiSymCoord = m2_ * rotatedAntiSymCoord + c2_
@@ -131,7 +153,7 @@ def eff_fun(x, charge='p', decay='dk_LL'):
 
     return res #( res+offset[decay])/mean[decay]
 
-def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), pc=None):
+def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), pc=None, **kwargs):
     """
     Function to calculate the amplitude squared for the B2DK and B2Dpi decays
 
@@ -145,8 +167,11 @@ def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), p
     Returns:
         float64: the amplitude squared
     """
-
     phase = DeltadeltaD(amp, ampbar)
+    if 'model_name' in kwargs:
+        if kwargs['model_name'] == 'ampgen':
+            phase = DeltadeltaD_old(amp, ampbar)
+
     if pc is not None:
         phase = phase + pc
 
@@ -168,7 +193,7 @@ def prob_totalAmplitudeSquared_XY(Bsign=1, amp=[], ampbar=[], x=(0,0,0,0,0,0), p
 
         return (absA**2  + absAbar **2 * rB2 + 2.0 * (absA * absAbar) * (xMinus * tf.cos(phase) + yMinus * tf.sin(phase)))
 
-def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampbar_tag=[], pc_sig=None, pc_tag=None):
+def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampbar_tag=[], pc_sig=None, pc_tag=None, **kwargs):
     """
     Function to calculate the amplitude squared for the D0->KsPiPi and D0bar->KsPiPi decays
 
@@ -184,13 +209,19 @@ def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampb
         float64: the amplitude squared
     """
 
-
+    amp_sig, ampbar_sig, amp_tag, ampbar_tag, mask = amp_mask(amp_sig, ampbar_sig, amp_tag, ampbar_tag)
     phase_sig = DeltadeltaD(amp_sig, ampbar_sig)
     phase_tag = DeltadeltaD(amp_tag, ampbar_tag)
+    if 'model_name' in kwargs:
+        if kwargs['model_name'] == 'ampgen':
+            phase_sig = DeltadeltaD_old(amp_sig, ampbar_sig)
+            phase_tag = DeltadeltaD_old(amp_tag, ampbar_tag)
 
     if pc_sig is not None:
+        pc_sig = data_mask(pc_sig, mask)
         phase_sig = phase_sig + pc_sig
     if pc_tag is not None:
+        pc_tag = data_mask(pc_tag, mask)
         phase_tag = phase_tag + pc_tag
 
     absA_sig = tf.cast(tf.abs(amp_sig), tf.float64)
@@ -215,12 +246,16 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], **kwargs):
     """
 
 
-
+    amp, ampbar, mask = amp_mask(amp, ampbar)
     DDsign = -1
     phase = DeltadeltaD(amp, ampbar)
+    if 'model_name' in kwargs:
+        if kwargs['model_name'] == 'ampgen':
+            phase = DeltadeltaD_old(amp, ampbar)
     pc = None if kwargs.get('pc') is None else kwargs.get('pc')
     Fplus = None if kwargs.get('Fplus') is None else kwargs.get('Fplus')
     if pc is not None:
+        pc = data_mask(pc, mask)
         phase = phase + pc
 
     absA = tf.cast(tf.abs(amp), tf.float64)
@@ -323,6 +358,7 @@ class Normalisation:
         else:
             self._name_misid = None
 
+        self.amp = None
         self.amp_MC = amp_MC
         self.ampbar_MC = ampbar_MC
         self._normA = None
@@ -350,6 +386,7 @@ class Normalisation:
         self._phaseCorrection = None
         self._phaseCorrection_tag = None
         self.tagged_i = None
+        self._mask = {}
 
     def add_pc(self, pc,**kwargs):
         """
@@ -360,8 +397,11 @@ class Normalisation:
         """
         if kwargs.get('pc_tag') is not None:
             self._phaseCorrection_tag = kwargs.get('pc_tag')
+            self._phaseCorrection_tag = data_mask(self._phaseCorrection_tag, self._mask)
 
         self._phaseCorrection = pc
+        self._phaseCorrection = data_mask(self._phaseCorrection, self._mask)
+
 
     def debug(self):
         self._DEBUG = True
@@ -372,6 +412,7 @@ class Normalisation:
         """
 
         print('Initialising normalisation for decay:', self._name)
+        #temporary add a mask here
         self.normA()
         self.normAbar()
         self.AAbar()
@@ -415,10 +456,10 @@ class Normalisation:
         float64: phase between the amplitude and the conjugate amplitude
         """
         if self._phase is None:
-            self._phase = DeltadeltaD(self.amp_MC[self._name], self.ampbar_MC[self._name])
+            self._phase = self.amp.DeltadeltaD(self.amp_MC[self._name], self.ampbar_MC[self._name])
             self._crossTerms[0] = tf.math.reduce_mean(self._AAbar*tf.cos(self._phase))
             self._crossTerms[1] = tf.math.reduce_mean(self._AAbar*tf.sin(self._phase))
-            self._phase_tag =  DeltadeltaD(self.amp_MC[self._name.replace('_sig', '_tag')], self.ampbar_MC[self._name.replace('_sig', '_tag')]) #tf.gather(self._phase, self.tagged_i) #+ phase_correction.eval_tf(tf.gather(events, tagged_i))
+            self._phase_tag =  self.amp.DeltadeltaD(self.amp_MC[self._name.replace('_sig', '_tag')], self.ampbar_MC[self._name.replace('_sig', '_tag')]) #tf.gather(self._phase, self.tagged_i) #+ phase_correction.eval_tf(tf.gather(events, tagged_i))
             self._crossTerms_complex =  tf.math.reduce_mean(
                 (tf.abs(self._A) * tf.abs(self._Abar_tag)) ** 2
                 + (tf.abs(self._Abar) * tf.abs(self._A_tag)) ** 2
@@ -437,17 +478,16 @@ class Normalisation:
         .. math: |A|^2
         """
         if self._normA is None:
+            self.amp_MC[self._name], self.ampbar_MC[self._name], self.amp_MC[self._name.replace('_sig', '_tag')], self.ampbar_MC[self._name.replace('_sig', '_tag')], self._mask = amp_mask(self.amp_MC[self._name], self.ampbar_MC[self._name], 
+                                                                                  self.amp_MC[self._name.replace('_sig', '_tag')], 
+                                                                                  self.ampbar_MC[self._name.replace('_sig', '_tag')])
             self._normA = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name])**2)
             self._BacTerms[0] = self._normA
             self._A = self.amp_MC[self._name]
-            #Old way to tag the events
-            #self.tagged_i = (tf.range(self._A.shape[0]) + self._A.shape[0] // 2) % self._A.shape[0]
-            #self._A_tag = tf.gather(self._A, self.tagged_i)
             self._A_tag = self.amp_MC[self._name.replace('_sig', '_tag')]
 
 
-            #if self._name[3] == 'p' and self._name[-1] == 'm':
-            #    self._BacTerms_bkg[0] = self._normA
+
 
         return self._normA
     
@@ -466,9 +506,6 @@ class Normalisation:
             self._BacTerms[1] = self._normAbar
             self._Abar = self.ampbar_MC[self._name]
             self._Abar_tag = self.ampbar_MC[self._name.replace('_sig', '_tag')]
-            #self._Abar_tag = tf.gather(self._Abar, self.tagged_i)
-            #if self._name[3] == 'p' and self._name[-1] == 'p':
-            #    self._BacTerms_bkg[1] = self._normAbar
 
         return self._normAbar
 
@@ -487,9 +524,6 @@ class Normalisation:
         if self._AAbar is None:
             self._AAbar = tf.abs(self.amp_MC[self._name]) * tf.abs(self.ampbar_MC[self._name])
             self._AAbar_tag = tf.abs(self._A_tag) * tf.abs(self._Abar_tag) 
-
-            #tagged_i = (tf.range(self.AAbar.shape[0]) + self.AAbar.shape[0] // 2) % self.AAbar.shape[0]
-            #self._AAbar_tag = tf.abs(tf.gather(self.amp_MC[self._name],tagged_i)) * tf.abs(tf.gather(self.ampbar_MC[self._name],tagged_i))
 
         return self._AAbar, self._AAbar_tag
 
@@ -724,7 +758,7 @@ class Normalisation:
         """
 
         if self._phase_misid is None:
-            self._phase_misid = DeltadeltaD(self.amp_MC[self._name_misid], self.ampbar_MC[self._name_misid])
+            self._phase_misid = self.amp.DeltadeltaD(self.amp_MC[self._name_misid], self.ampbar_MC[self._name_misid])
             self._crossTerms_misid[0] = tf.math.reduce_mean(self._AAbar_misid*tf.cos(self._phase_misid))
             self._crossTerms_misid[1] = tf.math.reduce_mean(self._AAbar_misid*tf.sin(self._phase_misid))
 

@@ -500,7 +500,22 @@ def data_mask(data, select):
     :param select: 1-d boolean array for selection
     :return: data after selection
     """
-    ret = data_map(data, tf.boolean_mask, args=(select,))
+    #check the shape of data, if data is a 1-d array, which means there is always one dimension should have the same shape as select.
+    #We will need to see if the shape is working for the data.
+    data_arr = np.array(data)
+    ret = None
+    if data_arr.ndim == 1:
+        if data_arr.shape[0] != select.shape[0]:
+            raise ValueError(
+                "The shape of data {} is not compatible with the shape of select {}".format(
+                    data_arr.shape, select.shape
+                )
+            )
+        if data_arr.shape[0] == select.shape[0]:
+            ret = data_arr[select]
+    else:
+        ret = data_arr[:, select]
+
     return ret
 
 

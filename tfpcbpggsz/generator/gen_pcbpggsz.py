@@ -1,31 +1,40 @@
 import tensorflow as tf
 from tfpcbpggsz.generator.phasespace import PhaseSpaceGenerator
-from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd
-from tfpcbpggsz.amp_up.D0ToKSpipi2018 import PyD0ToKSpipi2018
+from tfpcbpggsz.ulti import  deg_to_rad, p4_to_phsp, p4_to_srd, p4_to_mag, amp_mask
 from tfpcbpggsz.generator.generator import multi_sampling, multi_sampling2
 from tfpcbpggsz.core import DeltadeltaD
 from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
 from tfpcbpggsz.variable import VarsManager as vm
+from tfpcbpggsz.amp.amplitude import Amplitude
 
 class pcbpggsz_generator:
     #"""
     #Class for PCBPGGSZ generator
     #"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, amplitude, **kwargs):
         self.type = type
         self.gen = None
-
+            
         self.Gamma=[]
         self.phsp = PhaseSpaceGenerator()
-        self.Kspipi = PyD0ToKSpipi2018()
-        self.Kspipi.init()
         self.charge = 'p'
         self.fun = None
         self.pc = None
         self.DEBUG = False
         self._corr_from_fit = False
+        # Cache attributes
+        self._cached_s12 = None
+        self._cached_s13 = None
+        self._raw_amp_tensor_cache = None
+        self.amplitude = amplitude
+        self.amplitude.init()
+        self.model_name = 'evtgen'
+        if not isinstance(amplitude, Amplitude):
+            raise TypeError("Amplitude must be initialise before passing to the generator")
+            
+    
 
     def add_bias(self, correctionType="singleBias", **kwargs):
         
@@ -53,6 +62,12 @@ class pcbpggsz_generator:
 
         print(f'Efficiency applied with: {decay}_{charge}')
 
+    def add_res(self, params):
+        #"""Adding the resolution parameters"""
+        self.amplitude.set_res_params(params)
+        #self.amplitude.res = True
+        #self.amplitude.res_params = params
+
     def eval_bias(self, data):
         """
         Getting the bias value for given 4 momentum
@@ -67,6 +82,11 @@ class pcbpggsz_generator:
     def eval_eff(self, data):
         #"""Getting the efficiency value for given 4 momentum"""
         return eff_fun(p4_to_srd(data), self.charge, self.decay)
+    
+    def eval_res(self, data):
+        #"""Getting the resolution value for given 4 momentum"""
+        P_Ks, P_pim, P_pip = p4_to_mag(data)
+        return 
     
     def make_eff_fun(self):
         return self.eval_eff 
@@ -124,53 +144,6 @@ class pcbpggsz_generator:
 
             return ret_sig, ret_tag
 
-
-
-
-    def amp(self, data):
-        #"""Calculate the amplitude of the decay from momenta."""    
-
-        Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        if not isinstance(p1, tf.Tensor):
-            amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())     
-        else:
-            amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
-        amp_i = tf.cast(amp_i, tf.complex128)
-        return amp_i
-    
-    def ampbar(self, data):
-        #"""Calculate the amplitude of the decay from momenta."""
-
-        Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-        ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-        ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
-        return ampbar_i
-
-    def amp_np(self, data):
-        #"""Calculate the amplitude of the decay from momenta."""    
-
-        Kspipi = self.Kspipi
-        p1,p2,p3 = data
-        if not isinstance(p1, tf.Tensor):
-            amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())     
-        else:
-            amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
-        return amp_i
-    
-    def ampbar_np(self, data):
-        #"""Calculate the amplitude of the decay from momenta."""
-
-        Kspipi = self.Kspipi
-        p1,p2,p3 = data
-        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-        ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-        return ampbar_i
-    
     def formula(self):
         #"""Decay rate formula"""
 
@@ -192,26 +165,34 @@ class pcbpggsz_generator:
         #"""Decay rate for flav tags"""
 
         if self.type == 'flav':
-            absAmp = tf.abs(self.ampbar(data))**2
+            absAmp = tf.abs(self.amplitude.ampbar(data))**2
             Gamma = absAmp
             self.Gamma = Gamma
 
         elif self.type == 'flavbar':
-            absAmp = tf.abs(self.amp(data))**2
+            absAmp = tf.abs(self.amplitude.amp(data))**2
             Gamma = absAmp
             self.Gamma = Gamma
 
         return Gamma
 
+    def amp(self, data):
+        #"""Amplitude for the decay"""
+        return self.amplitude.amp(data)
+  
+    def ampbar(self, data):
+        #"""Amplitude bar for the decay"""
+        return self.amplitude.ampbar(data)
+    
     def cp_tag(self, data):
         #"""Decay rate for CP tags"""
 
         DD_sign=-1
-        phase = DeltadeltaD(self.amp(data), self.ampbar(data))
+        phase = self.amplitude.DeltadeltaD(self.amplitude.amp(data), self.amplitude.ampbar(data))
         phase_correction = tf.zeros_like(phase) if self.pc is None else self.eval_bias(data)
         phase = phase + phase_correction
-        absAmp = tf.abs(self.amp(data))
-        absAmpbar = tf.abs(self.ampbar(data))
+        absAmp = tf.abs(self.amplitude.amp(data))
+        absAmpbar = tf.abs(self.amplitude.ampbar(data))
         cp_sign=1 if self.type == 'cp_even' else -1
         Gamma = absAmp**2 + absAmpbar**2 + 2*DD_sign*cp_sign* absAmp * absAmpbar * tf.math.cos(phase)
         self.Gamma = Gamma
@@ -221,19 +202,18 @@ class pcbpggsz_generator:
     def cp_mixed(self, data_sig, data_tag):
         #"""Decay rate for CP mixed tags"""
 
-        phase_sig = DeltadeltaD(self.amp(data_sig), self.ampbar(data_sig))
+        phase_sig = self.amplitude.DeltadeltaD(self.amplitude.amp(data_sig), self.amplitude.ampbar(data_sig))
         phase_correction_sig = tf.zeros_like(phase_sig) if self.pc is None else self.eval_bias(data_sig)
-        print(phase_correction_sig) if self.DEBUG else None
+        #print(phase_correction_sig) if self.DEBUG else None
         phase_sig = phase_sig + phase_correction_sig
-        absAmp_sig = tf.abs(self.amp(data_sig))
-        absAmpbar_sig = tf.abs(self.ampbar(data_sig))
-        phase_tag = DeltadeltaD(self.amp(data_tag), self.ampbar(data_tag))
+        absAmp_sig = tf.abs(self.amplitude.amp(data_sig))
+        absAmpbar_sig = tf.abs(self.amplitude.ampbar(data_sig))
+        phase_tag = self.amplitude.DeltadeltaD(self.amplitude.amp(data_tag), self.amplitude.ampbar(data_tag))
         phase_correction_tag = tf.zeros_like(phase_tag) if self.pc is None else self.eval_bias(data_tag)
-        print(phase_correction_tag) if self.DEBUG else None
+        #print(phase_correction_tag) if self.DEBUG else None
         phase_tag = phase_tag + phase_correction_tag
-        absAmp_tag = tf.abs(self.amp(data_tag))
-        absAmpbar_tag = tf.abs(self.ampbar(data_tag))
-
+        absAmp_tag = tf.abs(self.amplitude.amp(data_tag))
+        absAmpbar_tag = tf.abs(self.amplitude.ampbar(data_tag))
         Gamma = (absAmp_sig*absAmpbar_tag)**2 + (absAmpbar_sig*absAmp_tag)**2 - 2*absAmp_sig*absAmpbar_tag*absAmpbar_sig*absAmp_tag*tf.math.cos(phase_sig-phase_tag)
         self.Gamma = Gamma
 
@@ -243,9 +223,9 @@ class pcbpggsz_generator:
         #"""Decay rate for B2Dh decay"""
 
         rb, deltaB, gamma = self.rb, deg_to_rad(self.deltaB), deg_to_rad(self.gamma)
-        absAmp = tf.abs(self.amp(data))
-        absAmpbar = tf.abs(self.ampbar(data))
-        phase = DeltadeltaD(self.amp(data), self.ampbar(data))
+        absAmp = tf.abs(self.amplitude.amp(data))
+        absAmpbar = tf.abs(self.amplitude.ampbar(data))
+        phase = DeltadeltaD(self.amplitude.amp(data), self.amplitude.ampbar(data))
         phase_correction = tf.zeros_like(phase) if self.pc is None else self.eval_bias(data)
         phase = phase + phase_correction
         print(phase_correction) if self.DEBUG else None

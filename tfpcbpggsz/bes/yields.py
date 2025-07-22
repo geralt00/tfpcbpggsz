@@ -1,10 +1,4 @@
-import math
-import numpy as np
-import os
 import json
-#import ROOT as rt
-import glob
-
 
 class yields:
     """
@@ -271,25 +265,3 @@ sigmc_list = [
 ]
 
 _wrapper = ["full", "misspi", "misspi0", "kspi0", "kseta_gamgam", "ksetap_pipieta", "kseta_3pi", "ksetap_gamrho", "ksomega", "klpi0pi0", "kk", "pipi", "pipipi0", "kspi0pi0", "klpi0", "kpipi0", "kpi", "k3pi", "kenu"]
-
-
-'''
-_Lumi={'0304': '2.9', '03-04': '2.9', '030415': '7.9', '15': '5.0', '16': '8.2', '17': '4.2', 'all': '20.0'}
-
-def Writedataset(round='16'):
-    dataset = rt.TLatex(0.87, 0.87, f'{_Lumi[round]}'+ ' fb^{-1}')
-    dataset.SetNDC()
-    dataset.SetTextFont(132)
-    dataset.SetTextSize(0.08)
-    dataset.SetTextAlign(33)
-    return dataset
-
-def Write(latex='', x=0.6, y=0.75):
-
-    dataset = rt.TLatex(x, y, latex)  # 0.88 for dp
-    dataset.SetNDC()
-    dataset.SetTextFont(42)
-    dataset.SetTextSize(0.05)
-    dataset.SetTextAlign(11)
-    return dataset
-'''
