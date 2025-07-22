@@ -23,7 +23,7 @@ import time
 
 #Set the path for the data and plot, get the package path
 import os
-path = importlib.resources.files('tfpcbpggsz').joinpath('benchmark')
+path = importlib.resources.files('tfpcbpggsz').joinpath('../benchmark')
 
 data_path= os.path.join(path, 'data/')
 

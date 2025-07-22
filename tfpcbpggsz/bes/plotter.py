@@ -84,8 +84,8 @@ class Hist:
 
     def fun_Kspipi(self, tag):
 
-        phase_correction_sig = self.pc.eval_corr(self.config.get_phsp_srd(tag,'sig'),reduce_retracing=True)
-        phase_correction_tag = self.pc.eval_corr(self.config.get_phsp_srd(tag,'tag'),reduce_retracing=True)
+        phase_correction_sig = self.pc.eval_corr_norm(self.config.get_phsp_srd(tag,'sig'))
+        phase_correction_tag = self.pc.eval_corr_norm(self.config.get_phsp_srd(tag,'tag'))
         #need to be flexible with the function name
         ret = core.prob_totalAmplitudeSquared_CP_mix(self.config.get_phsp_amp(tag,'sig'), self.config.get_phsp_ampbar(tag,'sig'), self.config.get_phsp_amp(tag,'tag'), self.config.get_phsp_ampbar(tag,'tag'), phase_correction_sig, phase_correction_tag)
         ret_no_corr = core.prob_totalAmplitudeSquared_CP_mix(self.config.get_phsp_amp(tag,'sig'), self.config.get_phsp_ampbar(tag,'sig'), self.config.get_phsp_amp(tag,'tag'), self.config.get_phsp_ampbar(tag,'tag'))
@@ -93,7 +93,7 @@ class Hist:
 
     def fun_CP(self, tag, Dsign):
 
-        phase_correction = self.pc.eval_corr(self.config.get_phsp_srd(tag),reduce_retracing=True)
+        phase_correction = self.pc.eval_corr_norm(self.config.get_phsp_srd(tag))
         if tag != 'pipipi0' :
             ret = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), pc=phase_correction)
             ret_no_corr = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag))
@@ -116,15 +116,7 @@ class Hist:
         self.bins[tag]={} if tag not in self.bins.keys() else self.bins[tag]
         self.count[tag][mc_type]={} if mc_type not in self.count[tag].keys() else self.count[tag][mc_type]
         self.bins[tag][mc_type]={} if mc_type not in self.bins[tag].keys() else self.bins[tag][mc_type]
-
-        # Use nbins directly here, the *3 factor is applied in hist_to_fun if needed
-        # Let's keep the histogramming itself consistent first. Assuming self.nbins is the desired base binning.
-        # <<< CHANGE 1 (Minor consistency) >>> Using self.nbins instead of self.nbins*3 for initial histogramming.
-        # <<< REASON 1 >>> The scaling factor 3 was applied later in hist_to_fun's scaling,
-        # which seemed odd. Let's try standard binning first and adjust scaling if necessary.
-        # If self.nbins*3 was truly intended for the histogram resolution itself, revert this change.
-        current_nbins = self.nbins # Use the configured number of bins
-
+        current_nbins = self.nbins
         if mc_type == 'phsp':
             if cato!='dks':
                 self.count[tag][mc_type]['s12'], self.bins[tag][mc_type]['s12'] = np.histogram(self.config.get_mc_mass(tag, mc_type)[0], current_nbins, weights=self.weights[tag], range=self.range['s12'])
@@ -171,7 +163,7 @@ class Hist:
                 for tag in self.plot_list[key]:
                      # Ensure base 'phsp' exists if needed for np.zeros_like
                     if 'phsp' not in self.count.get(tag, {}):
-                         self.get_hist_each(cato=key, tag=tag, mc_type='phsp') # Ensure phsp exists
+                         self.get_hist_each(cato=key, tag=tag, mc_type='phsp')
 
                     for i_mc_type in mc_type:
                         # Check if data for this mc_type exists or needs initialization
@@ -816,12 +808,12 @@ class Plotter:
         for tag in tags_to_sum:
             try:
                 scale['sig'] += self.config.get_sig_num(tag)
-                scale['qcmc'] += self.config.get_bkg_num(tag, 'qcmc')
-                scale['dpdm'] += self.config.get_bkg_num(tag, 'dpdm')
-                scale['qqbar'] += self.config.get_bkg_num(tag, 'qqbar')
+                scale['qcmc'] += self.config.get_bkg_num(tag, 'sig_range_nb_qcmc')
+                scale['dpdm'] += self.config.get_bkg_num(tag, 'sig_range_nb_dpdm')
+                scale['qqbar'] += self.config.get_bkg_num(tag, 'sig_range_nb_qqbar')
                 # Use get with default 0 for optional backgrounds
-                scale['sigmc_um'] += self.config.get_bkg_num(tag, 'sigmc_um', default=0)
-                scale['qcmc_oth'] += self.config.get_bkg_num(tag, 'qcmc_oth', default=0)
+                scale['sigmc_um'] += self.config.get_bkg_num(tag, 'sig_range_nb_sigmc_um', default=0)
+                scale['qcmc_oth'] += self.config.get_bkg_num(tag, 'sig_range_nb_qcmc_oth', default=0)
 
                 if cato != 'dks':
                     s12_sig_i, s13_sig_i = self.config.get_data_mass(tag=tag)
@@ -873,11 +865,11 @@ class Plotter:
         try:
              # Get scale factors
              scale['sig'] = self.config.get_sig_num(tag)
-             scale['qcmc'] = self.config.get_bkg_num(tag, 'qcmc')
-             scale['dpdm'] = self.config.get_bkg_num(tag, 'dpdm')
-             scale['qqbar'] = self.config.get_bkg_num(tag, 'qqbar')
-             scale['sigmc_um'] = self.config.get_bkg_num(tag, 'sigmc_um', default=0)
-             scale['qcmc_oth'] = self.config.get_bkg_num(tag, 'qcmc_oth', default=0)
+             scale['qcmc'] = self.config.get_bkg_num(tag, 'sig_range_nb_qcmc')
+             scale['dpdm'] = self.config.get_bkg_num(tag, 'sig_range_nb_dpdm')
+             scale['qqbar'] = self.config.get_bkg_num(tag, 'sig_range_nb_qqbar')
+             scale['sigmc_um'] = self.config.get_bkg_num(tag, 'sig_range_nb_sigmc_um', default=0)
+             scale['qcmc_oth'] = self.config.get_bkg_num(tag, 'sig_range_nb_qcmc_oth', default=0)
 
              # Determine if tag has 'sig'/'tag' structure based on name (heuristic)
              is_dks_like = tag in ['full', 'misspi', 'misspi0'] # Adjust this list as needed

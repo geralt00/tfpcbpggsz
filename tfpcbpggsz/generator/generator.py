@@ -98,7 +98,7 @@ def multi_sampling(
             all_data = [tmp]
             a.set_gen(data_shape(tmp))
         a.add_gen(data_shape(data))
-        # print(a.eff, a.N_gen, max_weight)
+        #print(a.eff, a.N_gen, max_weight)
         all_data.append(data)
 
     ret = data_merge(*all_data)
@@ -116,7 +116,7 @@ def multi_sampling2(
     phsp,
     amp,
     N,
-    max_N=200000,
+    max_N=100000,
     force=True,
     max_weight=None,
     importance_f=None,
@@ -155,7 +155,8 @@ def multi_sampling2(
         a.add_gen(data_shape(data_sig))
         a.add_gen(data_shape(data_tag))
         
-        # print(a.eff, a.N_gen, max_weight)
+        #print(a.eff, a.N_gen, max_weight)
+
         all_data_sig.append(data_sig)
         all_data_tag.append(data_tag)
 
@@ -178,27 +179,39 @@ def double_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     import tensorflow as tf
     from tfpcbpggsz.generator.data import data_mask
 
-    time1 = time.time()
+    #time1 = time.time()
     data_sig = phsp(N)
     data_tag = phsp(N)
-    time2 = time.time()
+    #time2 = time.time()
     weight = amp(data_sig, data_tag)
-    time3 = time.time()
+    #time3 = time.time()
     #Not yet sure about the importance_f
     if importance_f is not None:
         weight = weight / importance_f(data_sig, data_tag)
+    new_max_weight_temp = tf.reduce_max(weight)
+    new_max_weight = new_max_weight_temp.numpy()
+    #check is the new_max_weight is over too high 10e7
+    if new_max_weight > 5e7:
+        print(
+            f"Warning: new_max_weight is too high: {new_max_weight}, "
+            "this may cause overflow in the next step."
+        )
+        new_max_weight = tf.reduce_max(weight[weight < new_max_weight])
+        print(f"Using new_max_weight: {new_max_weight} instead.")
 
-    new_max_weight = tf.reduce_max(weight)
-    if max_weight is None or max_weight < new_max_weight:
+    if max_weight is None or max_weight < new_max_weight:#protect against overflow
+        #if new_max_weight < 1e8:
         max_weight = new_max_weight * 1.01
-    time4 = time.time()
+        #else:
+        #    max_weight = max_weight
+    #time4 = time.time()
     rnd = tf.random.uniform(weight.shape, dtype=weight.dtype)
-    time5 = time.time()
-    cut = rnd * max_weight < weight
-    time6 = time.time()
+    #time5 = time.time()
+    cut = tf.logical_and(rnd * max_weight < weight, weight > 0.0)
+    #time6 = time.time()
     data_sig = data_mask(data_sig, cut)
     data_tag = data_mask(data_tag, cut)
-    time7 = time.time()
+    #time7 = time.time()
 
     #print(f"Time taken for phsp: {time2-time1}")
     #print(f"Time taken for amp: {time3-time2}")
@@ -224,11 +237,25 @@ def single_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     time2 = time.time()
     if importance_f is not None:
         weight = weight / importance_f(data)
-    new_max_weight = tf.reduce_max(weight)
-    if max_weight is None or max_weight < new_max_weight:
+    new_max_weight_temp = tf.reduce_max(weight)
+    new_max_weight = new_max_weight_temp.numpy()
+    if tf.math.is_nan(new_max_weight_temp):
+        new_max_weight = tf.reduce_max(weight[tf.math.is_nan(weight) == False])
+        print(f"Using new_max_weight: {new_max_weight} instead.")
+    if new_max_weight > 5e7:
+        print(
+            f"Warning: new_max_weight is too high: {new_max_weight}, "
+            "this may cause overflow in the next step."
+        )
+        new_max_weight = tf.reduce_max(weight[weight < new_max_weight])
+        print(f"Using new_max_weight: {new_max_weight} instead.")
+
+    if max_weight is None or max_weight < new_max_weight:  # protect against overflow
+        # if new_max_weight < 1e8:
         max_weight = new_max_weight * 1.01
+    
     rnd = tf.random.uniform(weight.shape, dtype=weight.dtype)
-    cut = rnd * max_weight < weight
+    cut = tf.logical_and(rnd * max_weight < weight, weight > 0.0)
     data = data_mask(data, cut)
     #print(f"Time taken for amp: {time2-time1}")
     return data, max_weight

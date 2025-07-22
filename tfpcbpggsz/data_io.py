@@ -1,86 +1,80 @@
-from tfpcbpggsz.tensorflow_wrapper import tf
-from tfpcbpggsz.amp_up.D0ToKSpipi2018 import PyD0ToKSpipi2018
-from tfpcbpggsz.ulti import get_mass, phsp_to_srd
+from tfpcbpggsz.ulti import get_mass, phsp_to_srd, amp_mask
 
 
 class data_io:
     """Do something with the momentumfiles
     """
-    def __init__(self, data):
+    def __init__(self):
         """Do something with the momentumfiles
 
         Args:
             data (float64): list of the momentums
         """
-        self.data = data 
-        self.Kspipi = PyD0ToKSpipi2018()
+        self.amp = None
         self.variables = {}
+        self._amp_i = None
+        self.mask = None
 
-    def load_all(self):
+    def load_all(self, data):
         """Load all variables from the data
 
         Returns:
             dic: dictionary with all variables
         """
-        if len(self.data) == 3:
-            self.variables['amp'], self.variables['ampbar'] = self.get_amplitude(self.data)
-            self.variables['s12'], self.variables['s13'], self.variables['srd'] = self.get_mass(self.data)
+        if len(data) == 3:
+            self.variables['amp'], self.variables['ampbar'] = self.get_amplitude(data)
+            self.variables['s12'], self.variables['s13'], self.variables['srd'] = self.get_mass(data)
             return self.variables
 
-        elif len(self.data) == 2:
+        elif len(data) == 2:
             self.variables['amp'], self.variables['ampbar'], self.variables['s12'], self.variables['s13'], self.variables['srd'] = {}, {}, {}, {}, {}
-            for i, key in enumerate(['sig', 'tag']):
-                self.variables['amp'][key], self.variables['ampbar'][key] = self.get_amplitude(self.data[i])
-                self.variables['s12'][key], self.variables['s13'][key], self.variables['srd'][key] = self.get_mass(self.data[i])
-
+            self.variables['amp']['sig'], self.variables['ampbar']['sig'], self.variables['amp']['tag'], self.variables['ampbar']['tag'] = self.get_amplitude(data[0],data[1])
+            self.variables['s12']['sig'], self.variables['s13']['sig'], self.variables['srd']['sig'], self.variables['s12']['tag'], self.variables['s13']['tag'], self.variables['srd']['tag'] = self.get_mass(data[0],data[1])
             return self.variables
 
 
-    def get_amplitude(self, data):
+    def get_amplitude(self, data, data_tag=None):
         """Get the amplitude of the data
 
         Returns:
             float64: the amplitude of the data
             amp, ampbar: the amplitude of the data and the conjugate of the amplitude
         """
-        amp = self.amp(data)
-        ampbar = self.ampbar(data)
-
-        return amp, ampbar
-    
-    def amp(self, data):
-        """Calculate the amplitude of the decay from momenta."""
-
-        Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        if not isinstance(p1, tf.Tensor):
-            amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())
+        if self.amp is None:
+            raise ValueError("Amplitude is not set. Please set the amplitude before calling this function.")
+        
+        amp = self.amp.amp(data)
+        ampbar = self.amp.ampbar(data)
+        amp_tag, ampbar_tag = None, None
+        if data_tag is not None:
+            amp_tag = self.amp.amp(data_tag)
+            ampbar_tag = self.amp.ampbar(data_tag)
+            amp, ampbar, amp_tag, ampbar_tag, self.mask = amp_mask(amp, ampbar, amp_tag, ampbar_tag)
+            return amp, ampbar, amp_tag, ampbar_tag
         else:
-            amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())
-        return tf.cast(amp_i, tf.complex128)
-   
-    def ampbar(self, data):
-        """Calculate the amplitude of the decay from momenta."""
-
-        Kspipi = self.Kspipi
-        #time_cal_amp_start = time.time()
-        p1,p2,p3 = data
-        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-        ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-        ampbar_i = tf.negative(ampbar_i)
-        return ampbar_i
+            amp, ampbar, self.mask = amp_mask(amp, ampbar)
+            return amp, ampbar
     
-    def get_mass(self, data):
+    def get_mass(self, data, data_tag=None):
         """Get the s12, s13, srd from the data
 
         Returns:
             s12, s13, srd: list of Dalitz variables
         """
+        from tfpcbpggsz.generator.data import data_mask
 
         p1,p2,p3 = data
         s12 = get_mass(p1,p2)
         s13 = get_mass(p1,p3)
         srd = phsp_to_srd(s12,s13)
-
-        return s12, s13, srd
+        s12_tag, s13_tag, srd_tag = None, None, None
+        if data_tag is not None:
+            p1_tag, p2_tag, p3_tag = data_tag
+            s12_tag = get_mass(p1_tag,p2_tag)
+            s13_tag = get_mass(p1_tag,p3_tag)
+            srd_tag = phsp_to_srd(s12_tag,s13_tag)
+            s12, s13, srd, s12_tag, s13_tag, srd_tag = data_mask(s12, self.mask), data_mask(s13, self.mask), data_mask(srd, self.mask), data_mask(s12_tag, self.mask), data_mask(s13_tag, self.mask), data_mask(srd_tag, self.mask)
+            return s12, s13, srd, s12_tag, s13_tag, srd_tag
+        else:
+            s12, s13, srd = data_mask(s12, self.mask), data_mask(s13, self.mask), data_mask(srd, self.mask)
+            return s12, s13, srd

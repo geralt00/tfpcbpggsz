@@ -90,7 +90,7 @@ def phsp_to_srd(x_valid, y_valid):
 
     m1_ = 2.23289
     c1_ = -3.11554092
-    m2_ = 0.40229469
+    m2_ = 0.40229469*2
     c2_ = 0
 
     stretchedSymCoord = m1_ * rotatedSymCoord + c1_
@@ -302,7 +302,7 @@ def get_xy(physics_param):
 
     return [xp, yp, xm, ym] 
 
-def amp_mask(raw_amp, raw_ampbar, raw_amp_tag=None, raw_ampbar_tag=None, max_amp=100):
+def amp_mask(raw_amp, raw_ampbar, raw_amp_tag=None, raw_ampbar_tag=None, max_amp=150):
     """Mask amplitudes to be within a certain range to remove outliers.
 
     This function filters amplitude values by applying a maximum amplitude threshold,
@@ -333,8 +333,6 @@ def amp_mask(raw_amp, raw_ampbar, raw_amp_tag=None, raw_ampbar_tag=None, max_amp
     raw_ampbar = np.array(raw_ampbar)
     absA = np.abs(raw_amp)
     absAbar = np.abs(raw_ampbar)
-
-
     mask = (absA < max_amp) & (absAbar < max_amp)
     if raw_amp_tag is not None:
         absA_tag = np.abs(raw_amp_tag)

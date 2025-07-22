@@ -1,14 +1,11 @@
 import yaml
-import uproot as up
 import numpy as np
-import time
-from importlib.machinery import SourceFileLoader
 from tfpcbpggsz.core import Normalisation
 from tfpcbpggsz.variable import VarsManager
-from .yields import yields, D02KsPiPi
-from tfpcbpggsz.amp_up import D0ToKSpipi2018
-from tfpcbpggsz.bes.data import load_data
+from tfpcbpggsz.amp.amplitude import Amplitude
 
+from tfpcbpggsz.bes.yields import yields, D02KsPiPi
+from tfpcbpggsz.bes.data import load_data
 
 class ConfigLoader:
     """
@@ -24,20 +21,14 @@ class ConfigLoader:
         self.norm = Normalisation
         self.vm = VarsManager()
         self.load_config()
+        self.amp = Amplitude(self._config_data.get('model'))
+        self.amp.init()
         self.idx = {}
         self.data = load_data(self)
+        self.data.amp = self.amp
         self._data = {}
         self._mc = {}
         self._pdf = {}
-        '''
-        self._mc['phsp'] = {}
-        self._qcmc = {}
-        self._qcmc_oth = {}
-        self._dpdm = {}
-        self._qqbar = {}
-        self._sig_um = {}
-        '''
-        #It will be easier to use MC as a big dictionary
 
         self.D02KsPiPi = D02KsPiPi()
         self.yields = yields(self.D02KsPiPi)
@@ -162,7 +153,7 @@ class ConfigLoader:
                 nsig += self.get_sig_num(tag, vary=vary) if vary else self.get_sig_num(tag)
         
         ntot = nbkg + nsig
-        ret = np.array([self.get_bkg_num(tag, key, vary=vary) for key in self._pdf[tag].keys()])/ntot
+        ret = np.array([self.get_bkg_num(tag, f'sig_range_nb_{key}', vary=vary) for key in self._pdf[tag].keys()])/ntot
         #print([f'sig_range_nb_{key}' for key in self._pdf[tag].keys()])
         #print(f"INFO:: {tag} bkg fraction: {ret}")
         return ret.reshape(-1,1)
@@ -178,11 +169,11 @@ class ConfigLoader:
             
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        if f'sig_range_nb_{key}' not in self.mass_fit_results.keys():
+        if key not in self.mass_fit_results.keys():
             print(f'INFO:: {key} not found in mass_fit_results of {tag}')
             return default
         else:
-            val = self.new_mass_fit_results[f'sig_range_nb_{key}'] if vary else self.mass_fit_results[f'sig_range_nb_{key}']
+            val = self.new_mass_fit_results[key] if vary else self.mass_fit_results[key]
             return val
     
     def get_sig_num(self, tag, vary=False):

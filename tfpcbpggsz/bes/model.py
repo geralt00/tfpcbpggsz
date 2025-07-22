@@ -3,7 +3,6 @@ import tfpcbpggsz.core as core
 from tfpcbpggsz.phasecorrection import PhaseCorrection as pc
 from tfpcbpggsz.core import Normalisation as normalisation
 
-
 class BaseModel(object):
     def __init__(self, config):
         self.norm = {}
@@ -20,9 +19,11 @@ class BaseModel(object):
         for tag in self.tags:
             if tag in ["full", "misspi", "misspi0"]:
                 self.norm[tag] = normalisation({f'{tag}_sig': self.config_loader.get_phsp_amp(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_amp(tag, 'tag')}, {f'{tag}_sig': self.config_loader.get_phsp_ampbar(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_ampbar(tag, 'tag')}, f'{tag}_sig') 
+                self.norm[tag].amp = self.config_loader.amp
                 self.norm[tag].initialise()                
             else:
                 self.norm[tag] = normalisation({tag: self.config_loader.get_phsp_amp(tag)}, {tag: self.config_loader.get_phsp_ampbar(tag)}, tag)
+                self.norm[tag].amp = self.config_loader.amp
                 self.norm[tag].initialise()
 
 
@@ -39,7 +40,7 @@ class BaseModel(object):
         self.norm[tag].Update_crossTerms()
 
         #need to be flexible with the function name
-        prob = core.prob_totalAmplitudeSquared_CP_mix(self.config_loader.get_data_amp(tag,'sig'), self.config_loader.get_data_ampbar(tag,'sig'), self.config_loader.get_data_amp(tag,'tag'), self.config_loader.get_data_ampbar(tag,'tag'), phase_correction_sig, phase_correction_tag)
+        prob = core.prob_totalAmplitudeSquared_CP_mix(self.config_loader.get_data_amp(tag,'sig'), self.config_loader.get_data_ampbar(tag,'sig'), self.config_loader.get_data_amp(tag,'tag'), self.config_loader.get_data_ampbar(tag,'tag'), phase_correction_sig, phase_correction_tag, model_name=self.config_loader.amp.model_name)
         norm = self.norm[tag]._crossTerms_complex
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
@@ -65,11 +66,11 @@ class BaseModel(object):
         self.norm[tag].Update_crossTerms()
 
         if tag == 'pipipi0':
-            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign,self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, Fplus=0.9406)
+            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign,self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, Fplus=0.9406, model_name=self.config_loader.amp.model_name)
             norm = self.norm[tag].Integrated_CP_tag(Dsign, Fplus=0.9406)
 
         else:
-            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction)
+            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, model_name=self.config_loader.amp.model_name)
             norm = self.norm[tag].Integrated_CP_tag(Dsign)
         prob_bkg = self.config_loader.get_data_bkg(tag)
         frac_bkg = self.config_loader.get_bkg_frac(tag)
@@ -95,7 +96,6 @@ class BaseModel(object):
 
     @tf.function
     def nll_dks(self):
-        #nll = []
         ret = 0
         for tag in self.tags:
             if tag not in ["full", "misspi", "misspi0"]: continue
@@ -105,7 +105,6 @@ class BaseModel(object):
     
     @tf.function
     def nll_cpeven(self):
-        #nll = []
         ret = 0
         for tag in self.tags:
             if tag not in ["kk", "pipi", "pipipi0", "kspi0pi0", "klpi0"]: continue
@@ -115,7 +114,6 @@ class BaseModel(object):
     
     @tf.function
     def nll_cpodd(self):
-        #nll = []
         ret = 0
         for tag in self.tags:
             if tag not in ["kspi0", "kseta_gamgam", "ksetap_pipieta", "kseta_3pi", "ksetap_gamrho", "ksomega", "klpi0pi0"]: continue
@@ -128,8 +126,6 @@ class BaseModel(object):
     def fun(self, x):
         self.set_params(x)
         ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()
-#        ret = self.nll_cpodd()
-
 
         return ret
         
