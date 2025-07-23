@@ -1,0 +1,15 @@
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+transfer_output_files   = ""
+transfer_input_files    = 05_1_Fit_Dpi_varying_gamma.py, 05_2_Full_Toys_B2Dpi_misID_varying_gamma.py, Efficiency_shape_B2DK.json, sample_toy.root
+
+executable              = 05_run.sh
+universe                = vanilla
+getenv                  = true
+arguments               = $(ProcId)
+output                  = 2025_07_02/05_varying_gamma/out/05_$(ProcId).out
+error                   = 2025_07_02/05_varying_gamma/err/05_$(ProcId).err
+log                     = 2025_07_02/05_varying_gamma/log/05_$(ProcId).log
+max_materialize         = 200
++JobFlavour             = "workday"
+queue 2000
