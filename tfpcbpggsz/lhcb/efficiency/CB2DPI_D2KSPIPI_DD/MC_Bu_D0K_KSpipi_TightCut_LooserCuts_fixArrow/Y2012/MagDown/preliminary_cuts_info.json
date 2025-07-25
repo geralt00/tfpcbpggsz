@@ -1,0 +1,37 @@
+{
+    "Trigger": {
+        "selected_events": 19303,
+        "input_events": 20889,
+        "efficiency": 0.9240748719421705,
+        "preliminary_cuts": "(Bu_M > 0) & ( (Bu_L0Global_TIS==True) | (Bu_L0HadronDecision_TOS==True) ) & (Bu_Hlt1TrackAllL0Decision_TOS == True ) & ( (Bu_Hlt2Topo2BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo3BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo4BodyBBDTDecision_TOS==True) )"
+    },
+    "DTF_Status": {
+        "selected_events": 20875,
+        "input_events": 20889,
+        "efficiency": 0.9993297907989851,
+        "preliminary_cuts": "(Bu_M > 0) & (Bu_constD0KSPV_status == 0 ) & (Bu_constD0PV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0KSPV_swapBachToPi_status == 0) & (Bu_constD0KSPV_swapBachToK_status == 0) & (h1_IPCHI2_OWNPV>0) & (h2_IPCHI2_OWNPV>0) & (Bach_IPCHI2_OWNPV>0) & (Ksh1_IPCHI2_OWNPV>0) & (Ksh2_IPCHI2_OWNPV>0) & (D0_IPCHI2_OWNPV>0) & (Bu_IPCHI2_OWNPV>0) & (Bu_FDCHI2_OWNPV>0) & (Bu_P>0) & (Bu_PT>0) & (D0_P>0) & (D0_PT>0) & (Bach_PT>0) & (Bach_P>0) & (Bu_RHO_BPV>0) & (D0_RHO_BPV>0) & (D0_VTXCHI2DOF>0) & (Ks_VTXCHI2DOF>0) & (Bu_VTXCHI2DOF>0) & (Bu_constD0KSPV_chi2>0)"
+    },
+    "ProbNN_D_CHILDREN": {
+        "selected_events": 20850,
+        "input_events": 20889,
+        "efficiency": 0.9981329886543157,
+        "preliminary_cuts": "(Bu_M > 0) & (h1_PIDK < 20) & (h2_PIDK < 20)"
+    },
+    "DTF_Masses": {
+        "selected_events": 19580,
+        "input_events": 20889,
+        "efficiency": 0.9373354397051079,
+        "preliminary_cuts": "(Bu_M > 0) & (Bu_constD0PV_KS0_M < 512.611) & (Bu_constD0PV_KS0_M > 482.611) & (Bu_constKSPV_D0_M < 1889.83) & (Bu_constKSPV_D0_M > 1839.83) & (Bu_constD0KSPV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0PV_status == 0)"
+    },
+    "EndVertex_BDZSIG": {
+        "selected_events": 18139,
+        "input_events": 20889,
+        "efficiency": 0.8683517640863613,
+        "preliminary_cuts": "(Bu_M > 0) & ( (D0_ENDVERTEX_Z - Bu_ENDVERTEX_Z) / ( sqrt( D0_ENDVERTEX_ZERR*D0_ENDVERTEX_ZERR + Bu_ENDVERTEX_ZERR*Bu_ENDVERTEX_ZERR)) > 0.5 )"
+    },
+    "selected_events": 15771,
+    "input_events": 20889,
+    "efficiency": 0.7549906649432716,
+    "preliminary_cuts": "( (Bu_L0Global_TIS==True) | (Bu_L0HadronDecision_TOS==True) ) & (Bu_Hlt1TrackAllL0Decision_TOS == True ) & ( (Bu_Hlt2Topo2BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo3BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo4BodyBBDTDecision_TOS==True) ) & (Bu_constD0KSPV_status == 0 ) & (Bu_constD0PV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0KSPV_swapBachToPi_status == 0) & (Bu_constD0KSPV_swapBachToK_status == 0) & (h1_IPCHI2_OWNPV>0) & (h2_IPCHI2_OWNPV>0) & (Bach_IPCHI2_OWNPV>0) & (Ksh1_IPCHI2_OWNPV>0) & (Ksh2_IPCHI2_OWNPV>0) & (D0_IPCHI2_OWNPV>0) & (Bu_IPCHI2_OWNPV>0) & (Bu_FDCHI2_OWNPV>0) & (Bu_P>0) & (Bu_PT>0) & (D0_P>0) & (D0_PT>0) & (Bach_PT>0) & (Bach_P>0) & (Bu_RHO_BPV>0) & (D0_RHO_BPV>0) & (D0_VTXCHI2DOF>0) & (Ks_VTXCHI2DOF>0) & (Bu_VTXCHI2DOF>0) & (Bu_constD0KSPV_chi2>0) & (h1_PIDK < 20) & (h2_PIDK < 20) & (Bu_constD0PV_KS0_M < 512.611) & (Bu_constD0PV_KS0_M > 482.611) & (Bu_constKSPV_D0_M < 1889.83) & (Bu_constKSPV_D0_M > 1839.83) & (Bu_constD0KSPV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0PV_status == 0) & ( (D0_ENDVERTEX_Z - Bu_ENDVERTEX_Z) / ( sqrt( D0_ENDVERTEX_ZERR*D0_ENDVERTEX_ZERR + Bu_ENDVERTEX_ZERR*Bu_ENDVERTEX_ZERR)) > 0.5 )",
+    "comments": "Input events correspond to post-stripping + truth-matched events"
+}
