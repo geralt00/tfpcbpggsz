@@ -1,0 +1,9 @@
+#+begin_src bash
+lb-conda-dev virtual-env default local-python
+./local-python/run python3
+### pip install -r requirements.txt
+export QMIPATH="/software/rj23972/safety_net/qmi-gamma-measurement/python/"
+echo "Location of the Includes of the the analysis :" $QMIPATH
+
+#+end_src
+

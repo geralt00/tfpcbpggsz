@@ -73,6 +73,8 @@ def fit(minos=False):
     print(fit_result)
     fcn_minima = fit_result.fval
     correlation = fit_result.covariance.correlation()
+    os.makedirs(f"{path}/results", exist_ok=True)
+
     if minos:
         minos_errors = None
         minos_errors = read_minos_errors(fit_result)
@@ -85,7 +87,7 @@ def fit(minos=False):
 
 def plot(plot_all=False, plot_each=False, coefficient=None):
     from tfpcbpggsz.bes.plotter import Plotter
-    Model.pc.set_coefficients(coefficients=coefficient)
+    Model.pc.set_coefficients(coefficients=list(coefficient))
     Plotter = Plotter(Model)
     if plot_all:
         Plotter.plot_cato('cp_odd')
@@ -122,9 +124,9 @@ def plot(plot_all=False, plot_each=False, coefficient=None):
     plt.colorbar()
     plt.savefig(f"{plot_dir}/PhaseCorrection_mass_order{Model.pc.order}.png")
 
-#pc_coefficients, pc_errors = fit(minos=minos)
-fit_result = np.load(f"full_data_fit_order{order}.npz", allow_pickle=True)
-pc_coefficients = fit_result['fitted_params']
+pc_coefficients, pc_errors = fit(minos=minos)
+#fit_result = np.load(f"full_data_fit_order{order}.npz", allow_pickle=True)
+#pc_coefficients = fit_result['fitted_params']
 if args.plot:
     
     plot(plot_all=args.plot_all, plot_each=args.plot_each, coefficient=pc_coefficients)

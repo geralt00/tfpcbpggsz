@@ -7,6 +7,14 @@ from tfpcbpggsz.phasecorrection import PhaseCorrection
 from tfpcbpggsz.core import eff_fun
 from tfpcbpggsz.variable import VarsManager as vm
 from tfpcbpggsz.amp.amplitude import Amplitude
+from tfpcbpggsz.masspdfs import *
+from tfpcbpggsz.lhcb.functions import *
+DICT_EFFICIENCY_FUNCTIONS = {
+    "Flat"        : Flat,
+    "Legendre_2_2": Legendre_2_2,
+    "Legendre_5_5": Legendre_5_5,
+}
+
 
 class pcbpggsz_generator:
     #"""
@@ -31,6 +39,7 @@ class pcbpggsz_generator:
         self.amplitude = amplitude
         self.amplitude.init()
         self.model_name = 'evtgen'
+        self.apply_eff = True
         if not isinstance(amplitude, Amplitude):
             raise TypeError("Amplitude must be initialise before passing to the generator")
             
@@ -38,6 +47,7 @@ class pcbpggsz_generator:
 
     def add_bias(self, correctionType="singleBias", **kwargs):
         
+        #"""Adding the bias in different type"""
 
         self.pc = PhaseCorrection(vm=vm())
         self.pc.DEBUG = self.DEBUG
@@ -81,7 +91,21 @@ class pcbpggsz_generator:
     
     def eval_eff(self, data):
         #"""Getting the efficiency value for given 4 momentum"""
-        return eff_fun(p4_to_srd(data), self.charge, self.decay)
+        srd = p4_to_srd(data)
+        if (self.efficiency_function not in DICT_EFFICIENCY_FUNCTIONS.keys()):
+            print("WARNING --------------------- ")
+            print(" efficiency function {self.efficiency_function} not defined for this generation ")
+            print(" returning flat distribution")
+            ret_eff_func = Flat
+        else:    
+            ret_eff_func = DICT_EFFICIENCY_FUNCTIONS[self.efficiency_function]
+            pass
+        return ret_eff_func(0, 0, srd[0], srd[1], 0, variables=self.efficiency_variables)
+    
+    def eval_res(self, data):
+        #"""Getting the resolution value for given 4 momentum"""
+        P_Ks, P_pim, P_pip = p4_to_mag(data)
+        return 
     
     def eval_res(self, data):
         #"""Getting the resolution value for given 4 momentum"""
@@ -110,8 +134,42 @@ class pcbpggsz_generator:
             self.deltaB = kwargs['dB']
             self.gamma = kwargs['gamma']   
             self.charge = kwargs['charge']
+            self.efficiency_function  = kwargs['efficiency_function']
+            self.efficiency_variables = kwargs['efficiency_variables']
+            try:
+                generate_B_mass = kwargs['generate_B_mass'],
+                B_mass_range    = kwargs['B_mass_range'],
+                mass_shape_name = kwargs['mass_shape_name']
+                mass_variables  = kwargs['mass_variables']
+                mass_variables[0] = 1. # set the yields to something that is not 0
+                mass_variables[1] = 1. # set the yields to something that is not 0
+                mass_shape      = None
+            except KeyError:
+                generate_B_mass = False
+                B_mass_range    = None
+                mass_shape_name = None
+                mass_variables  = None
+                mass_shape      = None
+                pass
+            pass
 
+        elif type=="phsp":
+            self.efficiency_function  = kwargs['efficiency_function']
+            self.efficiency_variables = kwargs['efficiency_variables']
+            generate_B_mass = False
+            B_mass_range    = None
+            mass_shape_name = None
+            mass_variables  = None
+            mass_shape      = None
+            pass
 
+        # print(generate_B_mass)
+        # print(B_mass_range   )
+        # print(mass_shape_name)
+        # print(mass_variables )
+        # print(mass_shape     )
+
+        
         if kwargs.get('max_N') is not None:
             max_N = kwargs['max_N']
         
@@ -126,11 +184,27 @@ class pcbpggsz_generator:
 
 
         if type != 'cp_mixed':
+            if (generate_B_mass):
+                def_mass_PDF = MassPDF(mass_shape_name, self.type)
+                def_mass_PDF.get_mass_pdf(mass_variables)
+                mass_shape   = def_mass_PDF.pdf
+
+                ret, status, ret_mass = multi_sampling(
+                    phsp,
+                    self.prod_fun,
+                    N,
+                    force=True,
+                    generate_B_mass = generate_B_mass[0],
+                    B_mass_range    = B_mass_range[0],
+                    mass_shape      = mass_shape
+                )
+                return ret, ret_mass
+            
             ret, status = multi_sampling(
                 phsp,
                 self.prod_fun,
                 N,
-                force=True,
+                force=True
             )
 
             return ret

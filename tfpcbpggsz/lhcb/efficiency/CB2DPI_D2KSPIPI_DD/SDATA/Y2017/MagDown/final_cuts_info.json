@@ -1,0 +1,24 @@
+{
+    "is_in_D_PhaseSpace": {
+        "selected_events": 263129,
+        "input_events": 278341,
+        "efficiency": 0.9453476131795172,
+        "final_cuts": "(Bu_M > 0) & (is_in_D_PhaseSpace == True)"
+    },
+    "Lepton_veto": {
+        "selected_events": 224546,
+        "input_events": 278341,
+        "efficiency": 0.8067298745064507,
+        "final_cuts": "(Bu_M > 0) & (h2_PIDe < 0) & (h1_isMuon == 0) & (h2_isMuon == 0) & (Bach_isMuon == 0)"
+    },
+    "multiple_candidates": {
+        "selected_events": 272704,
+        "input_events": 278341,
+        "efficiency": 0.9797478632325097,
+        "final_cuts": "multiple_candidates"
+    },
+    "selected_events": 208552,
+    "input_events": 278341,
+    "efficiency": 0.7492679842351648,
+    "final_cuts": "(is_in_D_PhaseSpace == True) & (h2_PIDe < 0) & (h1_isMuon == 0) & (h2_isMuon == 0) & (Bach_isMuon == 0)"
+}

@@ -34,8 +34,9 @@ class UniformGenerator:
 
     def generate(self, N):
         random = tf.random.uniform([N], dtype="float64")
+        ###### add another random with a chosen range
         ms = (self.b - self.a) * random + self.a
-        return ms
+        return ms # and return the mass
 
 
 class PhaseSpaceGenerator(object):
@@ -82,7 +83,9 @@ class PhaseSpaceGenerator(object):
         ret = []
         for i in range(self.m_nt - 2):
             b = self.m0 - sm
+            # print("b = self.m0 - sm = ",b)
             a = m_n + self.m_mass[-i - 2]
+            # print("a = m_n + self.m_mass[-i - 2] = ",a)
             if self.mass_generator[i] is None:
                 random = tf.random.uniform([n_iter], dtype="float64")
                 ms = (b - a) * random + a
@@ -92,6 +95,7 @@ class PhaseSpaceGenerator(object):
             m_n = ms
             sm = sm - self.m_mass[-i - 3]
             ret.append(ms)
+            # print("ret: ", ret)
         return ret
 
     def mass_importances(self, mass):
@@ -113,19 +117,22 @@ class PhaseSpaceGenerator(object):
         return w
 
     def generate(
-        self, n_iter: int, force=True, flatten=True, importances=True
+            self, n_iter: int, force=True, flatten=True, importances=True,
+            generate_B_mass = False, B_mass_range = None
     ) -> list:
         """generate `n_iter` events
 
         :param n_iter: number of events
         :param force: switch for cutting generated data to required size
         :param flatten: switch for sampling with weights
+        :param generate_B_mass: generate a random number for the invariant B mass
 
         :return:   daughters 4-momentum, list of ndarray with shape (n_iter, 4)
         """
         n_gen = 0
         n_total = n_iter
 
+        # print("first generate mass")
         mass = self.generate_mass(n_iter)
         if not flatten or self.m_nt == 2:
             pi = self.generate_momentum(mass, n_iter)
@@ -138,19 +145,34 @@ class PhaseSpaceGenerator(object):
         n_gen += int(mass_f[0].shape[0]) 
 
         # loop until number of generated events above required
+        # print("mass_f: ", mass_f)
         while force and n_gen < n_iter:
             # guess the total events required
             n_iter2 = int(1.01 * (n_total - n_gen) / (n_gen + 1) * n_iter)
             n_iter2 = min(n_iter2, 4000000)
+            # print("second generate mass")
             mass2 = self.generate_mass(n_iter2)
             mass_f2 = self.flatten_mass(mass2)
+            # print("mass_f2: ", mass_f2)
             n_gen += mass_f2[0].shape[0]
             n_total += n_iter2
             mass_f = [tf.concat([i, j], 0) for i, j in zip(mass_f, mass_f2)]
 
         if force:
             mass_f = [i[:n_iter] for i in mass_f]
-        return self.generate_momentum(mass_f)
+            pass
+
+        # print("mass_f: ", mass_f)        
+        # print("len(mass_f): ", len(mass_f))        
+        # print("mass_f[0]: ", mass_f[0])        
+        ret = self.generate_momentum(mass_f)
+        if (generate_B_mass == True) and (B_mass_range is not None):
+            B_mass = tf.random.uniform([n_iter], dtype="float64")
+            B_mass = B_mass*(B_mass_range[1] - B_mass_range[0]) + B_mass_range[0]
+            ret = ret, B_mass
+            pass
+        
+        return ret
 
     def generate_momentum(self, mass, n_iter=None):
         """generate random momentum from mass, boost them to a same rest frame"""
@@ -160,12 +182,18 @@ class PhaseSpaceGenerator(object):
         for i in mass:
             mass_t.append(i)
         mass_t.append(self.m0)
+        # print("self.m0: ", self.m0)
+        # print("mass_t: ", mass_t)        
         zeros = tf.zeros([n_iter], dtype="float64")
         p_list = []
+        # print("self.m_nt: ", self.m_nt)
         for i in range(0, self.m_nt - 1):
+            # print("i: ", i)
+            # print("mass_t[i + 1], mass_t[i], self.m_mass[-i - 2]: ",mass_t[i + 1], mass_t[i], self.m_mass[-i - 2])
             p_list = self.generate_momentum_i(
                 mass_t[i + 1], mass_t[i], self.m_mass[-i - 2], n_iter, p_list
             )
+            # print("p_list: ", p_list)
 
         return p_list
 

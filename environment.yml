@@ -270,7 +270,6 @@ dependencies:
       - tensorflow-probability==0.24.0
       - termcolor==2.4.0
       - tf-keras==2.16.0
-      - tfpcbpggsz==0.1.0
       - werkzeug==3.0.2
       - wrapt==1.16.0
 prefix: /software/pc24403/miniconda3/envs/tfdev

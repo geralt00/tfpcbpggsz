@@ -64,14 +64,18 @@ class GenTest:
 
 
 def multi_sampling(
-    phsp,
-    amp,
-    N,
-    max_N=200000,
-    force=True,
-    max_weight=None,
-    importance_f=None,
-    display=True,
+        phsp,
+        amp,
+        N,
+        max_N=200000,
+        force=True,
+        max_weight=None,
+        importance_f=None,
+        display=True,
+        generate_B_mass = False,
+        B_mass_range = None,
+        mass_shape = None
+
 ):
 
     import tensorflow as tf
@@ -80,15 +84,30 @@ def multi_sampling(
 
     a = GenTest(max_N, display=display)
     all_data = []
-
-    for i in a.generate(N):
-        data, new_max_weight = single_sampling2(
-            phsp, amp, i, max_weight, importance_f
-        )
+    all_B_mass = []
+    
+    # print(a.generate(N))
+    
+    for i in a.generate(N):        
+        if (generate_B_mass == True):
+            data, new_max_weight, B_mass = single_sampling2(
+                phsp, amp, i, max_weight, importance_f,
+                generate_B_mass = generate_B_mass,
+                B_mass_range = B_mass_range,
+                mass_shape = mass_shape
+            )
+            pass
+        else:
+            data, new_max_weight = single_sampling2(
+                phsp, amp, i, max_weight, importance_f
+            )
+            pass
         if max_weight is None:
             max_weight = new_max_weight * 1.1
+            pass
         if new_max_weight > max_weight and len(all_data) > 0:
             tmp = data_merge(*all_data)
+            # tmp_mass = data_merge(*all_B_mass)
             rnd = tf.random.uniform((data_shape(tmp),), dtype=max_weight.dtype)
             cut = (
                 rnd * new_max_weight / max_weight < 1.0
@@ -97,17 +116,31 @@ def multi_sampling(
             tmp = data_mask(tmp, cut)
             all_data = [tmp]
             a.set_gen(data_shape(tmp))
+            pass
         a.add_gen(data_shape(data))
         #print(a.eff, a.N_gen, max_weight)
         all_data.append(data)
+        if (generate_B_mass == True):
+            all_B_mass.append(B_mass)
+            pass
+        pass
 
     ret = data_merge(*all_data)
 
     if force:
         cut = tf.range(data_shape(ret)) < N
         ret = data_mask(ret, cut)
+        pass
 
     status = (a, max_weight)
+
+    if (generate_B_mass == True):
+        ret_mass = data_merge(*all_B_mass)
+        if force:
+            cut_mass = tf.range(data_shape(ret_mass)) < N
+            ret_mass = data_mask(ret_mass, cut_mass)
+            pass
+        return ret, status, ret_mass
 
     return ret, status
 
@@ -223,12 +256,26 @@ def double_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     return data_sig, data_tag, max_weight
 
 
-def single_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
+def single_sampling2(phsp, amp, N, max_weight=None, importance_f=None,
+                     generate_B_mass = False, B_mass_range = None, mass_shape = None,
+                     max_weight_mass = None):
     import tensorflow as tf
 
     from tfpcbpggsz.generator.data import data_mask
 
-    data = phsp(N)
+    if (generate_B_mass==True):
+        data, B_mass = phsp(N, generate_B_mass = generate_B_mass, B_mass_range = B_mass_range)
+        weight_mass = mass_shape(B_mass)
+        new_max_weight_mass = tf.reduce_max(weight_mass)
+        if max_weight_mass is None or max_weight_mass < new_max_weight_mass:
+            max_weight_mass = new_max_weight_mass * 1.01
+            pass
+        rnd_mass = tf.random.uniform(weight_mass.shape, dtype=weight_mass.dtype)
+        cut_mass = rnd_mass * max_weight_mass < weight_mass
+        data = data_mask(data, cut_mass)
+        B_mass = data_mask(B_mass, cut_mass)
+    else:
+        data = phsp(N)
     time1 = time.time()
     weight = amp(data)
     if weight.numpy().any() < 0.0:
@@ -257,6 +304,9 @@ def single_sampling2(phsp, amp, N, max_weight=None, importance_f=None):
     rnd = tf.random.uniform(weight.shape, dtype=weight.dtype)
     cut = tf.logical_and(rnd * max_weight < weight, weight > 0.0)
     data = data_mask(data, cut)
+    if (generate_B_mass==True):
+        B_mass = data_mask(B_mass, cut)
+        return data, max_weight, B_mass
     #print(f"Time taken for amp: {time2-time1}")
     return data, max_weight
 

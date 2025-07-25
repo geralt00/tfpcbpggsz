@@ -1,0 +1,36 @@
+{
+    "selected_events": 36888,
+    "input_events": 50589,
+    "efficiency": 0.7291703730059894,
+    "preliminary_cuts": "( (Bu_L0Global_TIS==True) | (Bu_L0HadronDecision_TOS==True) ) & (Bu_Hlt1TrackAllL0Decision_TOS == True ) & ( (Bu_Hlt2Topo2BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo3BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo4BodyBBDTDecision_TOS==True) ) & (Bu_constD0KSPV_status == 0 ) & (Bu_constD0PV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0KSPV_swapBachToPi_status == 0) & (Bu_constD0KSPV_swapBachToK_status == 0) & (h1_PIDK < 20) & (h2_PIDK < 20) & (Bu_constD0PV_KS0_M < 512.611) & (Bu_constD0PV_KS0_M > 482.611) & (Bu_constKSPV_D0_M < 1889.83) & (Bu_constKSPV_D0_M > 1839.83) & (Bu_constD0KSPV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0PV_status == 0) & ( (D0_ENDVERTEX_Z - Bu_ENDVERTEX_Z) / ( sqrt( D0_ENDVERTEX_ZERR*D0_ENDVERTEX_ZERR + Bu_ENDVERTEX_ZERR*Bu_ENDVERTEX_ZERR)) > 0.5 )",
+    "Trigger": {
+        "selected_events": 46732,
+        "input_events": 50589,
+        "efficiency": 0.9237581292375813,
+        "preliminary_cuts": "(Bu_M > 0) & ( (Bu_L0Global_TIS==True) | (Bu_L0HadronDecision_TOS==True) ) & (Bu_Hlt1TrackAllL0Decision_TOS == True ) & ( (Bu_Hlt2Topo2BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo3BodyBBDTDecision_TOS==True) | (Bu_Hlt2Topo4BodyBBDTDecision_TOS==True) )"
+    },
+    "DTF_Status": {
+        "selected_events": 50548,
+        "input_events": 50589,
+        "efficiency": 0.9991895471347526,
+        "preliminary_cuts": "(Bu_M > 0) & (Bu_constD0KSPV_status == 0 ) & (Bu_constD0PV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0KSPV_swapBachToPi_status == 0) & (Bu_constD0KSPV_swapBachToK_status == 0)"
+    },
+    "ProbNN_D_CHILDREN": {
+        "selected_events": 50420,
+        "input_events": 50589,
+        "efficiency": 0.9966593528237364,
+        "preliminary_cuts": "(Bu_M > 0) & (h1_PIDK < 20) & (h2_PIDK < 20)"
+    },
+    "DTF_Masses": {
+        "selected_events": 45973,
+        "input_events": 50589,
+        "efficiency": 0.9087548676589773,
+        "preliminary_cuts": "(Bu_M > 0) & (Bu_constD0PV_KS0_M < 512.611) & (Bu_constD0PV_KS0_M > 482.611) & (Bu_constKSPV_D0_M < 1889.83) & (Bu_constKSPV_D0_M > 1839.83) & (Bu_constD0KSPV_status == 0) & (Bu_constKSPV_status == 0) & (Bu_constD0PV_status == 0)"
+    },
+    "EndVertex_BDZSIG": {
+        "selected_events": 43215,
+        "input_events": 50589,
+        "efficiency": 0.8542370871137994,
+        "preliminary_cuts": "(Bu_M > 0) & ( (D0_ENDVERTEX_Z - Bu_ENDVERTEX_Z) / ( sqrt( D0_ENDVERTEX_ZERR*D0_ENDVERTEX_ZERR + Bu_ENDVERTEX_ZERR*Bu_ENDVERTEX_ZERR)) > 0.5 )"
+    }
+}
