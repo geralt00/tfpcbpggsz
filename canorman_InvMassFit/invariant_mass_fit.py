@@ -11,18 +11,20 @@ import json
 import seaborn as sns
 import os
 
+from tfpcbpggsz.amp.amplitude import Amplitude
+
 """Default configuration options for `matplotlib`"""
 from matplotlib import rc, rcParams
-rc('text', usetex=True)
-rc('font',**{'family':'serif',
-             'serif':['Computer Modern Roman','cmu serif']+rcParams['font.serif']})
-rcParams['xtick.labelsize'] = 10
-rcParams['ytick.labelsize'] = 10
-rcParams['axes.labelsize'] = 14
-rcParams['text.latex.preamble']=r"\usepackage{amsmath}"
-rcParams['legend.frameon'] = False
-rcParams['legend.fontsize'] = 8
-rcParams["figure.figsize"] = (12, 6)
+#rc('text', usetex=True)
+#rc('font',**{'family':'serif',
+#             'serif':['Computer Modern Roman','cmu serif']+rcParams['font.serif']})
+#rcParams['xtick.labelsize'] = 10
+#rcParams['ytick.labelsize'] = 10
+#rcParams['axes.labelsize'] = 14
+#rcParams['text.latex.preamble']=r"\usepackage{amsmath}"
+#rcParams['legend.frameon'] = False
+#rcParams['legend.fontsize'] = 8
+#rcParams["figure.figsize"] = (12, 6)
 import tensorflow as tf
 tf.get_logger().setLevel('INFO')
 
@@ -45,26 +47,24 @@ time1 = time.time()
 scale = 5
 
 from tfpcbpggsz.core import *
+from tfpcbpggsz.ulti import *
 from tfpcbpggsz.masspdfs import *
-from tfpcbpggsz.amp import *
 
-
-from tfpcbpggsz.amp_up import *
-Kspipi_up = PyD0ToKSpipi2018()
+from tfpcbpggsz.amp.amplitude import Amplitude
+Kspipi_up = Amplitude()
 Kspipi_up.init()
 
 
 import sys
 import os
-# sys.path.append("/software/rj23972/safety_net/qmi-gamma-measurement/python/")
-from tfpcbpggsz.Includes.common_classes import *
-from tfpcbpggsz.Includes.selections import *
-from tfpcbpggsz.Includes.ntuples import *
-from tfpcbpggsz.Includes.variables import *
-from tfpcbpggsz.Includes.common_constants import *
-from tfpcbpggsz.Includes.functions import *
-from tfpcbpggsz.Includes.Measurement import Measurement
-from tfpcbpggsz.Includes.VARDICT_DALITZ import VARDICT, varDict
+from tfpcbpggsz.lhcb.common_classes import *
+from tfpcbpggsz.lhcb.selections import *
+from tfpcbpggsz.lhcb.ntuples import *
+from tfpcbpggsz.lhcb.variables import *
+from tfpcbpggsz.lhcb.common_constants import *
+from tfpcbpggsz.lhcb.functions import *
+from tfpcbpggsz.lhcb.Measurement import Measurement
+from tfpcbpggsz.lhcb.VARDICT_DALITZ import VARDICT, varDict
 
 
 ntuples = {}
