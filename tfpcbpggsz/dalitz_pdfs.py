@@ -1,10 +1,10 @@
-from tfpcbpggsz.Includes.selections import *
-from tfpcbpggsz.Includes.ntuples import *
-from tfpcbpggsz.Includes.variables import *
-from tfpcbpggsz.Includes.common_constants import *
-from tfpcbpggsz.Includes.functions import *
-from tfpcbpggsz.Includes.VARDICT import VARDICT
-from tfpcbpggsz.Includes.common_classes import *
+from tfpcbpggsz.lhcb.selections import *
+from tfpcbpggsz.lhcb.ntuples import *
+from tfpcbpggsz.lhcb.variables import *
+from tfpcbpggsz.lhcb.common_constants import *
+from tfpcbpggsz.lhcb.functions import *
+from tfpcbpggsz.lhcb.VARDICT import VARDICT
+from tfpcbpggsz.lhcb.common_classes import *
 
 from tfpcbpggsz.core import *
 

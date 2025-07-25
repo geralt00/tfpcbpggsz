@@ -4,7 +4,7 @@ import numpy as np
 from tfpcbpggsz.masspdfs import *
 from tfpcbpggsz.phasecorrection import * 
 from tfpcbpggsz.generator.data import data_mask
-from tfpcbpggsz.Includes.functions import INFO, ERROR, get_gaussian_constraints
+from tfpcbpggsz.lhcb.functions import INFO, ERROR, get_gaussian_constraints
 
 #Common functions
 _PI = tf.constant(np.pi, dtype=tf.float64)

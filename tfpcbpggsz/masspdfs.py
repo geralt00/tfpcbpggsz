@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow_probability as tfp
 import math
-from tfpcbpggsz.Includes.common_constants import *
+from tfpcbpggsz.lhcb.common_constants import *
 
 
 #Repare for the class build

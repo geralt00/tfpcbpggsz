@@ -8,7 +8,7 @@ from tfpcbpggsz.core import eff_fun
 from tfpcbpggsz.variable import VarsManager as vm
 from tfpcbpggsz.amp.amplitude import Amplitude
 from tfpcbpggsz.masspdfs import *
-from tfpcbpggsz.Includes.functions import *
+from tfpcbpggsz.lhcb.functions import *
 DICT_EFFICIENCY_FUNCTIONS = {
     "Flat"        : Flat,
     "Legendre_2_2": Legendre_2_2,
