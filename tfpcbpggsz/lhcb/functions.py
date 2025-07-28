@@ -1,4 +1,4 @@
-import tensorflow as tf
+from tfpcbpggsz.tensorflow_wrapper import tf
 import numpy as np
 from tfpcbpggsz.lhcb.common_constants import *
 from tfpcbpggsz.ulti import get_xy_xi, deg_to_rad, rad_to_deg
@@ -60,12 +60,12 @@ def func_var_rotated_stretched(var_rotated):
 
 
 def Dalitz_upper_limit(skpip): # in GeV !!
-    res = (0.394465 + 1.8821*skpip - 0.5* tf.math.pow(skpip,2) + 1.86484* tf.math.sqrt(0.044744 - 0.485412*skpip + 1.13203*tf.math.pow(skpip,2) - 0.541203*tf.math.pow(skpip,3) + 0.0718881*tf.math.pow(skpip,4) ) ) / skpip
+    res = (0.394465 + 1.8821*skpip - 0.5* tf.pow(skpip,2) + 1.86484* tf.math.sqrt(0.044744 - 0.485412*skpip + 1.13203*tf.pow(skpip,2) - 0.541203*tf.pow(skpip,3) + 0.0718881*tf.pow(skpip,4) ) ) / skpip
     return res
 
 
 def Dalitz_lower_limit(skpip): # in GeV !!
-    res =  (0.394465 + 1.8821*skpip - 0.5* tf.math.pow(skpip,2) - 1.86484* tf.math.sqrt(0.044744 - 0.485412*skpip + 1.13203*tf.math.pow(skpip,2) - 0.541203*tf.math.pow(skpip,3) + 0.0718881*tf.math.pow(skpip,4) ) ) / skpip
+    res =  (0.394465 + 1.8821*skpip - 0.5* tf.pow(skpip,2) - 1.86484* tf.math.sqrt(0.044744 - 0.485412*skpip + 1.13203*tf.pow(skpip,2) - 0.541203*tf.pow(skpip,3) + 0.0718881*tf.pow(skpip,4) ) ) / skpip
     return res
 
 # def in_Dalitz_plot(skpip, skpim): 
@@ -116,9 +116,9 @@ def clip_log(x, _epsilon=1e-6):
 # @tf.function
 def Legendre_2_2(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     Legendre_zp_1 = zp_p
-    Legendre_zp_2 = (3 * tf.math.power(zp_p, 2) - 1) / 2.
+    Legendre_zp_2 = (3 * tf.pow(zp_p, 2) - 1) / 2.
     Legendre_zm_1 = zm_pp
-    Legendre_zm_2 = (3 * tf.math.power(zm_pp, 2) - 1) / 2.
+    Legendre_zm_2 = (3 * tf.pow(zm_pp, 2) - 1) / 2.
     res = (
         variables[0] +
         Legendre_zp_1*variables[1] +
@@ -151,15 +151,15 @@ def Legendre_2_2(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_var
 # @tf.function
 def Legendre_5_5(ampD0, ampD0bar, zp_p, zm_pp, Bsign, variables=None, shared_variables=None):
     Legendre_zp_1 = zp_p
-    Legendre_zp_2 = (3 * tf.math.pow(zp_p, 2) - 1) / 2.
-    Legendre_zp_3 = (5 * tf.math.pow(zp_p, 3) - 3 * zp_p) / 2.
-    Legendre_zp_4 = (35 * tf.math.pow(zp_p, 4) - 30 * tf.math.pow(zp_p, 2) + 3) / 8.
-    Legendre_zp_5 = (63 * tf.math.pow(zp_p, 5) - 70 * tf.math.pow(zp_p, 3) + 15 * zp_p) / 8.
+    Legendre_zp_2 = (3 * tf.pow(zp_p, 2) - 1) / 2.
+    Legendre_zp_3 = (5 * tf.pow(zp_p, 3) - 3 * zp_p) / 2.
+    Legendre_zp_4 = (35 * tf.pow(zp_p, 4) - 30 * tf.pow(zp_p, 2) + 3) / 8.
+    Legendre_zp_5 = (63 * tf.pow(zp_p, 5) - 70 * tf.pow(zp_p, 3) + 15 * zp_p) / 8.
     Legendre_zm_1 = zm_pp
-    Legendre_zm_2 = (3 * tf.math.pow(zm_pp, 2) - 1) / 2.
-    Legendre_zm_3 = (5 * tf.math.pow(zm_pp, 3) - 3 * zm_pp) / 2.
-    Legendre_zm_4 = (35 * tf.math.pow(zm_pp, 4) - 30 * tf.math.pow(zm_pp, 2) + 3) / 8.
-    Legendre_zm_5 = (63 * tf.math.pow(zm_pp, 5) - 70 * tf.math.pow(zm_pp, 3) + 15 * zm_pp) / 8.
+    Legendre_zm_2 = (3 * tf.pow(zm_pp, 2) - 1) / 2.
+    Legendre_zm_3 = (5 * tf.pow(zm_pp, 3) - 3 * zm_pp) / 2.
+    Legendre_zm_4 = (35 * tf.pow(zm_pp, 4) - 30 * tf.pow(zm_pp, 2) + 3) / 8.
+    Legendre_zm_5 = (63 * tf.pow(zm_pp, 5) - 70 * tf.pow(zm_pp, 3) + 15 * zm_pp) / 8.
     res = (variables[0] +
            Legendre_zp_1*variables[1] +
            Legendre_zp_2*variables[2] +
