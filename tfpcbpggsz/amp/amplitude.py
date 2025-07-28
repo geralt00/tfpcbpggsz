@@ -1,7 +1,7 @@
 import numpy as np
 from tfpcbpggsz.amp.evtgen.D0ToKspipi2018 import PyD0ToKspipi2018
 from tfpcbpggsz.amp.ampgen.D0ToKSpipi2018 import PyD0ToKSpipi2018
-from tfpcbpggsz.ulti import p4_to_phsp
+from tfpcbpggsz.ulti import p4_to_phsp, p4_to_srd
 from tfpcbpggsz.tensorflow_wrapper import tf
 
 
@@ -23,7 +23,8 @@ class Amplitude:
             raise ValueError("Model must be either 'evtgen' or 'ampgen'.")
         self.kwargs = kwargs
         self.res = False
-
+        self.pc = None
+        self._data = None
 
     def init(self):
         """        Initializes the amplitude model instance.
@@ -53,6 +54,7 @@ class Amplitude:
         
         phsp_points = []
         raw_A_output, raw_Abar_output = None, None
+        self._data = data_input
         phsp_points = p4_to_phsp(data_input)
         if self.res is True:
             phsp_points += self.res_params
@@ -128,12 +130,19 @@ class Amplitude:
         """
 
         from tfpcbpggsz.core import DeltadeltaD, DeltadeltaD_old
+        DeltadeltaD_val = []
         if self.model_name == 'evtgen':
             # Use the DeltadeltaD function from tfpcbpggsz.core
-            return DeltadeltaD(amp, ampbar)
+            DeltadeltaD_val = DeltadeltaD(amp, ampbar)
         else:
             # Use the DeltadeltaD_old function from tfpcbpggsz.core
-            return DeltadeltaD_old(amp, ampbar)
+            DeltadeltaD_val = DeltadeltaD_old(amp, ampbar)
+
+        if self.pc is not None:
+            # Apply phase correction if available
+            DeltadeltaD_val += self.pc.eval_corr_norm(p4_to_srd(self._data))
+
+        return DeltadeltaD_val
             
 
 

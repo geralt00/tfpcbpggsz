@@ -43,6 +43,21 @@ def DeltadeltaD(A, Abar):
 
     return var
 
+def DeltadeltaD_limit(Dd=DeltadeltaD):
+    """
+    Function to limit the phase difference between -Pi and Pi
+    
+    Args:
+        Dd (function): the strong phase difference
+
+    Returns:
+        function: the function to limit the phase difference between the amplitude and the conjugate amplitude
+    """
+    var_a = tf.where(Dd > _PI, Dd - 2*_PI, Dd)
+    var = tf.where(var_a < -_PI, var_a + 2*_PI, var_a)
+
+    return var
+
 
 
 
@@ -248,10 +263,10 @@ def prob_totalAmplitudeSquared_CP_mix(amp_sig=[], ampbar_sig=[],amp_tag=[], ampb
 
     if pc_sig is not None:
         pc_sig = data_mask(pc_sig, mask)
-        phase_sig = phase_sig + pc_sig
+        phase_sig = DeltadeltaD_limit(phase_sig + pc_sig)
     if pc_tag is not None:
         pc_tag = data_mask(pc_tag, mask)
-        phase_tag = phase_tag + pc_tag
+        phase_tag = DeltadeltaD_limit(phase_tag + pc_tag)
 
     absA_sig = tf.cast(tf.abs(amp_sig), tf.float64)
     absAbar_sig = tf.cast(tf.abs(ampbar_sig), tf.float64)
@@ -285,7 +300,7 @@ def prob_totalAmplitudeSquared_CP_tag(CPsign=1, amp=[], ampbar=[], **kwargs):
     Fplus = None if kwargs.get('Fplus') is None else kwargs.get('Fplus')
     if pc is not None:
         pc = data_mask(pc, mask)
-        phase = phase + pc
+        phase = DeltadeltaD_limit(phase + pc)
 
     absA = tf.cast(tf.abs(amp), tf.float64)
     absAbar = tf.cast(tf.abs(ampbar), tf.float64)
@@ -1322,6 +1337,7 @@ class DecayNLL_Charm:
 
             
 class NLLComputation:
+    
 
     def __init__(self, start_values, limit_values, dict_shared_parameters, dict_constrained_parameters, dict_gaussian_constraints, list_channels, dict_fixed_variables, ntuples):
         self.start_values                  = start_values                 
