@@ -1,0 +1,180 @@
+paths:
+  # Directory for saving fit results (log files, parameters)
+  fit_dir: "{date}/invariant_mass_fit"
+  # Directory for saving plots
+  plot_dir: "{date}/invariant_mass_fit"
+
+
+settings:
+  # The BDT cut value to apply
+  bdt_cut: 0.4
+  # The mass range [min, max] for the fit and histograms
+  mass_range: [5080, 5800]
+  # Number of bins for plotting histograms
+  nbins: 100
+  # List of Monte Carlo sources to process
+  list_sources:
+    - "MC_Bu_D0K_KSpipi"
+    - "MC_Bu_D0pi_KSpipi"
+  # List of data channels to fit
+  list_channels:
+    - "CB2DK_D2KSPIPI_DD"
+    - "CB2DPI_D2KSPIPI_DD"
+
+physics_inputs:
+  gamma: 70.0
+  rb_dk: 0.1
+  deltab_dk: 130.0
+  rb_dpi: 0.055
+  deltab_dpi: 300.0
+
+# Matplotlib keyword arguments for plotting data points
+kwargs_data:
+  histtype: 'errorbar'
+  linestyle: "None"
+  color: "black"
+
+# LaTeX labels for plot legends
+components_tex:
+  DK_Kspipi: "$B^{\\pm} \\rightarrow D K^{\\pm}$"
+  Dpi_Kspipi_misID: "$B^{\\pm} \\rightarrow D \\pi^{\\pm}$ (mis-ID)"
+  Dst0K_D0pi0_Kspipi: "$B^{\\pm} \\rightarrow (D^{*0} \\rightarrow D [\\pi^0]) K^{\\pm}$"
+  DstpK_D0pip_Kspipi: "$B^0 \\rightarrow (D^{*+} \\rightarrow D [\\pi^+]) K^{\\pm}$"
+  Dst0pi_D0pi0_Kspipi_misID_PartReco: "$B^{\\pm} \\rightarrow (D^{*0} \\rightarrow D [\\pi^0]) \\pi^{\\pm}$ (mis-ID, Part-Reco)"
+  Dstppi_D0pip_Kspipi_misID_PartReco: "$B^0 \\rightarrow (D^{*+} \\rightarrow D [\\pi^+]) \\pi^{\\pm}$ (mis-ID, Part-Reco)"
+  Dst0K_D0gamma_Kspipi: "$B^{\\pm} \\rightarrow (D^{*} \\rightarrow D [\\gamma]) K^{\\pm}$"
+  Dst0pi_D0gamma_Kspipi_misID_PartReco: "$B^{\\pm} \\rightarrow (D^{*} \\rightarrow D [\\gamma]) \\pi^{\\pm}$ (mis-ID, Part-Reco)"
+  DKpi_Kspipi: "$B \\rightarrow D K^{\\pm} [\\pi]$"
+  Dpipi_Kspipi_misID_PartReco: "$B \\rightarrow D \\pi^{\\pm} [\\pi]$ (mis-ID, Part-Reco)"
+  Bs2DKpi_Kspipi_PartReco: "$B_s \\rightarrow D K^{\\pm} [\\pi^\\pm]$ (Part-Reco)"
+  Dpi_Kspipi: "$B^{\\pm} \\rightarrow D \\pi^{\\pm}$"
+  DK_Kspipi_misID: "$B^{\\pm} \\rightarrow D K^{\\pm}$ (mis-ID)"
+  Dst0pi_D0pi0_Kspipi: "$B^{\\pm} \\rightarrow (D^{*0} \\rightarrow D [\\pi^0]) \\pi^{\\pm}$"
+  Dstppi_D0pip_Kspipi: "$B^0 \\rightarrow (D^{*+} \\rightarrow D [\\pi^+]) \\pi^{\\pm}$"
+  Dst0K_D0pi0_Kspipi_misID_PartReco: "$B^{\\pm} \\rightarrow (D^{*0} \\rightarrow D [\\pi^0]) K^{\\pm}$ (mis-ID, Part-Reco)"
+  DstpK_D0pip_Kspipi_misID_PartReco: "$B^0 \\rightarrow (D^{*+} \\rightarrow D [\\pi^+]) K^{\\pm}$ (mis-ID, Part-Reco)"
+  Dst0pi_D0gamma_Kspipi: "$B^{\\pm} \\rightarrow (D^{*} \\rightarrow D [\\gamma]) \\pi^{\\pm}$"
+  Dst0K_D0gamma_Kspipi_misID_PartReco: "$B^{\\pm} \\rightarrow (D^{*} \\rightarrow D [\\gamma]) K^{\\pm}$ (mis-ID, Part-Reco)"
+  Dpipi_Kspipi: "$B \\rightarrow D \\pi^{\\pm} [\\pi]$"
+  Combinatorial: "Combinatorial"
+
+# Defines the components [name, mass_pdf, dalitz_pdf] for each channel.
+components:
+  CB2DK_D2KSPIPI_DD:
+    - ["DK_Kspipi", "Cruijff+Gaussian", "Flat"]
+    - ["Dpi_Kspipi_misID", "SumCBShape", "Flat"]
+    - ["Dst0K_D0pi0_Kspipi", "HORNSdini", "Flat"]
+    - ["DstpK_D0pip_Kspipi", "HORNSdini", "Flat"]
+    - ["Dst0pi_D0pi0_Kspipi_misID_PartReco", "HORNSdini_misID", "Flat"]
+    - ["Dstppi_D0pip_Kspipi_misID_PartReco", "HORNSdini_misID", "Flat"]
+    - ["Dst0K_D0gamma_Kspipi", "HILLdini", "Flat"]
+    - ["Dst0pi_D0gamma_Kspipi_misID_PartReco", "HILLdini_misID", "Flat"]
+    - ["DKpi_Kspipi", "HORNSdini+Gaussian", "Flat"]
+    - ["Dpipi_Kspipi_misID_PartReco", "HORNSdini_misID", "Flat"]
+    - ["Bs2DKpi_Kspipi_PartReco", "HORNSdini", "Flat"]
+    - ["Combinatorial", "Exponential", "Flat"]
+  CB2DPI_D2KSPIPI_DD:
+    - ["Dpi_Kspipi", "Cruijff+Gaussian", "Flat"]
+    - ["DK_Kspipi_misID", "CBShape", "Flat"]
+    - ["Dst0pi_D0pi0_Kspipi", "HORNSdini", "Flat"]
+    - ["Dstppi_D0pip_Kspipi", "HORNSdini", "Flat"]
+    - ["Dst0K_D0pi0_Kspipi_misID_PartReco", "HORNSdini_misID", "Flat"]
+    - ["DstpK_D0pip_Kspipi_misID_PartReco", "HORNSdini_misID", "Flat"]
+    - ["Dst0pi_D0gamma_Kspipi", "HILLdini", "Flat"]
+    - ["Dst0K_D0gamma_Kspipi_misID_PartReco", "HILLdini_misID", "Flat"]
+    - ["Dpipi_Kspipi", "HORNSdini+HORNSdini", "Flat"]
+    - ["Combinatorial", "Exponential", "Flat"]
+
+fit_parameters:
+  start_values:
+    ratio_BR_DK_to_Dpi: 0.07
+    signal_mean_DK: 5329.65
+    signal_mean_Dpi: 5329.65
+    signal_width_DK_DD: 65.0
+    signal_width_Dpi_DD: 65.0
+    Dst0K_D0pi0_Kspipi_yield_Bplus_DD: 3000.
+    DstpK_D0pip_Kspipi_yield_Bplus_DD: 3000.
+    Dstppi_D0pip_Kspipi_misID_PartReco_yield_Bplus_DD: 3000.
+    Dst0K_D0gamma_Kspipi_yield_Bplus_DD: 3000.
+    Combinatorial_yield_Bplus_DK_DD: 12000.
+    Dpi_Kspipi_yield_Bplus_DD: 120000.
+    Dst0pi_D0pi0_Kspipi_yield_Bplus_DD: 7000.
+    Dst0pi_D0gamma_Kspipi_yield_Bplus_DD: 7000.
+    Combinatorial_yield_Bplus_DPI_DD: 20000.
+    Combinatorial_c_DK_DD: -0.003
+
+  limit_values:
+    ratio_BR_DK_to_Dpi: [0.0001, 1]
+    signal_mean_DK: [5080, 5800]
+    signal_mean_Dpi: [5080, 5800]
+    signal_width_DK_DD: [1, 100]
+    signal_width_Dpi_DD: [1, 100]
+    Dst0K_D0pi0_Kspipi_yield_Bplus_DD: [0, 20000]
+    DstpK_D0pip_Kspipi_yield_Bplus_DD: [0, 20000]
+    Dstppi_D0pip_Kspipi_misID_PartReco_yield_Bplus_DD: [0, 20000]
+    Dst0K_D0gamma_Kspipi_yield_Bplus_DD: [0, 20000]
+    Combinatorial_yield_Bplus_DK_DD: [0, 50000]
+    Dpi_Kspipi_yield_Bplus_DD: [0, 400000]
+    Dst0pi_D0pi0_Kspipi_yield_Bplus_DD: [0, 400000]
+    Dst0pi_D0gamma_Kspipi_yield_Bplus_DD: [0, 400000]
+    Combinatorial_yield_Bplus_DPI_DD: [0, 400000]
+    Combinatorial_c_DK_DD: [-0.01, -0.0005]
+
+shared_parameters:
+  ratio_BR_DK_to_Dpi:
+    - ["SHARED_THROUGH_CHANNELS", "parameters", "mass", "ratio_BR_DK_to_Dpi"]
+  signal_mean_DK:
+    - ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "cruij_m0"]
+    - ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "gauss_mean"]
+  signal_mean_Dpi:
+    - ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "cruij_m0"]
+    - ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "gauss_mean"]
+  signal_width_DK_DD:
+    - ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "cruij_sigmaL"]
+    - ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "cruij_sigmaR"]
+    - ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "gauss_sigma"]
+  signal_width_Dpi_DD:
+    - ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "cruij_sigmaL"]
+    - ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "cruij_sigmaR"]
+    - ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "gauss_sigma"]
+  Dst0K_D0pi0_Kspipi_yield_Bplus_DD:
+    - ["CB2DK_D2KSPIPI_DD", "Dst0K_D0pi0_Kspipi", "mass", "yield_Bplus"]
+  DstpK_D0pip_Kspipi_yield_Bplus_DD:
+    - ["CB2DK_D2KSPIPI_DD", "DstpK_D0pip_Kspipi", "mass", "yield_Bplus"]
+  Dstppi_D0pip_Kspipi_misID_PartReco_yield_Bplus_DD:
+    - ["CB2DK_D2KSPIPI_DD", "Dstppi_D0pip_Kspipi_misID_PartReco", "mass", "yield_Bplus"]
+  Dst0K_D0gamma_Kspipi_yield_Bplus_DD:
+    - ["CB2DK_D2KSPIPI_DD", "Dst0K_D0gamma_Kspipi", "mass", "yield_Bplus"]
+  Combinatorial_yield_Bplus_DK_DD:
+    - ["CB2DK_D2KSPIPI_DD", "Combinatorial", "mass", "yield_Bplus"]
+  Dpi_Kspipi_yield_Bplus_DD:
+    - ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "yield_Bplus"]
+  Dst0pi_D0pi0_Kspipi_yield_Bplus_DD:
+    - ["CB2DPI_D2KSPIPI_DD", "Dst0pi_D0pi0_Kspipi", "mass", "yield_Bplus"]
+  Dst0pi_D0gamma_Kspipi_yield_Bplus_DD:
+    - ["CB2DPI_D2KSPIPI_DD", "Dst0pi_D0gamma_Kspipi", "mass", "yield_Bplus"]
+  Combinatorial_yield_Bplus_DPI_DD:
+    - ["CB2DPI_D2KSPIPI_DD", "Combinatorial", "mass", "yield_Bplus"]
+  Combinatorial_c_DK_DD:
+    - ["CB2DK_D2KSPIPI_DD", "Combinatorial", "mass", "c"]
+
+
+constrained_parameters:
+  # Constrain DK from Dpi
+  -
+    - [["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "yield_Bplus"],
+       ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "yield_Bplus", ["SHARED_THROUGH_CHANNELS", "parameters", "mass", "ratio_BR_DK_to_Dpi", "ratio_DK_to_Dpi"]]]
+  # Constrain misID Dpi in DK channel from goodID Dpi
+  -
+    - [["CB2DK_D2KSPIPI_DD", "Dpi_Kspipi_misID", "mass", "yield_Bplus"],
+       ["CB2DPI_D2KSPIPI_DD", "Dpi_Kspipi", "mass", "yield_Bplus", "ratio_Dpi_misID_to_Dpi"]]
+  # Constrain misID DK in Dpi channel from goodID DK
+  -
+    - [["CB2DPI_D2KSPIPI_DD", "DK_Kspipi_misID", "mass", "yield_Bplus"],
+       ["CB2DK_D2KSPIPI_DD", "DK_Kspipi", "mass", "yield_Bplus", "ratio_DK_misID_to_DK"]]
+
+# Defines Gaussian constraints on fit parameters.
+gaussian_constraints:
+  # Constrain DstpK yield relative to Dst0K yield with a Gaussian term.
+  - from: ["CB2DK_D2KSPIPI_DD", "DstpK_D0pip_Kspipi", "mass", "yield_Bplus"]
+    to: ["CB2DK_D2KSPIPI_DD", "Dst0K_D0pi0_Kspipi", "mass", "yield_Bplus", 1.0, 0.1] # Multiplier, Error
