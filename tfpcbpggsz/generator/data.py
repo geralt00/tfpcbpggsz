@@ -511,25 +511,27 @@ def data_mask(data, select):
                         data.shape, select.shape
                     )
                 )
-            return tf.boolean_mask(data, select)
+            ret = data_map(data, tf.boolean_mask, args=(select,))
         else:
-            return tf.boolean_mask(data, select, axis=0)
+            ret = tf.boolean_mask(data, select, axis=0)
     else:
         data_arr = np.array(data)
-
         if data_arr.ndim == 1:
+            print("data_arr.shape", data_arr.shape)
             if data_arr.shape[0] != select.shape[0]:
                 raise ValueError(
                     "The shape of data {} is not compatible with the shape of select {}".format(
                         data_arr.shape, select.shape
                     )
                 )
-            if data_arr.shape[0] == select.shape[0]:
-                ret = data_arr[select]
+            #if data_arr.shape[0] == select.shape[0]:
+            ret = data_map(data, tf.boolean_mask, args=(select,))
         else:
-            ret = data_arr[:, select]
+            #ret = data_arr[:, select]
+            ret = data_map(data[:], tf.boolean_mask, args=(select,))
 
-        return ret
+
+    return ret
 
 
 def data_cut(data, expr, var_map=None):
