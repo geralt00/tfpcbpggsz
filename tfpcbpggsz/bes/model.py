@@ -10,8 +10,25 @@ class BaseModel(object):
         self.pc = pc(vm=self.config_loader.vm)
         self.vm = self.pc.vm
         self.tags = self.config_loader.idx
+        self.reweight = self.config_loader._config_data.get('reweight', False)
+
         self.load_norm()
         self._nll = {}
+        self._bkg_frac = {}
+
+    def load_bkg_frac(self):
+        """Load the background fraction for each tag from the configuration file"""
+        self._bkg_frac = self.config_loader.get_bkg_frac()
+        if not self._bkg_frac:
+            print("WARNING: No background fractions is calculated, assuming all background fractions are 0")
+            for tag in self.tags:
+                self._bkg_frac[tag] =  {'total': tf.zeros(shape=(1,), dtype=tf.float64)}
+
+    def reset_bkg(self, tag, key, num=0):
+        temp_val = self._bkg_frac[tag][key]
+        self.config_loader.reset_yield(tag, key, num)
+        self.load_bkg_frac()
+        print(f"INFO:: Reset {key} bkg frac from {temp_val} to {self._bkg_frac[tag][key]} for {tag}")
 
 
     def load_norm(self):
@@ -20,11 +37,28 @@ class BaseModel(object):
             if tag in ["full", "misspi", "misspi0"]:
                 self.norm[tag] = normalisation({f'{tag}_sig': self.config_loader.get_phsp_amp(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_amp(tag, 'tag')}, {f'{tag}_sig': self.config_loader.get_phsp_ampbar(tag, 'sig'), f'{tag}_tag': self.config_loader.get_phsp_ampbar(tag, 'tag')}, f'{tag}_sig') 
                 self.norm[tag].amp = self.config_loader.amp
-                self.norm[tag].initialise()                
+                self.norm[tag].reweight = self.reweight
+                if self.reweight:
+                    data_sig = self.config_loader._mc['phsp'][tag].copy()
+                    Reweighter_sig = core.Reweight(data_sig,  tag='sig')
+                    Reweighter_sig.init()
+                    data_tag = self.config_loader._mc['phsp'][tag].copy()
+                    Reweighter_tag = core.Reweight(data_tag, tag='tag')
+                    Reweighter_tag.init()
+                    self.norm[tag].weights = Reweighter_sig.weights['weights']*Reweighter_tag.weights['weights']
+                self.norm[tag].initialise()
+
             else:
                 self.norm[tag] = normalisation({tag: self.config_loader.get_phsp_amp(tag)}, {tag: self.config_loader.get_phsp_ampbar(tag)}, tag)
                 self.norm[tag].amp = self.config_loader.amp
+                self.norm[tag].reweight = self.reweight
+                if self.reweight:
+                    Reweighter = core.Reweight(self.config_loader._mc['phsp'][tag])
+                    Reweighter.init()
+                    self.norm[tag].weights = Reweighter.weights['weights']
                 self.norm[tag].initialise()
+
+
 
 
     #@tf.function
@@ -43,12 +77,12 @@ class BaseModel(object):
         prob = core.prob_totalAmplitudeSquared_CP_mix(self.config_loader.get_data_amp(tag,'sig'), self.config_loader.get_data_ampbar(tag,'sig'), self.config_loader.get_data_amp(tag,'tag'), self.config_loader.get_data_ampbar(tag,'tag'), phase_correction_sig, phase_correction_tag, model_name=self.config_loader.amp.model_name)
         norm = self.norm[tag]._crossTerms_complex
         prob_bkg = self.config_loader.get_data_bkg(tag)
-        frac_bkg = self.config_loader.get_bkg_frac(tag)
+        frac_bkg = self._bkg_frac[tag]['total']
         #print(f"The backgdound fraction for {tag}:",frac_bkg)
         prob_bkg = (prob_bkg)*frac_bkg
         bkg_part = tf.reduce_sum(prob_bkg, axis=0)
-        
         sig_part = (prob/norm)*(1.0-tf.reduce_sum(frac_bkg))
+
 
 
         nll = tf.reduce_sum(-2*core.clip_log( sig_part + bkg_part))
@@ -73,7 +107,7 @@ class BaseModel(object):
             prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, model_name=self.config_loader.amp.model_name)
             norm = self.norm[tag].Integrated_CP_tag(Dsign)
         prob_bkg = self.config_loader.get_data_bkg(tag)
-        frac_bkg = self.config_loader.get_bkg_frac(tag)
+        frac_bkg = self._bkg_frac[tag]['total']
         #print(f"The backgdound fraction for {tag}:",frac_bkg)
         prob_bkg = (prob_bkg)*frac_bkg
         bkg_part = tf.reduce_sum(prob_bkg, axis=0)

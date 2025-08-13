@@ -29,12 +29,20 @@ class ConfigLoader:
         self._data = {}
         self._mc = {}
         self._pdf = {}
+        self._bkg_frac = {}
+        self._yields = {}
+        self._vary = self._config_data.get('vary', False)
+        if self._vary:
+            self.random_seed = self._config_data.get('random_seed', 100)
+            self.random = np.random.default_rng(self.random_seed)
+            print(f"INFO:: Varying the yields with random seed: {self.random_seed} \n")
+
+
 
         self.D02KsPiPi = D02KsPiPi()
         self.yields = yields(self.D02KsPiPi)
         self.mass_fit_results = {}
         self.new_mass_fit_results = {}
-
 
     def load_config(self):
 
@@ -60,16 +68,17 @@ class ConfigLoader:
     def get_all_data(self):
         datafile = ['data', 'phsp', 'pdf', 'qcmc', 'dpdm', 'qqbar', 'sigmc_um', 'qcmc_oth']
         self.get_order()
-        
-        self._data, self._mc['phsp'], self._pdf, self._mc['qcmc'], self._mc['dpdm'], self._mc['qqbar'], self._mc['sigmc_um'], self._mc['qcmc_oth'] = [self.data.get_data(i) for i in datafile]
+        if 'qcmc' in self._config_data['data'].keys():
+            self._data, self._mc['phsp'], self._pdf, self._mc['qcmc'], self._mc['dpdm'], self._mc['qqbar'], self._mc['sigmc_um'], self._mc['qcmc_oth'] = [self.data.get_data(i) for i in datafile]
+        else:
+            datafile = ['data', 'phsp']
+            self._data, self._mc['phsp'] = [self.data.get_data(i) for i in datafile]
         return self._data, self._mc, self._pdf
 
     def get_data(self, type):
         self.get_order()
         self._data = self.data.get_data(type)
         return self._data
-
-    #def get_data
 
     def get_data_srd(self, tag, key=None):
         if isinstance(self._data[tag]['srd'], dict):
@@ -96,6 +105,7 @@ class ConfigLoader:
             return self._data[tag]['ampbar']
         
     def get_mc_mass(self, tag, key, key_tag=None):
+        #print(f"INFO:: Getting MC mass for tag: {tag}, key: {key}, key_tag: {key_tag}")
         if isinstance(self._mc[key][tag]['s12'], dict):
             return self._mc[key][tag]['s12'][key_tag], self._mc[key][tag]['s13'][key_tag]
         else:
@@ -132,33 +142,58 @@ class ConfigLoader:
         Args:
             ret (float64): the probability of the background in shape (n,)
         """
-        ret = np.array([self._pdf[tag][key] for key in self._pdf[tag].keys()])
+        ret = None
+
+        if not self._pdf:
+            ret = np.array([0.0], dtype=np.float64)
+            
+        else:
+            ret = np.array([self._pdf[tag][key] for key in self._pdf[tag].keys()])
         return ret
-    
-    def get_bkg_frac(self, tag, **kwargs):
 
 
-        vary = False
-        if 'vary' in kwargs.keys():
-            vary = kwargs['vary']
+    def get_bkg_frac(self):
+
+        for tag in self._pdf.keys():
+            self._bkg_frac[tag] = {}
+            self.get_tag_bkg_frac(tag)
+
+        return self._bkg_frac
+            
+    def get_tag_bkg_frac(self, tag):
+
+
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
         ntot = 0
         nsig = 0
         nbkg = 0
+        self._yields[tag] = {} if tag not in self._yields else self._yields[tag]
         for key in self.mass_fit_results.keys():
             if 'sig_range_nb_' in key:
-                nbkg += self.get_bkg_num(tag, key, vary=vary) if vary else self.get_bkg_num(tag, key)
+                if key.split('sig_range_nb_')[-1] in self._yields[tag].keys():
+                    nbkg += self._yields[tag][key.split('sig_range_nb_')[-1]]
+                else:
+                    nbkg += self.get_bkg_num(tag, key)
             if 'sig_range_nsig' in key:
-                nsig += self.get_sig_num(tag, vary=vary) if vary else self.get_sig_num(tag)
-        
+                if 'sig' in self._yields[tag].keys():
+                    nsig += self._yields[tag]['sig']
+                else:
+                    nsig += self.get_sig_num(tag)
         ntot = nbkg + nsig
-        ret = np.array([self.get_bkg_num(tag, f'sig_range_nb_{key}', vary=vary) for key in self._pdf[tag].keys()])/ntot
-        #print([f'sig_range_nb_{key}' for key in self._pdf[tag].keys()])
-        #print(f"INFO:: {tag} bkg fraction: {ret}")
-        return ret.reshape(-1,1)
+        #Looping over the pdfs making sure the frac matrix matchs pdfs
+        ret = np.array([self._yields[tag][key] for key in self._pdf[tag].keys()])/ntot
+        ret = ret.reshape(-1,1)
+        self._bkg_frac[tag]['total'] = ret
+        for key in self._pdf[tag].keys():
+            self._bkg_frac[tag][key] = self._yields[tag][key]/ntot
 
-    def get_bkg_num(self, tag, key, default=0, vary=False):
+    def reset_yield(self, tag, key, num=0):
+        self._yields[tag][key] = num
+        
+        print(f"INFO:: Reset {key} yield for {tag} to {num}")
+
+    def get_bkg_num(self, tag, key, default=0):
         """Get the number of the background
         Args:
             tag (str): the tag name
@@ -169,30 +204,34 @@ class ConfigLoader:
             
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        self.mass_fit_errors = self.yields.get(type='fit_result')['error']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
         if key not in self.mass_fit_results.keys():
             print(f'INFO:: {key} not found in mass_fit_results of {tag}')
             return default
         else:
-            val = self.new_mass_fit_results[key] if vary else self.mass_fit_results[key]
+            val = self.re_sample_yields(self.mass_fit_results[key], self.mass_fit_errors[key]) if self._vary else self.mass_fit_results[key]
+            self._yields[tag][key.split('sig_range_nb_')[-1]] = val
             return val
     
-    def get_sig_num(self, tag, vary=False):
+    def get_sig_num(self, tag):
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        val = self.new_mass_fit_results[f'sig_range_nsig'] if vary else self.mass_fit_results[f'sig_range_nsig']
+        self.mass_fit_errors = self.yields.get(type='fit_result')['error']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        val = self.re_sample_yields(self.mass_fit_results[f'sig_range_nsig'],self.mass_fit_errors[f'sig_range_nsig']) if self._vary else self.mass_fit_results[f'sig_range_nsig']
+        self._yields[tag]['sig'] = val
         return val
     
-    def re_sample_yields(self, tag):
+    
+    def re_sample_yields(self, mean, error):
         """Resample the yields for the given tag
         Args:
-            tag (str): the tag name
-            kwargs: the keyword arguments for the resampling
+            mean (float): the mean value for the resampling
+            error (float): the error value for the resampling
         """
-        self.yields.load(self._config_data['data'].get('mass_fit_results'))
-        self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        covariance = self.yields.get(type='fit_result')['cov']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        name_order = self.yields.get(type='fit_result')['cov_name']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        old_yields = np.array([self.mass_fit_results[key] for key in name_order])
-        new_yields = np.random.multivariate_normal(old_yields, covariance)
-        for i, key in enumerate(name_order):
-            self.new_mass_fit_results[key] = new_yields[i]
+        #If error is 0.0, which is fixed, then do a possion
+        if error == 0.0:
+            return self.random.poisson(mean)
+        return self.random.normal(mean, error)
+        #new_yields = np.random.multivariate_normal(old_yields, covariance)
+        #for i, key in enumerate(name_order):
+        #    self.new_mass_fit_results[key] = new_yields[i]

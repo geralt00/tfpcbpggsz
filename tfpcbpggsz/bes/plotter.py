@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
 import tfpcbpggsz.core as core # Assuming this exists and works
-from plothist import make_hist, get_color_palette, plot_data_model_comparison, plot_model, plot_function # Assuming this exists
+from plothist import make_hist, get_color_palette, plot_data_model_comparison, plot_model, plot_function, add_text # Assuming this exists
 from tfpcbpggsz.generator.phasespace import gets23 # Assuming this exists
 import os
 import matplotlib.pyplot as plt # Added for potential fig.clf() if needed outside plot_cato
@@ -95,11 +95,11 @@ class Hist:
 
         phase_correction = self.pc.eval_corr_norm(self.config.get_phsp_srd(tag))
         if tag != 'pipipi0' :
-            ret = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), pc=phase_correction)
-            ret_no_corr = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag))
+            ret = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), pc=phase_correction, model_name=self.config.amp.model_name)
+            ret_no_corr = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), model_name=self.config.amp.model_name   )
         else:
-            ret = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), pc=phase_correction,  Fplus=0.9406)
-            ret_no_corr = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), Fplus=0.9406)
+            ret = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), pc=phase_correction,  Fplus=0.9406, model_name=self.config.amp.model_name)
+            ret_no_corr = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config.get_phsp_amp(tag), self.config.get_phsp_ampbar(tag), Fplus=0.9406, model_name=self.config.amp.model_name)
         return ret, ret_no_corr
 
     def get_hist_each(self, cato='dks', tag='full', mc_type='phsp'):
@@ -154,7 +154,7 @@ class Hist:
         # of self.config and self.plot_list. Assuming its logic is correct for summation.
         # No changes related to smoothing needed here.
 
-        mc_type = ['phsp', 'qcmc', 'dpdm', 'qqbar', 'sigmc_um', 'qcmc_oth']
+        mc_type = list(self.config._mc.keys())#['phsp', 'qcmc', 'dpdm', 'qqbar', 'sigmc_um', 'qcmc_oth']
         for key in self.plot_list:
             if key != 'dks':
                 self.bins_sum[key]={}
@@ -240,7 +240,7 @@ class Hist:
             else: # key == 'dks'
                  self.bins_sum[key]={}
                  self.count_sum[key]={}
-                 mc_type = ['phsp', 'qcmc', 'dpdm', 'qqbar', 'sigmc_um'] # Specific mc_types for dks
+                 mc_type = list(self.config._mc.keys()) # Specific mc_types for dks
 
                  # Initialization logic for dks
                  for tag in self.plot_list[key]:
@@ -256,7 +256,9 @@ class Hist:
                              needs_init = True
 
                          if needs_init:
-                             if tag in ['full', 'misspi'] and i_mc_type == 'sigmc_um':
+                             #if tag  not in ['full', 'misspi'] and i_mc_type == 'sigmc_um':
+                             if tag not in ['misspi0'] and i_mc_type == 'sigmc_um' or \
+                                (tag in ['full', 'misspi', 'misspi0'] and i_mc_type == 'qcmc_oth'):
                                  if tag not in self.count: self.count[tag] = {}
                                  if i_mc_type not in self.count[tag]: self.count[tag][i_mc_type] = {}
                                  if tag not in self.bins: self.bins[tag] = {}
@@ -400,6 +402,9 @@ class Plotter:
             mc_type = base_mc_type + ['qcmc_oth', 'sigmc_um']
         else:
             mc_type = base_mc_type # Default or unknown category
+        if len(list(self.config._mc.keys()) )< len(mc_type):
+            print(f"Warning: Not enough mc_types defined in config for category '{cato}'. Using default mc_types: {list(self.config._mc.keys())}.")
+            mc_type = list(self.config._mc.keys()) # Fallback to whatever is defined in config
 
         # Populate count and bins dictionaries safely
         for i_mc_type in mc_type:
@@ -568,6 +573,7 @@ class Plotter:
                         range=self.hist.range[key],
                         data_uncertainty_type='symmetrical', # Or 'poisson'
                     )
+                    #add_text()
 
                     # <<< CHANGE 4 (Minor plotting detail) >>> Re-plotting the signal line separately
                     # <<< REASON 4 >>> Sometimes the unstacked signal line in plot_data_model_comparison
@@ -625,7 +631,9 @@ class Plotter:
             mc_type = base_mc_type + ['qcmc_oth', 'sigmc_um']
         else:
             mc_type = base_mc_type
-
+        if len(list(self.config._mc.keys())) < len(mc_type):
+            print(f"Warning: Not enough mc_types defined in config for category '{cato}'. Using default mc_types: {list(self.config._mc.keys())}.")
+            mc_type = list(self.config._mc.keys()) # Fallback to whatever is defined in config
         # --- CHOOSE YOUR PALETTE ---
         chosen_palette = palette_candy_pop
 
@@ -807,13 +815,13 @@ class Plotter:
 
         for tag in tags_to_sum:
             try:
-                scale['sig'] += self.config.get_sig_num(tag)
-                scale['qcmc'] += self.config.get_bkg_num(tag, 'sig_range_nb_qcmc')
-                scale['dpdm'] += self.config.get_bkg_num(tag, 'sig_range_nb_dpdm')
-                scale['qqbar'] += self.config.get_bkg_num(tag, 'sig_range_nb_qqbar')
+                scale['sig'] += self.config._yields[tag].get('sig', 0)
+                scale['qcmc'] += self.config._yields[tag].get('qcmc', 0)
+                scale['dpdm'] += self.config._yields[tag].get('dpdm', 0)
+                scale['qqbar'] += self.config._yields[tag].get('qqbar', 0)
                 # Use get with default 0 for optional backgrounds
-                scale['sigmc_um'] += self.config.get_bkg_num(tag, 'sig_range_nb_sigmc_um', default=0)
-                scale['qcmc_oth'] += self.config.get_bkg_num(tag, 'sig_range_nb_qcmc_oth', default=0)
+                scale['sigmc_um'] += self.config._yields[tag].get('sigmc_um', 0)
+                scale['qcmc_oth'] += self.config._yields[tag].get('qcmc_oth', 0)
 
                 if cato != 'dks':
                     s12_sig_i, s13_sig_i = self.config.get_data_mass(tag=tag)
@@ -864,12 +872,12 @@ class Plotter:
 
         try:
              # Get scale factors
-             scale['sig'] = self.config.get_sig_num(tag)
-             scale['qcmc'] = self.config.get_bkg_num(tag, 'sig_range_nb_qcmc')
-             scale['dpdm'] = self.config.get_bkg_num(tag, 'sig_range_nb_dpdm')
-             scale['qqbar'] = self.config.get_bkg_num(tag, 'sig_range_nb_qqbar')
-             scale['sigmc_um'] = self.config.get_bkg_num(tag, 'sig_range_nb_sigmc_um', default=0)
-             scale['qcmc_oth'] = self.config.get_bkg_num(tag, 'sig_range_nb_qcmc_oth', default=0)
+             scale['sig'] = self.config._yields[tag].get('sig')
+             scale['qcmc'] = self.config._yields[tag].get('qcmc')
+             scale['dpdm'] = self.config._yields[tag].get('dpdm')
+             scale['qqbar'] = self.config._yields[tag].get('qqbar', 0)
+             scale['sigmc_um'] = self.config._yields[tag].get('sigmc_um', 0)
+             scale['qcmc_oth'] = self.config._yields[tag].get('qcmc_oth', 0)
 
              # Determine if tag has 'sig'/'tag' structure based on name (heuristic)
              is_dks_like = tag in ['full', 'misspi', 'misspi0'] # Adjust this list as needed
@@ -891,18 +899,18 @@ class Plotter:
             if s12_sig is None: raise ValueError(f"Data missing for tag '{tag}'") # Should not happen if above succeeded
             data_s12_hist = make_hist(s12_sig, bins=self.hist.nbins, range=self.hist.range['s12'])
             data_s13_hist = make_hist(s13_sig, bins=self.hist.nbins, range=self.hist.range['s13'])
-            s23_sig = gets23(s12_sig, s13_sig) if s12_sig.size > 0 else np.array([])
+            s23_sig = gets23(s12_sig, s13_sig) if len(s12_sig) > 0 else np.array([])
             data_s23_hist = make_hist(s23_sig, bins=self.hist.nbins, range=self.hist.range['s23'])
             return data_s12_hist, data_s13_hist, data_s23_hist, scale
         else:
             if s12_sig is None or s12_tag is None: raise ValueError(f"Data missing for tag '{tag}'")
             data_s12_sig_hist = make_hist(s12_sig, bins=self.hist.nbins, range=self.hist.range['s12'])
             data_s13_sig_hist = make_hist(s13_sig, bins=self.hist.nbins, range=self.hist.range['s13'])
-            s23_sig = gets23(s12_sig, s13_sig) if s12_sig.size > 0 else np.array([])
+            s23_sig = gets23(s12_sig, s13_sig) if len(s12_sig) > 0 else np.array([])
             data_s23_sig_hist = make_hist(s23_sig, bins=self.hist.nbins, range=self.hist.range['s23'])
 
             data_s12_tag_hist = make_hist(s12_tag, bins=self.hist.nbins, range=self.hist.range['s12'])
             data_s13_tag_hist = make_hist(s13_tag, bins=self.hist.nbins, range=self.hist.range['s13'])
-            s23_tag = gets23(s12_tag, s13_tag) if s12_tag.size > 0 else np.array([])
+            s23_tag = gets23(s12_tag, s13_tag) if len(s12_tag) > 0 else np.array([])
             data_s23_tag_hist = make_hist(s23_tag, bins=self.hist.nbins, range=self.hist.range['s23'])
             return data_s12_sig_hist, data_s13_sig_hist, data_s23_sig_hist, data_s12_tag_hist, data_s13_tag_hist, data_s23_tag_hist, scale
