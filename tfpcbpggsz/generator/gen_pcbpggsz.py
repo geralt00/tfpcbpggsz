@@ -37,9 +37,9 @@ class pcbpggsz_generator:
         self._cached_s13 = None
         self._raw_amp_tensor_cache = None
         self.amplitude = amplitude
-        self.amplitude.init()
         self.model_name = 'evtgen'
         self.apply_eff = True
+        self.generate_B_mass = False
         if not isinstance(amplitude, Amplitude):
             raise TypeError("Amplitude must be initialise before passing to the generator")
             
@@ -137,7 +137,7 @@ class pcbpggsz_generator:
             self.efficiency_function  = kwargs['efficiency_function']
             self.efficiency_variables = kwargs['efficiency_variables']
             try:
-                generate_B_mass = kwargs['generate_B_mass'],
+                self.generate_B_mass = kwargs['generate_B_mass'],
                 B_mass_range    = kwargs['B_mass_range'],
                 mass_shape_name = kwargs['mass_shape_name']
                 mass_variables  = kwargs['mass_variables']
@@ -145,7 +145,7 @@ class pcbpggsz_generator:
                 mass_variables[1] = 1. # set the yields to something that is not 0
                 mass_shape      = None
             except KeyError:
-                generate_B_mass = False
+                self.generate_B_mass = False
                 B_mass_range    = None
                 mass_shape_name = None
                 mass_variables  = None
@@ -156,7 +156,7 @@ class pcbpggsz_generator:
         elif type=="phsp":
             self.efficiency_function  = kwargs['efficiency_function']
             self.efficiency_variables = kwargs['efficiency_variables']
-            generate_B_mass = False
+            self.generate_B_mass = False
             B_mass_range    = None
             mass_shape_name = None
             mass_variables  = None
@@ -184,7 +184,7 @@ class pcbpggsz_generator:
 
 
         if type != 'cp_mixed':
-            if (generate_B_mass):
+            if (self.generate_B_mass):
                 def_mass_PDF = MassPDF(mass_shape_name, self.type)
                 def_mass_PDF.get_mass_pdf(mass_variables)
                 mass_shape   = def_mass_PDF.pdf
@@ -194,7 +194,7 @@ class pcbpggsz_generator:
                     self.prod_fun,
                     N,
                     force=True,
-                    generate_B_mass = generate_B_mass[0],
+                    generate_B_mass = self.generate_B_mass[0],
                     B_mass_range    = B_mass_range[0],
                     mass_shape      = mass_shape
                 )
@@ -223,7 +223,7 @@ class pcbpggsz_generator:
 
         if self.type[:4] == 'flav':
             return  self.flavour
-        elif self.type == 'cp_even' or self.type == 'cp_odd':
+        elif self.type == 'cp_even' or self.type == 'cp_odd' or self.type == 'cp_even_pipipi0':
             return  self.cp_tag
         elif self.type == 'cp_mixed':
             return  self.cp_mixed
@@ -267,8 +267,11 @@ class pcbpggsz_generator:
         phase = phase + phase_correction
         absAmp = tf.abs(self.amplitude.amp(data))
         absAmpbar = tf.abs(self.amplitude.ampbar(data))
-        cp_sign=1 if self.type == 'cp_even' else -1
+        cp_sign=1 if self.type == 'cp_even' or self.type == 'cp_even_pipipi0' else -1
         Gamma = absAmp**2 + absAmpbar**2 + 2*DD_sign*cp_sign* absAmp * absAmpbar * tf.math.cos(phase)
+        if self.type == 'cp_even_pipipi0':
+            Fplus = 0.9406
+            Gamma = absAmp**2 + absAmpbar**2 + 2*DD_sign*cp_sign* absAmp * absAmpbar * tf.math.cos(phase)*(2*Fplus-1)
         self.Gamma = Gamma
         return Gamma
 

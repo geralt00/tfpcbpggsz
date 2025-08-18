@@ -7,8 +7,8 @@ from tfpcbpggsz.generator.angle import LorentzVector
 
 #Set the masses of the particles
 m_D0 = 1.86484
-m_Ks = 0.497614
-m_pi = 0.13957018
+m_Ks = 0.497611
+m_pi = 0.13957039
 
 def get_p(M, ma, mb):
     """Get the momentun in the res rest frame"""
