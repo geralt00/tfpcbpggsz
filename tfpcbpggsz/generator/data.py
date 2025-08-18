@@ -491,7 +491,68 @@ def data_struct(data):
         return tuple(data.shape)
     return data
 
+from typing import Union, List, Any, Optional, Dict, Tuple
 
+
+def data_mask(
+    data: Union[np.ndarray, tf.Tensor, List],
+    select: np.ndarray,
+) -> Any:
+    """
+    Masks a single array-like object, automatically finding the correct axis.
+    This function is intended to be the "worker" called by data_map.
+    """
+    is_tf_tensor = isinstance(data, tf.Tensor)
+    # Convert data to a consistent type for analysis
+    data_arr = tf.convert_to_tensor(data) if is_tf_tensor else np.asarray(data)
+
+    if data_arr.ndim == 0:
+        raise ValueError("Cannot mask a scalar value.")
+
+    # --- Automatic Axis Finder ---
+    # Find all axes whose length matches the mask's length
+    matching_axes = [
+        i for i, dim_size in enumerate(data_arr.shape) if dim_size == select.shape[0]
+    ]
+    axis = None
+    if not matching_axes:
+        raise ValueError(
+            f"Mask of length {select.shape[0]} does not match the size of any "
+            f"axis in data with shape {data_arr.shape}."
+        )
+    elif len(matching_axes) > 1:
+        #raise ValueError(
+        #    f"Ambiguous mask: shape {data_arr.shape} has multiple axes "
+        #    f"{matching_axes} of size {select.shape[0]}. Cannot guess which one to use."
+        #)
+        print("INFO:: assume the axis is the second one")
+        axis = matching_axes[1]
+    else:
+        axis = matching_axes[0]
+    # --- End of Axis Finder ---
+
+    # Apply the mask using the detected axis
+    if is_tf_tensor:
+        return data_map(data_arr, tf.boolean_mask, args=(select, axis))
+
+    else:
+        if len(data_arr.shape) == 2:
+            if data_arr.shape[0] == select.shape[0]:
+                return data_map(data, tf.boolean_mask, args=(select, axis))
+            if data_arr.shape[-1] == select.shape[0]:
+                return data_map(data, tf.boolean_mask, args=(select,axis))
+        elif len(data_arr.shape) == 3:
+            return data_map(data, tf.boolean_mask, args=(select,))
+        elif len(data_arr.shape) == 1:
+            return data_map(data, tf.boolean_mask, args=(select,))
+        else:
+            raise ValueError(
+                "The shape of data {} is not compatible with the shape of select {}".format(
+                    data_arr.shape, select.shape
+                )
+            )
+        
+'''
 def data_mask(data, select):
     """
     This function using boolean mask to select data.
@@ -517,7 +578,6 @@ def data_mask(data, select):
     else:
         data_arr = np.array(data)
         if data_arr.ndim == 1:
-            print("data_arr.shape", data_arr.shape)
             if data_arr.shape[0] != select.shape[0]:
                 raise ValueError(
                     "The shape of data {} is not compatible with the shape of select {}".format(
@@ -527,12 +587,22 @@ def data_mask(data, select):
             #if data_arr.shape[0] == select.shape[0]:
             ret = data_map(data, tf.boolean_mask, args=(select,))
         else:
-            #ret = data_arr[:, select]
-            ret = data_map(data[:], tf.boolean_mask, args=(select,))
+            if data_arr.shape[0] == select.shape[0]:
+                ret = data_map(data, tf.boolean_mask, args=(select,))
+            elif data_arr.shape[-1] == select.shape[0]:
+                ret = data_arr[:, select]
+            elif data_arr.shape[-2] == select.shape[0]:
+                ret = data_map(data, tf.boolean_mask, args=(select,))
+            else:
+                raise ValueError(
+                    "The shape of data {} is not compatible with the shape of select {}".format(
+                        data_arr.shape, select.shape
+                    )
+                )
 
 
     return ret
-
+'''
 
 def data_cut(data, expr, var_map=None):
     """cut data with boolean expression
