@@ -96,8 +96,11 @@ class PhaseCorrection:
         coefficients = kwargs.get('coefficients', None)
         if isinstance(coefficients, dict):
             self.coefficients = coefficients
-        elif isinstance(coefficients, list) or isinstance(coefficients, np.ndarray) or isinstance(coefficients, tf.Tensor):
+        elif isinstance(coefficients, np.ndarray) or isinstance(coefficients, tf.Tensor):
             for i in range(coefficients.shape[0]):
+                self.coefficients[self.term_to_string(i)] = coefficients[i]
+        elif isinstance(coefficients, list):
+            for i in range(len(coefficients)):
                 self.coefficients[self.term_to_string(i)] = coefficients[i]
 
         else:
