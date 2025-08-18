@@ -1,5 +1,4 @@
-from tfpcbpggsz.ulti import get_mass, phsp_to_srd, amp_mask
-
+from tfpcbpggsz.ulti import get_mass, phsp_to_srd, amp_mask, p4_to_mag
 
 class data_io:
     """Do something with the momentumfiles
@@ -24,12 +23,15 @@ class data_io:
         if len(data) == 3:
             self.variables['amp'], self.variables['ampbar'] = self.get_amplitude(data)
             self.variables['s12'], self.variables['s13'], self.variables['srd'] = self.get_mass(data)
+            self.variables['pKs'], self.variables['ppim'], self.variables['ppip'] = self.get_momentum(data)
             return self.variables
 
         elif len(data) == 2:
             self.variables['amp'], self.variables['ampbar'], self.variables['s12'], self.variables['s13'], self.variables['srd'] = {}, {}, {}, {}, {}
+            self.variables['pKs'], self.variables['ppim'], self.variables['ppip'] = {}, {}, {}
             self.variables['amp']['sig'], self.variables['ampbar']['sig'], self.variables['amp']['tag'], self.variables['ampbar']['tag'] = self.get_amplitude(data[0],data[1])
             self.variables['s12']['sig'], self.variables['s13']['sig'], self.variables['srd']['sig'], self.variables['s12']['tag'], self.variables['s13']['tag'], self.variables['srd']['tag'] = self.get_mass(data[0],data[1])
+            self.variables['pKs']['sig'], self.variables['ppim']['sig'], self.variables['ppip']['sig'], self.variables['pKs']['tag'], self.variables['ppim']['tag'], self.variables['ppip']['tag'] = self.get_momentum(data[0],data[1])
             return self.variables
 
 
@@ -78,3 +80,20 @@ class data_io:
         else:
             s12, s13, srd = data_mask(s12, self.mask), data_mask(s13, self.mask), data_mask(srd, self.mask)
             return s12, s13, srd
+
+    def get_momentum(self, data, data_tag=None):
+        """Get the momentum of the data
+
+        Returns:
+            p1, p2, p3: list of momentums
+        """
+        if data_tag is not None:
+            p1, p2, p3 = data
+            p1_tag, p2_tag, p3_tag = data_tag
+            P_Ks, P_pim, P_pip = p4_to_mag(data)
+            P_Ks_tag, P_pim_tag, P_pip_tag = p4_to_mag(data_tag)
+            return P_Ks, P_pim, P_pip, P_Ks_tag, P_pim_tag, P_pip_tag
+        else:
+            p1, p2, p3 = data
+            P_Ks, P_pim, P_pip = p4_to_mag(data)
+            return P_Ks, P_pim, P_pip
