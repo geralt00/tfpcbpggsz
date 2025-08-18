@@ -30,6 +30,9 @@ class BaseModel(object):
         self.load_bkg_frac()
         print(f"INFO:: Reset {key} bkg frac from {temp_val} to {self._bkg_frac[tag][key]} for {tag}")
 
+    def reset_sig(self, tag, key, num=0):
+        self.config_loader.reset_yield(tag, key, num)
+        
 
     def load_norm(self):
         
@@ -40,10 +43,10 @@ class BaseModel(object):
                 self.norm[tag].reweight = self.reweight
                 if self.reweight:
                     data_sig = self.config_loader._mc['phsp'][tag].copy()
-                    Reweighter_sig = core.Reweight(data_sig,  tag='sig')
+                    Reweighter_sig = core.Reweight(data_sig,  tag='sig', random_seed=self.config_loader._config_data.get('random_seed', 1234), gaussian_reweight_sheet=self.config_loader._config_data.get('gaussian_reweight_sheet', False))
                     Reweighter_sig.init()
                     data_tag = self.config_loader._mc['phsp'][tag].copy()
-                    Reweighter_tag = core.Reweight(data_tag, tag='tag')
+                    Reweighter_tag = core.Reweight(data_tag, tag='tag', random_seed=self.config_loader._config_data.get('random_seed', 1234), gaussian_reweight_sheet=self.config_loader._config_data.get('gaussian_reweight_sheet', False))
                     Reweighter_tag.init()
                     self.norm[tag].weights = Reweighter_sig.weights['weights']*Reweighter_tag.weights['weights']
                 self.norm[tag].initialise()
@@ -53,7 +56,7 @@ class BaseModel(object):
                 self.norm[tag].amp = self.config_loader.amp
                 self.norm[tag].reweight = self.reweight
                 if self.reweight:
-                    Reweighter = core.Reweight(self.config_loader._mc['phsp'][tag])
+                    Reweighter = core.Reweight(self.config_loader._mc['phsp'][tag], random_seed=self.config_loader._config_data.get('random_seed', 1234), gaussian_reweight_sheet=self.config_loader._config_data.get('gaussian_reweight_sheet', False))
                     Reweighter.init()
                     self.norm[tag].weights = Reweighter.weights['weights']
                 self.norm[tag].initialise()

@@ -53,11 +53,10 @@ def DeltadeltaD_limit(Dd=DeltadeltaD):
     Returns:
         function: the function to limit the phase difference between the amplitude and the conjugate amplitude
     """
-    var_a = tf.where(Dd > _PI, Dd - 2*_PI, Dd)
-    var = tf.where(var_a < -_PI, var_a + 2*_PI, var_a)
+    #var_a = tf.where(Dd > _PI, Dd - 2*_PI, Dd)
+    var = Dd#tf.where(var_a < -_PI, var_a + 2*_PI, var_a)
 
     return var
-
 
 
 
@@ -403,6 +402,183 @@ def prob_comb(amp=[], ampbar=[], normA=1.2, normAbar=1.2, fracDD=0.82, eff1=[], 
     return (prob1 * frac1 + prob2 * frac1 + prob3 * frac2)
 
 
+
+class Reweight:
+    def __init__(self, data, tag=None, gaussian_reweight_sheet=False, random_seed=1234):
+        self.tag = tag
+        self.data = data
+        self.KS_reweight_sheet = None
+        self.KS_reweight_means_sheet = None
+        self.KS_reweight_errors_sheet = None
+        self.tracking_reweight_sheet = None
+        self.tracking_reweight_means_sheet = None
+        self.tracking_reweight_errors_sheet = None
+        self.gaussian_reweight_sheet = gaussian_reweight_sheet
+        self.PID_reweight_sheet = {'positive': None, 'negative': None}
+        self.PID_reweight_means_sheet = {'positive': None, 'negative': None}
+        self.PID_reweight_errors_sheet = {'positive': None, 'negative': None}
+        self.weights = {'KS': None, 'tracking': None, 'PID': None, 'weights': None}
+        self.random_seed=random_seed
+        self.random = np.random.RandomState(self.random_seed)
+
+
+    def init(self):
+        """Initialize the reweighting sheets"""
+        self.normalise_data()
+        self.KS_reweight()
+        self.tracking_reweight()
+        self.PID_reweight()
+        self.apply_weights()
+
+    def normalise_data(self):
+        """
+        Normalise the data to the total number of events
+        """
+        if self.tag is not None:
+            temp_pKs = self.data['pKs'].get(self.tag, None)
+            temp_ppip = self.data['ppip'].get(self.tag, None)
+            temp_ppim = self.data['ppim'].get(self.tag, None)
+            self.data['pKs'] = temp_pKs
+            self.data['ppip'] = temp_ppip
+            self.data['ppim'] = temp_ppim
+
+    def cal_weights(self, means, errors):
+        "Calculate the reweight sheet based on different distribution"
+        reweight_sheet = {}
+        for (low, high), mean in means.items():
+            val = 1-np.random.normal(mean, errors[(low, high)]) if self.gaussian_reweight_sheet else 1 - mean
+            reweight_sheet[(low, high)] = val
+        return reweight_sheet
+    
+    def KS_reweight(self):
+        # Placeholder for KS reweighting logic
+        print("KS reweighting applied to data.")
+        self.KS_reweight_means_sheet = {(0.0, 0.2): -0.016,
+                                         (0.2, 0.4): -0.011,
+                                         (0.4, 0.6): -0.007,
+                                   (0.6, 0.8): -0.002,
+                                   (0.8, 1.0): -0.001}
+        self.KS_reweight_errors_sheet = {(0.0, 0.2): 0.007,
+                                          (0.2, 0.4): 0.003,
+                                          (0.4, 0.6): 0.003,
+                                          (0.6, 0.8): 0.003,
+                                          (0.8, 1.0): 0.003}
+        self.KS_reweight_sheet = self.cal_weights(self.KS_reweight_means_sheet, self.KS_reweight_errors_sheet)
+        #apply the weight to the data according to the data['pKs'] range
+        self.weights['KS'] = tf.zeros_like(self.data['pKs'])
+        for (low, high), weight in self.KS_reweight_sheet.items():
+            #print(f"Applying weight {weight} for pKs in range ({low}, {high})")
+            mask = tf.logical_and(self.data['pKs'] > low, self.data['pKs'] < high)
+            self.weights['KS'] = tf.where(mask, weight, self.weights['KS'])
+
+
+    def tracking_reweight(self):
+        # Placeholder for tracking reweighting logic
+        print("Tracking reweighting applied to data.")
+        self.tracking_reweight_means_sheet = {(0.0, 0.1): -0.0044,
+                                         (0.1, 0.2): -0.0027,
+                                         (0.2, 0.3): -0.0061,
+                                   (0.3, 0.4): -0.0059,
+                                   (0.4, 0.5): -0.0041,
+                                   (0.5, 0.6): -0.0019,
+                                   (0.6, 0.7): -0.0022,
+                                   (0.7, 0.8): -0.0017,
+                                   (0.8, 0.9): -0.0019,
+                                   (0.9, 5.0): -0.0012}
+        self.tracking_reweight_errors_sheet = {(0.0, 0.1): 0.0119,
+                                         (0.1, 0.2): 0.0019,
+                                         (0.2, 0.3): 0.0012,
+                                   (0.3, 0.4): 0.0008,
+                                   (0.4, 0.5): 0.0005,
+                                   (0.5, 0.6): 0.0004,
+                                   (0.6, 0.7): 0.0004,
+                                   (0.7, 0.8): 0.0004,
+                                   (0.8, 0.9): 0.0004,
+                                   (0.9, 5.0): 0.0004}
+
+        self.tracking_reweight_sheet = self.cal_weights(self.tracking_reweight_means_sheet, self.tracking_reweight_errors_sheet)
+
+        #apply the weight to the data according to the data['ppip'] and data['ppim'] range, the weight is the same for both positive and negative, the weight is squared sum of the two
+        self.weights['tracking'] = tf.zeros_like(self.data['ppip'])
+        temp_weights_pi1 = tf.zeros_like(self.data['ppim'])
+        temp_weights_pi2 = tf.zeros_like(self.data['ppim'])
+        for (low, high), weight in self.tracking_reweight_sheet.items():
+            #print(f"Applying weight {weight} for ppip and ppim in range ({low}, {high})")
+            mask_pi1 = tf.logical_and(self.data['ppip'] > low, self.data['ppip'] < high)
+            temp_weights_pi1 = tf.where(mask_pi1, weight, temp_weights_pi1)
+            mask_pi2 = tf.logical_and(self.data['ppim'] > low, self.data['ppim'] < high)
+            temp_weights_pi2 = tf.where(mask_pi2, weight, temp_weights_pi2)
+
+        self.weights['tracking'] = temp_weights_pi1 * temp_weights_pi2
+
+    def PID_reweight(self):
+        # Placeholder for PID reweighting logic
+        print("PID reweighting applied to data.")
+        self.PID_reweight_means_sheet['positive'] = {(0.0, 0.1): -0.0153,
+                                   (0.1, 0.2): -0.0016,
+                                   (0.2, 0.3): -0.0003,
+                                   (0.3, 0.4): -0.0003,
+                                   (0.4, 0.5): -0.0009,
+                                   (0.5, 0.6): -0.0023,
+                                   (0.6, 0.7): -0.0036,
+                                   (0.7, 0.8): -0.0066,
+                                   (0.8, 0.9): -0.0087,
+                                   (0.9, 5.0): -0.0084}
+        self.PID_reweight_errors_sheet['positive'] = {(0.0, 0.1): 0.0025,
+                                                      (0.1, 0.2): 0.0002,
+                                                      (0.2, 0.3): 0.0001,
+                                                      (0.3, 0.4): 0.0001,
+                                                      (0.4, 0.5): 0.0002,
+                                                      (0.5, 0.6): 0.0003,
+                                                      (0.6, 0.7): 0.0004,
+                                                      (0.7, 0.8): 0.0005,
+                                                      (0.8, 0.9): 0.0007,
+                                                      (0.9, 5.0): 0.0010}
+        
+        self.PID_reweight_means_sheet['negative'] = {(0.0, 0.1): -0.0215,
+                                   (0.1, 0.2): -0.0020,
+                                   (0.2, 0.3): -0.0003,
+                                   (0.3, 0.4): -0.0010,
+                                   (0.4, 0.5): -0.0013,
+                                   (0.5, 0.6): -0.0023,
+                                   (0.6, 0.7): -0.0039,
+                                   (0.7, 0.8): -0.0054,
+                                   (0.8, 0.9): -0.0067,
+                                   (0.9, 5.0): -0.0057}
+        self.PID_reweight_errors_sheet['negative'] = {(0.0, 0.1): 0.0027,
+                                   (0.1, 0.2): 0.0002,
+                                   (0.2, 0.3): 0.0001,
+                                   (0.3, 0.4): 0.0002,
+                                   (0.4, 0.5): 0.0002,
+                                   (0.5, 0.6): 0.0003,
+                                   (0.6, 0.7): 0.0004,
+                                   (0.7, 0.8): 0.0005,
+                                   (0.8, 0.9): 0.0007,
+                                   (0.9, 5.0): 0.0011}
+        self.PID_reweight_sheet['positive'] = self.cal_weights(self.PID_reweight_means_sheet['positive'], self.PID_reweight_errors_sheet['positive'])
+        self.PID_reweight_sheet['negative'] = self.cal_weights(self.PID_reweight_means_sheet['negative'], self.PID_reweight_errors_sheet['negative'])
+
+        #apply the weight to the data according to the data['ppip'] and data['ppim'] range, the weight is the same for both positive and negative, the weight is squared sum of the two
+        self.weights['PID'] = tf.zeros_like(self.data['ppip'])
+        temp_weights_pi1 = tf.zeros_like(self.data['ppim'])
+        temp_weights_pi2 = tf.zeros_like(self.data['ppim'])
+        for (low, high), weight in self.PID_reweight_sheet['positive'].items():
+            #print(f"Applying positive weight {weight} for ppip and ppim in range ({low}, {high})")
+            mask_pi1 = tf.logical_and(self.data['ppip'] > low, self.data['ppip'] < high)
+            temp_weights_pi1 = tf.where(mask_pi1, weight, temp_weights_pi1)
+        for (low, high), weight in self.PID_reweight_sheet['negative'].items():
+            #print(f"Applying negative weight {weight} for ppip and ppim in range ({low}, {high})")
+            mask_pi2 = tf.logical_and(self.data['ppim'] > low, self.data['ppim'] < high)
+            temp_weights_pi2 = tf.where(mask_pi2, weight, temp_weights_pi2)
+        self.weights['PID'] = temp_weights_pi1 * temp_weights_pi2
+
+    def apply_weights(self):
+        #square sum all weights
+        print("Applying all weights to data.")
+        self.weights['weights'] = self.weights['KS'] * self.weights['tracking'] * self.weights['PID']
+
+    
+
 #Probabily just for validation stage, should be more general for the Normalisation class
 class Normalisation:
     """
@@ -452,6 +628,8 @@ class Normalisation:
         self._phaseCorrection_tag = None
         self.tagged_i = None
         self._mask = {}
+        self.reweight = False 
+        self.weights = None
 
     def add_pc(self, pc,**kwargs):
         """
@@ -470,6 +648,8 @@ class Normalisation:
 
     def debug(self):
         self._DEBUG = True
+
+
         
     def initialise(self):
         """
@@ -546,10 +726,10 @@ class Normalisation:
             self.amp_MC[self._name], self.ampbar_MC[self._name], self.amp_MC[self._name.replace('_sig', '_tag')], self.ampbar_MC[self._name.replace('_sig', '_tag')], self._mask = amp_mask(self.amp_MC[self._name], self.ampbar_MC[self._name], 
                                                                                   self.amp_MC[self._name.replace('_sig', '_tag')], 
                                                                                   self.ampbar_MC[self._name.replace('_sig', '_tag')])
-            self._normA = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name])**2)
+            self._normA = tf.math.reduce_mean(tf.abs(self.amp_MC[self._name])**2) if self.reweight is False else tf.math.reduce_mean(tf.abs(self.amp_MC[self._name])**2 * self.weights)
             self._BacTerms[0] = self._normA
-            self._A = self.amp_MC[self._name]
-            self._A_tag = self.amp_MC[self._name.replace('_sig', '_tag')]
+            self._A = self.amp_MC[self._name] #if self.reweight is False else self.amp_MC[self._name] * self.weights
+            self._A_tag = self.amp_MC[self._name.replace('_sig', '_tag')] #if self.reweight is False else self.amp_MC[self._name.replace('_sig', '_tag')] * self.weights
 
 
 
@@ -567,10 +747,10 @@ class Normalisation:
 
         """
         if self._normAbar is None:
-            self._normAbar = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name])**2)
+            self._normAbar = tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name])**2) if self.reweight is False else tf.math.reduce_mean(tf.abs(self.ampbar_MC[self._name])**2 * self.weights)
             self._BacTerms[1] = self._normAbar
-            self._Abar = self.ampbar_MC[self._name]
-            self._Abar_tag = self.ampbar_MC[self._name.replace('_sig', '_tag')]
+            self._Abar = self.ampbar_MC[self._name] #if self.reweight is False else self.ampbar_MC[self._name] * self.weights
+            self._Abar_tag = self.ampbar_MC[self._name.replace('_sig', '_tag')] #if self.reweight is False else self.ampbar_MC[self._name.replace('_sig', '_tag')] * self.weights
 
         return self._normAbar
 
@@ -587,8 +767,8 @@ class Normalisation:
         """
 
         if self._AAbar is None:
-            self._AAbar = tf.abs(self.amp_MC[self._name]) * tf.abs(self.ampbar_MC[self._name])
-            self._AAbar_tag = tf.abs(self._A_tag) * tf.abs(self._Abar_tag) 
+            self._AAbar = tf.abs(self.amp_MC[self._name]) * tf.abs(self.ampbar_MC[self._name]) #if self.reweight is False else tf.abs(self.amp_MC[self._name]) * tf.abs(self.ampbar_MC[self._name]) * self.weights
+            self._AAbar_tag = tf.abs(self._A_tag) * tf.abs(self._Abar_tag) #if self.reweight is False else tf.abs(self._A_tag) * tf.abs(self._Abar_tag) * self.weights
 
         return self._AAbar, self._AAbar_tag
 
@@ -611,8 +791,13 @@ class Normalisation:
                 (tf.abs(self._A) * tf.abs(self._Abar_tag)) ** 2
                 + (tf.abs(self._Abar) * tf.abs(self._A_tag)) ** 2
                     - 2 * self._AAbar * self._AAbar_tag * tf.cos(self._phase + self._phaseCorrection - self._phase_tag-self._phaseCorrection_tag)
-                )
-    
+                ) if self.reweight is False else \
+                    tf.math.reduce_mean(
+                        (tf.abs(self._A) * tf.abs(self._Abar_tag)*self.weights) ** 2
+                        + (tf.abs(self._Abar) * tf.abs(self._A_tag)*self.weights) ** 2
+                        - 2 * self._AAbar * self._AAbar_tag * tf.cos(self._phase + self._phaseCorrection - self._phase_tag-self._phaseCorrection_tag) * self.weights
+                    )
+
         return self._crossTerms
 
     def Integrated_BacTerms(self):
@@ -735,9 +920,11 @@ class Normalisation:
 
         if kwargs.get('Fplus') is not None:
             Fplus = kwargs.get('Fplus')
-            return tf.cast(normA + normAbar + 2.0 * DD_sign* CPsign * crossTerm[0]*(2*Fplus-1), tf.float64)
+            norm_value = tf.cast(normA + normAbar + 2.0 * DD_sign* CPsign * crossTerm[0]*(2*Fplus-1), tf.float64)
+            return norm_value
         else:
-            return tf.cast(normA + normAbar + 2.0 * DD_sign* CPsign * crossTerm[0], tf.float64)
+            norm_value = tf.cast(normA + normAbar + 2.0 * DD_sign* CPsign * crossTerm[0], tf.float64)
+            return norm_value
 
 
 

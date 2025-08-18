@@ -29,9 +29,9 @@ class root_data:
         #Double Kspipi
         #data_kspipi = up.open(f"{self.data_path}:{self.tree_name}")
         branches = self.branches
-        data_arr_old = self.load_arr()#data_kspipi.arrays(branches, cut=self.cut) if self.cut else data_kspipi.arrays(branches)
+        data_arr_old = self.load_arr()#data_kspipi.arrays(branches, cut=self.cut) if self.cut is not None else data_kspipi.arrays(branches)
         data_arr = {}
-        #Since the BESIII data was stored in order of (px,py,pz, E), we need to reorder it to (px,py,pz,E)
+        #Since the BESIII data was stored in order of (px,py,pz, E), we need to reorder it to (E,px,py,pz)
         for key in branches:
             if self.is_reorder:
                 data_arr[key] = self.reorder_p4(data_arr_old[key])
@@ -46,8 +46,15 @@ class root_data:
             return [data_arr[branches[0]], data_arr[branches[1]], data_arr[branches[2]]], [data_arr[branches[3]], data_arr[branches[4]], data_arr[branches[5]]]
         
     def reorder_p4(self, data):
-        return np.array([data[:,3],data[:,0],data[:,1],data[:,2]]).T
-    
+        """Reorder the p4 data to (E,px,py,pz)
+        Args:
+            data (np.array): array with the data
+        Returns:
+            np.array: array with the data reordered to (E,px,py,pz) format
+        """
+        return np.array([data[:,3], data[:,0], data[:,1], data[:,2]]).T
+
+            
     def read_momentum(self, data, idx):
         return data[idx]
 
@@ -64,7 +71,7 @@ class root_data:
             for file in files:
                 data_kspipi = up.open(f"{file}:{self.tree_name}")
                 branches = self.branches
-                data_arr_old = data_kspipi.arrays(branches, cut=self.cut) if self.cut else data_kspipi.arrays(branches)
+                data_arr_old = data_kspipi.arrays(branches, cut=self.cut) if self.cut is not None else data_kspipi.arrays(branches)
                 for key in branches:
                     if key in data_arr:
                         data_arr[key] = np.concatenate((data_arr[key],data_arr_old[key]))
@@ -74,18 +81,32 @@ class root_data:
         else:
             data_kspipi = up.open(f"{self.data_path}:{self.tree_name}")
             branches = self.branches
-            data_arr = data_kspipi.arrays(branches, cut=self.cut) if self.cut else data_kspipi.arrays(branches)
+            data_arr = data_kspipi.arrays(branches, cut=self.cut, library="np") if self.cut is not None else data_kspipi.arrays(branches)
             return data_arr
 
 
 class load_data:
-    """The class to load the data from the root or npz file
+    """
+    The class to load the data from the root or npz file
+    Args:
+        config_data (dic): dictionary with the configuration data
+    Attributes:
+        data (dic): dictionary with the data
+        amp (object): amplitude object
+        config (dic): dictionary with the configuration data
+        data_path (dic): dictionary with the data path
+        apply_cuts (bool): whether to apply cuts or not, default is True if not specified in config file
     """
     def __init__(self, config_data):
         self.data ={}
         self.amp = None
         self.config = config_data
         self.data_path = {}
+        self.apply_cuts = True
+        if 'cuts' in self.config._config_data['data'].keys():
+            if self.config._config_data['data']['cuts'] == 'No':
+                self.apply_cuts = False
+                print("No cuts will be applied to the data")
 
 
     def get_data_path(self, idx):
@@ -152,27 +173,30 @@ class load_data:
 
         #It will be better to loop over the tags that the data is loaded
         for tag in self.data_path[idx].keys():
-            #print(f"Loading data for {tag}, {idx}")
             self.data[tag] = {} if tag not in self.data.keys() else self.data[tag]
-            cuts=self.config.D02KsPiPi.cuts(tag)
+            cuts=self.config.D02KsPiPi.cuts(tag) if self.apply_cuts else None
             if idx != 'pdf':
                 path = self.data_path[idx][tag]
-                #print(f"Path: {path}")
                 if path.endswith('.root'):
                     if tag in ['full', 'misspi0', 'misspi']:
                         branches = ['p4_Ks','p4_pim','p4_pip','p4_Ks2','p4_pim2','p4_pip2']
                         self.data_io = data_io()
                         self.data_io.amp = self.amp
-                        self.data[tag][idx] = self.data_io.load_all(root_data(path, self.config._config_data['data'].get('tree'), cut=cuts, branches=branches).load_tuple())
+                        load_root = root_data(path, self.config._config_data['data'].get('tree'), cut=cuts, branches=branches)
+                        load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
+                        self.data[tag][idx] = self.data_io.load_all(load_root.load_tuple())
                         #print(f'Loading {tag} for {idx} alread: {self.data[tag][idx]}')
                     else:
                         self.data_io = data_io()
                         self.data_io.amp = self.amp
-                        self.data[tag][idx] = self.data_io.load_all(root_data(path, self.config._config_data['data'].get('tree'),cut=self.config.D02KsPiPi.cuts(tag)).load_tuple())
+                        load_root = root_data(path, self.config._config_data['data'].get('tree'), cut=cuts)
+                        load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
+                        self.data[tag][idx] = self.data_io.load_all(load_root.load_tuple())
                 elif path.endswith('.npy'):
-                    #prob = 
-                    self.data[tag][idx] = np.load(path)   
-            else :
+                    self.data[tag][idx] = np.load(path)
+                elif path.endswith('.txt'):
+                    self.data[tag][idx] = np.loadtxt(path)
+            else:
                 self.data[tag][idx] = {}
                 for i_pdf in self.data_path[idx][tag].keys():
                     self.data[tag][idx][i_pdf] = {}
@@ -182,21 +206,26 @@ class load_data:
                         if path.endswith('.root'):
                             self.data_io = data_io()
                             self.data_io.amp = self.amp
-                            self.data[tag][idx][i_pdf] = self.data_io.load_all(root_data(path, self.config._config_data['data'].get('tree')).load_tuple())
+                            load_root = root_data(path, self.config._config_data['data'].get('tree'))
+                            load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
+                            self.data[tag][idx][i_pdf] = self.data_io.load_all(load_root.load_tuple())
                         elif path.endswith('.npy'):
                             self.data[tag][idx][i_pdf] = np.load(path)
+                        elif path.endswith('.txt'):
+                            self.data[tag][idx][i_pdf] = np.loadtxt(path)
                     else:
                         for i_ext_pdf in self.data_path[idx][tag][i_pdf].keys():
                             path = self.data_path[idx][tag][i_pdf][i_ext_pdf]
                             if path.endswith('.root'):
                                 self.data_io = data_io()
                                 self.data_io.amp = self.amp
-                                self.data[tag][idx][i_pdf][i_ext_pdf] = self.data_io.load_all(root_data(path, self.config._config_data['data'].get('tree')).load_tuple())
+                                load_root = root_data(path, self.config._config_data['data'].get('tree'))
+                                load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
+                                self.data[tag][idx][i_pdf][i_ext_pdf] = self.data_io.load_all(load_root.load_tuple())
                             elif path.endswith('.npy'):
                                 self.data[tag][idx][i_pdf][i_ext_pdf] = np.load(path)
-
-
-
+                            elif path.endswith('.txt'):
+                                self.data[tag][idx][i_pdf][i_ext_pdf] = np.loadtxt(path)
 
         #reform the data as for returning the data
         data = {}

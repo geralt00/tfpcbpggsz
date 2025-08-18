@@ -205,33 +205,61 @@ class ConfigLoader:
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
         self.mass_fit_errors = self.yields.get(type='fit_result')['error']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
+        val = 0.0
+        self._yields[tag] = {} if tag not in self._yields else self._yields[tag]
         if key not in self.mass_fit_results.keys():
             print(f'INFO:: {key} not found in mass_fit_results of {tag}')
             return default
+        elif 'qcmc' in key:
+            if 'qcmc_oth' in key:
+                _, val = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc_oth'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc_oth']), rho=-1.0)
+                self._yields[tag]['qcmc_oth'] = val
+            else:
+                _, val = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc']), rho=-1.0)
+                self._yields[tag]['qcmc'] = val
         else:
             val = self.re_sample_yields(self.mass_fit_results[key], self.mass_fit_errors[key]) if self._vary else self.mass_fit_results[key]
             self._yields[tag][key.split('sig_range_nb_')[-1]] = val
-            return val
+        return val
     
     def get_sig_num(self, tag):
         self.yields.load(self._config_data['data'].get('mass_fit_results'))
         self.mass_fit_results = self.yields.get(type='fit_result')['mean']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
         self.mass_fit_errors = self.yields.get(type='fit_result')['error']['all'][self.D02KsPiPi.catogery(tag=tag)][tag]
-        val = self.re_sample_yields(self.mass_fit_results[f'sig_range_nsig'],self.mass_fit_errors[f'sig_range_nsig']) if self._vary else self.mass_fit_results[f'sig_range_nsig']
+        #val = self.re_sample_yields(self.mass_fit_results[f'sig_range_nsig'],self.mass_fit_errors[f'sig_range_nsig']) if self._vary else self.mass_fit_results[f'sig_range_nsig']
+        val = 0.0
+        self._yields[tag] = {} if tag not in self._yields else self._yields[tag]
+        if self._vary:
+            if 'qcmc_oth' in self.mass_fit_results.keys():
+                val, _ = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc_oth'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc_oth']), rho=-1.0)
+            else:
+                val, _ = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc']), rho=-1.0)
+        else:
+            val = self.mass_fit_results['sig_range_nsig']
         self._yields[tag]['sig'] = val
         return val
     
     
-    def re_sample_yields(self, mean, error):
+    def re_sample_yields(self, mean, error, mean2=None, error2=None, rho=None):
         """Resample the yields for the given tag
         Args:
             mean (float): the mean value for the resampling
             error (float): the error value for the resampling
         """
         #If error is 0.0, which is fixed, then do a possion
-        if error == 0.0:
-            return self.random.poisson(mean)
-        return self.random.normal(mean, error)
+        if rho is not None:
+            # Covariance matrix
+            cov = [
+                [error**2, rho * error * error2],
+                [rho * error * error2, error2**2]
+            ]
+            x, y = np.random.multivariate_normal([mean, mean2], cov)
+            return x, y
+
+        else:
+            if error == 0.0:
+                return self.random.poisson(mean)
+            return self.random.normal(mean, error)
         #new_yields = np.random.multivariate_normal(old_yields, covariance)
         #for i, key in enumerate(name_order):
         #    self.new_mass_fit_results[key] = new_yields[i]
