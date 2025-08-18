@@ -130,7 +130,7 @@ class Amplitude:
         """
 
         from tfpcbpggsz.core import DeltadeltaD, DeltadeltaD_old
-        DeltadeltaD_val = []
+        DeltadeltaD_val = None
         if self.model_name == 'evtgen':
             # Use the DeltadeltaD function from tfpcbpggsz.core
             DeltadeltaD_val = DeltadeltaD(amp, ampbar)
@@ -140,6 +140,7 @@ class Amplitude:
 
         if self.pc is not None:
             # Apply phase correction if available
+            print("Applying phase correction") 
             DeltadeltaD_val += self.pc.eval_corr_norm(p4_to_srd(self._data))
 
         return DeltadeltaD_val
