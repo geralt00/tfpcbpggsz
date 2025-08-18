@@ -14,8 +14,9 @@ and provides transformations to various coordinate systems including phase space
 Rotated Dalitz (RD), and Stretched Rotated Dalitz (SRD) coordinates.
 """
 
+import pandas as pd
 import numpy as np
-
+from scipy.optimize import curve_fit
 
 def get_mass(p1, p2):
     """Calculates the invariant mass squared of a two-particle system.
@@ -27,13 +28,31 @@ def get_mass(p1, p2):
         np.ndarray: A numpy array of shape (N,) representing the invariant mass squared of the two-particle system.
 
     """
-    if p1.shape[0] != p2.shape[0]:
-        raise ValueError("Input arrays must have the same number of rows (events).")
-    if p1.shape[1] != 4 or p2.shape[1] != 4:
-        raise ValueError("Input arrays must have shape (N, 4) for 4-momentum vectors.")
-    mass_squared = (p1[:, 0] + p2[:, 0])**2 - (p1[:, 1] + p2[:, 1])**2 - (p1[:, 2] + p2[:, 2])**2 - (p1[:, 3] + p2[:, 3])**2
+    # 1. Convert inputs to NumPy arrays for consistent and robust handling
+    p1 = np.asarray(p1)
+    p2 = np.asarray(p2)
 
-    return mass_squared
+    # 2. Perform robust validation using array properties, which works even for N=0
+    if p1.ndim != 2 or p2.ndim != 2 or p1.shape[1] != 4 or p2.shape[1] != 4:
+        raise ValueError(f"Inputs must be 2D arrays with shape (N, 4). Got {p1.shape} and {p2.shape}.")
+    
+    if p1.shape[0] != p2.shape[0]:
+        raise ValueError(f"Input arrays must have the same number of events. Got {p1.shape[0]} and {p2.shape[0]}.")
+
+    # 3. If there are no events, return an empty array of the correct shape
+    #if p1.shape[0] == 0:
+    #    print(p1.shape)
+        #return np.array([])
+
+    # 4. Calculate the sum of the 4-momenta in a vectorized way
+    total_p = p1 + p2
+    
+    # E^2 - (px^2 + py^2 + pz^2)
+    # The formula is M^2 = E_total^2 - p_total^2
+    energy_sq = total_p[:, 0]**2
+    momentum_sq = np.sum(total_p[:, 1:4]**2, axis=1) # Sums px^2 + py^2 + pz^2
+    
+    return energy_sq - momentum_sq
 
 def get_mass_bes(p1, p2):
     """Calculates the invariant mass squared of a two-particle system in BES format.
@@ -348,3 +367,273 @@ def amp_mask(raw_amp, raw_ampbar, raw_amp_tag=None, raw_ampbar_tag=None, max_amp
         masked_ampbar_tag = data_mask(raw_ampbar_tag, mask)
         return masked_amp, masked_ampbar, masked_amp_tag, masked_ampbar_tag, mask
     return masked_amp, masked_ampbar, mask
+
+def calculate_covariance(data):
+    """
+    Calculate the covariance matrix of the given data.
+    
+    Parameters:
+    data (numpy.ndarray): The input data for which to calculate the covariance.
+    
+    Returns:
+    numpy.ndarray: The covariance matrix of the input data.
+    """
+    return np.cov(data, rowvar=False), np.corrcoef(data, rowvar=False)
+
+def print_correlation_matrix(correlation, coeff={}):
+    corr_df = pd.DataFrame(correlation, columns=coeff.keys(), index=coeff.keys())
+    corr_df = corr_df.where(np.triu(np.ones(corr_df.shape), k=1).astype(bool))
+    corr_df = corr_df.round(2)  # Round to 2 decimal places
+    corr_df = corr_df.fillna('')  # Fill NaN with empty string for LaTeX compatibility
+    corr_df.index.name = 'Parameter'
+    corr_df.columns.name = 'Parameter'  
+    latex_table = corr_df.to_latex(float_format="%.2f", index=True, header=True, escape=False, sparsify=True)
+    latex_table = corr_df.to_latex(float_format="%.2f", index=True, header=True, escape=False)
+    return latex_table
+
+
+# --- Assume Gaussian function is defined like this ---
+# Make sure this matches the parameters expected by curve_fit's p0
+def gaussian(x, mu, sigma, amplitude):
+    """Gaussian function where amplitude is the peak height."""
+    # Ensure sigma is positive if curve_fit doesn't enforce bounds
+    sigma = abs(sigma)
+    if sigma == 0:
+        # Avoid division by zero if sigma somehow becomes zero during fitting
+        # Return a very small value or handle appropriately based on context
+        # Returning zeros might be safe if x is not exactly mu
+        return np.zeros_like(x)
+    return amplitude * np.exp(-((x - mu)**2) / (2 * sigma**2))
+# ----------------------------------------------------
+#Define a asymmetric gaussian function
+def gaussian_asym(x, mu, sigma, amplitude, alpha):
+    """Asymmetric Gaussian function."""
+    # Ensure sigma is positive if curve_fit doesn't enforce bounds
+    sigma = abs(sigma)
+    if sigma == 0:
+        return np.zeros_like(x)
+    # Asymmetric Gaussian formula
+    return amplitude * np.exp(-((x - mu)**2) / (2 * sigma**2)) * (1 + alpha * (x - mu))
+
+
+def fit_gaussian(data, bins, ax, key, range=None):
+    """
+    Fits a Gaussian function to histogram data, calculates chi2/ndf, and plots.
+
+    Args:
+        data (array-like): The raw data to be histogrammed and fitted.
+        bins (int or sequence): The number of bins or the bin edges for the histogram.
+        ax (matplotlib.axes.Axes): The axes object to plot on.
+        key (str): A label or title key for the plot.
+        range (tuple, optional): The lower and upper range of the bins. Defaults to None.
+
+    Returns:
+        tuple: (popt, perr, chi2_ndf)
+               popt: Optimal values for the parameters (mu, sigma, amplitude).
+               perr: Standard deviation errors on the parameters.
+               chi2_ndf: Chi-squared per degree of freedom.
+               Returns (None, None, None) if fit fails.
+    """
+    counts, bin_edges = np.histogram(data, bins=bins, range=range)
+    bin_centres = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # --- Prepare for weighted fit ---
+    # Use sqrt(counts) as errors. Handle bins with 0 counts.
+    errors = np.sqrt(counts)
+    # Assign a finite error (e.g., 1) to zero-count bins.
+    # These bins will have very little weight in the fit.
+    errors[errors == 0] = 1.0
+
+    # Filter out bins with zero counts *before* fitting?
+    # Alternative: Keep them but use the error=1. Let's try keeping them.
+    # valid_indices = counts > 0
+    # bin_centres_fit = bin_centres[valid_indices]
+    # counts_fit = counts[valid_indices]
+    # errors_fit = errors[valid_indices]
+    # If filtering, use these _fit arrays below. If not, use original arrays.
+    # Let's stick to the original approach of fitting all bins, using error=1 for zero counts.
+
+    # Initial parameter guesses
+    # Ensure data is not empty / std is not zero before calculating p0
+    if len(data) == 0 or np.std(data) == 0:
+        print(f"Warning: Not enough data or zero standard deviation for key: {key}. Skipping fit.")
+        ax.hist(data, bins=bins, histtype='step', color='black', range=range)
+        ax.set_title(f'${key}$ (No Fit - Invalid Data)')
+        return None, None, None
+
+    p0 = [np.mean(data), np.std(data), np.max(counts)] # mu, sigma, amplitude
+
+    try:
+        # Perform the weighted fit
+        # absolute_sigma=True means 'sigma' represents actual std deviations.
+        popt, pcov = curve_fit(gaussian, bin_centres, counts, p0=p0, sigma=errors, absolute_sigma=True)
+        perr = np.sqrt(np.diag(pcov)) # Standard deviation errors on parameters
+
+        # --- Calculate Chi-squared ---
+        expected_counts = gaussian(bin_centres, *popt)
+
+        # Calculate chi-squared statistic
+        # Use only bins with non-zero counts for chi2 calculation,
+        # as chi2 is ill-defined for expected=0, and sqrt(0) error was problematic.
+        # However, since we used errors=1 for 0-count bins in the fit,
+        # it might be more consistent to include them in chi2 calculation too,
+        # using the same errors used for fitting. Let's do that.
+        # If a bin had count=0, error=1. If count>0, error=sqrt(count).
+        chi2 = np.sum(((counts - expected_counts) / errors)**2)
+
+        # Calculate degrees of freedom
+        n_params = len(popt)
+        # NDF = (Number of data points) - (Number of parameters)
+        # The number of data points is the number of bins.
+        ndf = len(bin_centres) - n_params
+
+        # Calculate chi2/ndf, handle ndf <= 0
+        if ndf > 0:
+            chi2_ndf = chi2 / ndf
+        else:
+            chi2_ndf = np.inf # Or float('nan'), indicate undefined/unreliable
+
+        # --- Plotting ---
+        x_fit = np.linspace(bin_edges[0], bin_edges[-1], 5000) # More points for smoother curve
+        fit_label = (f'$\mu$={popt[0]:.2f} ± {perr[0]:.2f}\n'
+                     f'$\sigma$={popt[1]:.2f} ± {perr[1]:.2f}\n'
+                     f'Amp={popt[2]:.1f} ± {perr[2]:.1f}') # Added Amplitude to label
+        ax.plot(x_fit, gaussian(x_fit, *popt), color='red')
+
+        # Plot histogram data (use error bars for better visualization)
+        # ax.hist(data, bins=bins, histtype='step', color='black', range=range) # Original
+        ax.errorbar(bin_centres, counts, yerr=errors, fmt='k.', markersize=4, capsize=2, label='Data') # Plot data points with errors
+
+        # Add text box with parameters and chi2/ndf
+        # Adjust text position (e.g., 0.05, 0.95) and alignment for clarity
+        text_content = (f'Mean: {popt[0]:.2f} ± {perr[0]:.2f}\n'
+                        f'Width: {popt[1]:.2f} ± {perr[1]:.2f}\n'
+                        f'Amp: {popt[2]:.1f} ± {perr[2]:.1f}\n' # Added Amplitude
+                        f'$\chi^2$/NDF: {chi2_ndf:.2f} ({chi2:.1f} / {ndf})') # Added chi2 info
+
+        ax.text(0.05, 0.95, text_content, transform=ax.transAxes, fontsize=14, # Smaller font?
+                verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+        ax.set_title(f'${key}$')
+        ax.set_xlabel("Value") # Add generic labels if needed
+        ax.set_ylabel("Counts")
+        ax.legend() # Display legend including fit label and data label
+
+        return popt, perr, chi2_ndf
+
+    except RuntimeError:
+        print(f"Error: Fit failed to converge for key: {key}.")
+        # Plot just the histogram if fit fails
+        ax.hist(data, bins=bins, histtype='step', color='black', range=range)
+        ax.set_title(f'${key}$ (Fit Failed)')
+        ax.text(0.05, 0.95, 'Fit Failed', transform=ax.transAxes, color='red', verticalalignment='top')
+        return None, None, None
+    except Exception as e:
+        print(f"An unexpected error occurred during fitting for key {key}: {e}")
+        # Plot just the histogram if fit fails
+        ax.hist(data, bins=bins, histtype='step', color='black', range=range)
+        ax.set_title(f'${key}$ (Fit Error)')
+        ax.text(0.05, 0.95, f'Fit Error:\n{e}', transform=ax.transAxes, color='red', verticalalignment='top', fontsize=8)
+        return None, None, None
+
+def fit_gaussian_asym(data, bins, ax, key, range=None):
+    """
+    Fits an asymmetric Gaussian function to histogram data, calculates chi2/ndf, and plots.
+
+    Args:
+        data (array-like): The raw data to be histogrammed and fitted.
+        bins (int or sequence): The number of bins or the bin edges for the histogram.
+        ax (matplotlib.axes.Axes): The axes object to plot on.
+        key (str): A label or title key for the plot.
+        range (tuple, optional): The lower and upper range of the bins. Defaults to None.
+
+    Returns:
+        tuple: (popt, perr, chi2_ndf)
+               popt: Optimal values for the parameters (mu, sigma, amplitude).
+               perr: Standard deviation errors on the parameters.
+               chi2_ndf: Chi-squared per degree of freedom.
+               Returns (None, None, None) if fit fails.
+    """
+    counts, bin_edges = np.histogram(data, bins=bins, range=range)
+    bin_centres = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # --- Prepare for weighted fit ---
+    # Use sqrt(counts) as errors. Handle bins with 0 counts.
+    errors = np.sqrt(counts)
+    # Assign a finite error (e.g., 1) to zero-count bins.
+    # These bins will have very little weight in the fit.
+    errors[errors == 0] = 1.0
+
+    # Initial parameter guesses
+    # Ensure data is not empty / std is not zero before calculating p0
+    if len(data) == 0 or np.std(data) == 0:
+        print(f"Warning: Not enough data or zero standard deviation for key: {key}. Skipping fit.")
+        ax.hist(data, bins=bins, histtype='step', color='black', range=range)
+        ax.set_title(f'${key}$ (No Fit - Invalid Data)')
+        return None, None, None
+
+    p0 = [np.mean(data), np.std(data), np.max(counts), 0.5] # mu, sigma, amplitude
+
+    try:
+        # Perform the weighted fit
+        # absolute_sigma=True means 'sigma' represents actual std deviations.
+        popt, pcov = curve_fit(gaussian_asym, bin_centres
+                               , counts, p0=p0, sigma=errors, absolute_sigma=True)
+        perr = np.sqrt(np.diag(pcov)) # Standard deviation errors on parameters
+        # --- Calculate Chi-squared ---
+        expected_counts = gaussian_asym(bin_centres, *popt)
+        # Calculate chi-squared statistic
+        # Use only bins with non-zero counts for chi2 calculation,
+        # as chi2 is ill-defined for expected=0, and sqrt(0) error was problematic.
+        # However, since we used errors=1 for 0-count bins in the fit,
+        # it might be more consistent to include them in chi2 calculation too,
+        # using the same errors used for fitting. Let's do that.
+        # If a bin had count=0, error=1. If count>0, error=sqrt(count).
+        chi2 = np.sum(((counts - expected_counts) / errors)**2)
+        # Calculate degrees of freedom
+        n_params = len(popt)
+        # NDF = (Number of data points) - (Number of parameters)
+        # The number of data points is the number of bins.
+        ndf = len(bin_centres) - n_params
+        # Calculate chi2/ndf, handle ndf <= 0
+        if ndf > 0:
+            chi2_ndf = chi2 / ndf
+        else:
+            chi2_ndf = np.inf # Or float('nan'), indicate undefined/unreliable
+        # --- Plotting ---
+        x_fit = np.linspace(bin_edges[0], bin_edges[-1], 5000) # More points for smoother curve 
+        fit_label = (f'$\mu$={popt[0]:.2f} ± {perr[0]:.2f}\n'
+                     f'$\sigma$={popt[1]:.2f} ± {perr[1]:.2f}\n'
+                     f'Amp={popt[2]:.1f} ± {perr[2]:.1f}') # Added Amplitude to label
+        ax.plot(x_fit, gaussian_asym(x_fit, *popt), color='red')
+        # Plot histogram data (use error bars for better visualization)
+        # ax.hist(data, bins=bins, histtype='step', color='black', range=range) # Original
+        ax.errorbar(bin_centres, counts, yerr=errors, fmt='k.', markersize=4, capsize=2, label='Data') # Plot data points with errors
+        # Add text box with parameters and chi2/ndf
+        # Adjust text position (e.g., 0.05, 0.95) and alignment for clarity 
+        text_content = (f'Mean: {popt[0]:.2f} ± {perr[0]:.2f}\n'
+                        f'Width: {popt[1]:.2f} ± {perr[1]:.2f}\n'
+                        f'Amp: {popt[2]:.1f} ± {perr[2]:.1f}\n' # Added Amplitude
+                        f'$\chi^2$/NDF: {chi2_ndf:.2f} ({chi2:.1f} / {ndf})') # Added chi2 info
+        ax.text(0.05, 0.95, text_content, transform=ax.transAxes, fontsize=14, # Smaller font?
+                verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        ax.set_title(f'${key}$')
+        ax.set_xlabel("Value") # Add generic labels if needed
+        ax.set_ylabel("Counts")
+        ax.legend() # Display legend including fit label and data label
+        return popt, perr, chi2_ndf
+    except RuntimeError:
+        print(f"Error: Fit failed to converge for key: {key}.")
+        # Plot just the histogram if fit fails
+        ax.hist(data, bins=bins, histtype='step', color='black', range=range)
+        ax.set_title(f'${key}$ (Fit Failed)')
+        ax.text(0.05, 0.95, 'Fit Failed', transform=ax.transAxes, color='red', verticalalignment='top')
+        return None, None, None
+    except Exception as e:
+        print(f"An unexpected error occurred during fitting for key {key}: {e}")
+        # Plot just the histogram if fit fails
+        ax.hist(data, bins=bins, histtype='step', color='black', range=range)
+        ax.set_title(f'${key}$ (Fit Error)')
+        ax.text(0.05, 0.95, f'Fit Error:\n{e}', transform=ax.transAxes, color='red', verticalalignment='top', fontsize=8)
+        return None, None, None
+

@@ -6,7 +6,7 @@ import json
 import math
 import time
 import warnings
-
+import uproot as up
 import numpy as np
 
 
@@ -489,3 +489,41 @@ def combine_asym_error(errs, N=10000):
         tmp = tmp / np.sum(tmp)
         y = convolve(y, tmp, mode="same")
     return search_interval(y, xrange=xrange)
+
+def reorder_p4_phsp(data):
+    """Reorder the p4 data to (px,py,pz,E)
+    Args:
+        data (np.array): array with the data
+    Returns:
+        np.array: array with the data reordered to (px,py,pz,E)
+    """
+    return np.array([data[:,1], data[:,2], data[:,3], data[:,0]]).T
+
+def save_as_root(data, path, reorder=False):
+    """
+    Save data as a ROOT file.
+    """
+    p=[]
+    branches = ['p4_Ks','p4_pim','p4_pip','p4_Ks2','p4_pim2','p4_pip2']
+
+    if len(data) == 3:
+
+        branches = ['p4_Ks','p4_pim','p4_pip']
+        if reorder:
+            p = [reorder_p4_phsp(data[0]), reorder_p4_phsp(data[1]), reorder_p4_phsp(data[2])]
+        else:
+            p = [data[0], data[1], data[2]]
+    elif len(data) == 2:
+        data_sig, data_tag = data
+        if reorder:
+            p = [reorder_p4_phsp(data_sig[0]), reorder_p4_phsp(data_sig[1]), reorder_p4_phsp(data_sig[2]),
+                 reorder_p4_phsp(data_tag[0]), reorder_p4_phsp(data_tag[1]), reorder_p4_phsp(data_tag[2])]
+        else:
+            p = [data_sig[0], data_sig[1], data_sig[2], data_tag[0], data_tag[1], data_tag[2]]
+
+    var_dict = {}
+    for i, branch in enumerate(branches):
+        var_dict[branch] = p[i]
+    with up.recreate(path) as f:
+        f['nt'] = var_dict
+    print(f"Data saved to {path}")
