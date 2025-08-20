@@ -1,4 +1,4 @@
-name: tfdev
+name: tfpcbpggsz
 channels:
   - conda-forge
   - defaults
@@ -286,7 +286,6 @@ dependencies:
   - zipp=3.17.0
   - zlib=1.2.13
   - zstd=1.5.2
-  - pip:
       - absl-py==2.1.0
       - alabaster==0.7.16
       - astunparse==1.6.3
