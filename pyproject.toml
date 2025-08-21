@@ -18,11 +18,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "tensorflow",
-    "matplotlib",
-    "sphinx_rtd_theme",
-    "sphinx_gallery",
-    "Sphinx",
+    "pyyaml",
+    "iminuit",
+    "plothist"
     ]
 
 [tool.setuptools]
