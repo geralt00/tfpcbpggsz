@@ -29,7 +29,7 @@ conda env create -f requirements.yml
 
 ### Install the package
 ```bash
-pip install -e . --no-deps
+pip install -e .
 ```
 
 ## Examples
