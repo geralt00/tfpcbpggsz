@@ -1,9 +1,11 @@
-model: 'evtgen'
-
+fit_result_dir: '/dice/users/pc24403/PCBPGGSZ/pcfit/all/ampgen'
+model: 'ampgen'
+reweight: true
 data:
   data_dir: '/dice/users/pc24403/bes/pcfit/'
   tag_list: ['ksetap_pipieta', 'kseta_3pi', 'kseta_gamgam', 'ksetap_gamrho', 'ksomega', 'kspi0', 'klpi0pi0', 'kk', 'pipi', 'pipipi0', 'kspi0pi0', 'klpi0', 'full', 'misspi', 'misspi0']
   tree: 'nt'
+  is_reorder: True
   data: ['/dice/users/pc24403/bes/pcfit/cpodd/ksetap_pipieta/data_ksetap_pipieta.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_3pi/data_kseta_3pi.root', '/dice/users/pc24403/bes/pcfit/cpodd/kseta_gamgam/data_kseta_gamgam.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksetap_gamrho/data_ksetap_gamrho.root', '/dice/users/pc24403/bes/pcfit/cpodd/ksomega/data_ksomega.root', '/dice/users/pc24403/bes/pcfit/cpodd/kspi0/data_kspi0.root', '/dice/users/pc24403/bes/pcfit/cpodd/klpi0pi0/data_klpi0pi0.root',
           '/dice/users/pc24403/bes/pcfit/cpeven/kk/data_kk.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipi/data_pipi.root', '/dice/users/pc24403/bes/pcfit/cpeven/pipipi0/data_pipipi0.root', '/dice/users/pc24403/bes/pcfit/cpeven/kspi0pi0/data_kspi0pi0.root', '/dice/users/pc24403/bes/pcfit/cpeven/klpi0/data_klpi0.root',
           '/dice/users/pc24403/bes/pcfit/dks/full/data_full.root', '/dice/users/pc24403/bes/pcfit/dks/misspi/data_misspi.root', '/dice/users/pc24403/bes/pcfit/dks/misspi0/data_misspi0.root']
@@ -55,9 +57,8 @@ data:
       misspi0: '/dice/users/pc24403/bes/pcfit/dks/misspi0/pdf_sigmc_um_roundall.npy'
       klpi0pi0: '/dice/users/pc24403/bes/pcfit/cpodd/klpi0pi0/pdf_sigmc_um_roundall.npy'
 
-
-
   mass_fit_results: '/software/pc24403/tfpcbpggsz/tfpcbpggsz/external/yields.json'
+
 
 $include: 'yields.json'
 

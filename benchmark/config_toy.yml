@@ -1,0 +1,29 @@
+fit_result_dir: '/software/pc24403/tfpcbpggsz/benchmark/results/ampgen'
+model: 'ampgen'
+data:
+  data_dir: '/software/pc24403/tfpcbpggsz/benchmark/data'
+  tag_list: ['ksetap_pipieta', 'kseta_3pi', 'kseta_gamgam', 'ksetap_gamrho', 'ksomega', 'kspi0', 'klpi0pi0', 'kk', 'pipi', 'pipipi0', 'kspi0pi0', 'klpi0', 'full', 'misspi', 'misspi0']
+  tree: 'nt'
+  cuts: 'No'
+  is_reorder: False
+  data: ['/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/ksetap_pipieta_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/kseta_3pi_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/kseta_gamgam_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/ksetap_gamrho_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/ksomega_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/kspi0_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/klpi0pi0_1.root',
+          '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/kk_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/pipi_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/pipipi0_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/kspi0pi0_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/klpi0_1.root',
+          '/software/pc24403/tfpcbpggsz/benchmark/data/dks/full_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/dks/misspi_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/dks/misspi0_1.root']
+
+  phsp: ['/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/phsp_ksetap_pipieta_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/phsp_kseta_3pi_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/phsp_kseta_gamgam_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/phsp_ksetap_gamrho_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/phsp_ksomega_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/phsp_kspi0_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpodd/phsp_klpi0pi0_1.root',
+          '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/phsp_kk_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/phsp_pipi_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/phsp_pipipi0_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/phsp_kspi0pi0_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/cpeven/phsp_klpi0_1.root',
+          '/software/pc24403/tfpcbpggsz/benchmark/data/dks/phsp_full_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/dks/phsp_misspi_1.root', '/software/pc24403/tfpcbpggsz/benchmark/data/dks/phsp_misspi0_1.root']
+
+  mass_fit_results: '/software/pc24403/tfpcbpggsz/tfpcbpggsz/external/yields.json'
+
+
+plot:
+  bins: 50
+  range: 
+    s12: [0.3, 3.1]
+    s13: [0.3, 3.1]
+    s23: [0.0, 2.0]
+  plot_sum:
+    cp_odd: ['ksetap_pipieta', 'kseta_3pi', 'kseta_gamgam', 'ksetap_gamrho', 'ksomega', 'kspi0', 'klpi0pi0']
+    cp_even: ['kk', 'pipi', 'pipipi0', 'kspi0pi0', 'klpi0']
+    dks: ['misspi', 'full', 'misspi0']

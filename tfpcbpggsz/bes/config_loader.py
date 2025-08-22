@@ -157,6 +157,9 @@ class ConfigLoader:
         for tag in self._pdf.keys():
             self._bkg_frac[tag] = {}
             self.get_tag_bkg_frac(tag)
+        if len(self._bkg_frac) == 0:
+            for tag in self._mc['phsp'].keys():
+                self.get_sig_num(tag)
 
         return self._bkg_frac
             

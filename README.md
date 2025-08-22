@@ -25,7 +25,6 @@ cd tf-pcgamma
 Set up the required environment using Conda
 ```bash
 conda env create -f requirements.yml
-conda install --file requirements.txt
 ```
 
 ### Install the package
@@ -33,33 +32,27 @@ conda install --file requirements.txt
 pip install -e . --no-deps
 ```
 
-## Project Structure
+## Examples
 
-tfpcbpggsz/
-├── tfpcbpggsz/              # main source code
-│   ├── amp/                 # amplitude analysis modules
-│   ├── bes/                 # BES data handling
-│   ├── generator/           # toy MC and event generation
-│   ├── lhcb/                # LHCb-specific code
-│   ├── external/            # external utilities
-│   ├── core.py              # core fitting routines
-│   ├── fit.py               # fit engine
-│   ├── dalitz_pdfs.py       # Dalitz plot PDFs
-│   ├── masspdfs.py          # invariant mass PDFs
-│   ├── phasecorrection.py   # phase correction logic
-│   ├── plotter.py           # plotting utilities
-│   └── version.py
-│
-├── benchmark/               # benchmarking configs, scripts & results
-├── canorman_B2DPI_misID/    # misID shape studies
-├── canorman_Efficency/      # efficiency-related studies
-├── canorman_InvMassFit/     # invariant mass fitting studies
-│
-├── docs/                    # documentation (Sphinx)
-├── examples/                # example scripts & galleries
-│
-├── environment.yml          # conda environment definition
-├── requirements.txt         # pip dependencies
-├── pyproject.toml           # project metadata & build config
-├── README.md
-└── CONTRIBUTING.md
+### Ex1 Generate the Quantum-correlated data with phase-correction applied
+
+```python
+python3 ex1_gen_toy.py --config config_toy.yml --fit_result results/ampgen/fit_result_order6.json --order 6
+```
+
+Then the toy will save as a root file in the specified data path.
+
+### Ex2 Fit the QC toy data
+
+```python
+python3 ex2_fit_toy.py --config config_toy.yml --order 6 --plot --plot-all --plot-each
+
+```
+
+
+### Ex3 Fit the QC real data
+
+```python
+python3 ex3_fit_bes_data.py --config config.yml --order 6 --plot --plot-all --plot-each
+
+```

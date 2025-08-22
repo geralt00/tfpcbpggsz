@@ -812,9 +812,10 @@ class Plotter:
              else:
                  return empty_hist, empty_hist, empty_hist, empty_hist, empty_hist, empty_hist, scale
 
-
+        print(self.config._yields)
         for tag in tags_to_sum:
             try:
+                 # Debugging line to check yields
                 scale['sig'] += self.config._yields[tag].get('sig', 0)
                 scale['qcmc'] += self.config._yields[tag].get('qcmc', 0)
                 scale['dpdm'] += self.config._yields[tag].get('dpdm', 0)
@@ -871,6 +872,8 @@ class Plotter:
         s12_sig, s13_sig, s12_tag, s13_tag = None, None, None, None # Initialize as None
 
         try:
+             print(self.config._yields[tag]) # Debugging line to check yields
+
              # Get scale factors
              scale['sig'] = self.config._yields[tag].get('sig')
              scale['qcmc'] = self.config._yields[tag].get('qcmc')
