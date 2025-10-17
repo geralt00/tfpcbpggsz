@@ -368,7 +368,7 @@ def amp_mask(raw_amp, raw_ampbar, raw_amp_tag=None, raw_ampbar_tag=None, max_amp
         return masked_amp, masked_ampbar, masked_amp_tag, masked_ampbar_tag, mask
     return masked_amp, masked_ampbar, mask
 
-def calculate_covariance(data):
+def calculate_covariance(data , bias=False):
     """
     Calculate the covariance matrix of the given data.
     
@@ -378,7 +378,32 @@ def calculate_covariance(data):
     Returns:
     numpy.ndarray: The covariance matrix of the input data.
     """
-    return np.cov(data, rowvar=False), np.corrcoef(data, rowvar=False)
+    covariance = np.cov(data, rowvar=False, bias=bias)
+    correlation = np.corrcoef(data, rowvar=False, bias=bias)
+    if bias:
+        sigma = np.sqrt(np.diag(covariance))
+        mu = np.mean(data, axis=0)
+        corrected_sigma = np.sqrt(np.array(mu)**2+np.array(sigma)**2)
+        corrected_covariance = corrected_sigma[:, None] * corrected_sigma[None, :] * correlation
+        return corrected_covariance, correlation
+
+    return covariance, correlation
+
+def calculate_correlation_matrix_from_covariance_matrix(covariance):
+    """
+    Calculate the correlation matrix from the covariance matrix.
+    
+    Parameters:
+    covariance (numpy.ndarray): The covariance matrix.
+
+    Returns:
+    numpy.ndarray: The correlation matrix.
+    """
+    stddev = np.sqrt(np.diag(covariance))
+    correlation = covariance / stddev[:, None] / stddev[None, :]
+    correlation[~np.isfinite(correlation)] = 0  # Handle division by zero
+    return correlation
+    
 
 def print_correlation_matrix(correlation, coeff={}):
     corr_df = pd.DataFrame(correlation, columns=coeff.keys(), index=coeff.keys())
