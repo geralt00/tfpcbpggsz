@@ -21,11 +21,16 @@ class ConfigLoader:
         self.norm = Normalisation
         self.vm = VarsManager()
         self.load_config()
-        self.amp = Amplitude(self._config_data.get('model'))
+        self.ampfile = None 
+        if self._config_data.get('ampfile') is not None:
+            self.ampfile = self._config_data.get('ampfile')
+        #self.amp = Amplitude(self._config_data.get('model'))
+        self.amp = Amplitude(self._config_data.get('model'), amp_file=self.ampfile) if self.ampfile is not None else Amplitude(self._config_data.get('model'))
         self.amp.init()
         self.idx = {}
         self.data = load_data(self)
         self.data.amp = self.amp
+        self.mask = {}
         self._data = {}
         self._mc = {}
         self._pdf = {}
@@ -214,12 +219,16 @@ class ConfigLoader:
             print(f'INFO:: {key} not found in mass_fit_results of {tag}')
             return default
         elif 'qcmc' in key:
-            if 'qcmc_oth' in key:
-                _, val = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc_oth'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc_oth']), rho=-1.0)
-                self._yields[tag]['qcmc_oth'] = val
+            if self._vary:
+                if 'qcmc_oth' in key:
+                    _, val = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc_oth'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc_oth']), rho=-1.0)
+                    self._yields[tag]['qcmc_oth'] = val
+                else:
+                    _, val = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc']), rho=-1.0)
+                    self._yields[tag]['qcmc'] = val
             else:
-                _, val = self.re_sample_yields(self.mass_fit_results['sig_range_nsig'], self.mass_fit_errors['sig_range_nsig'], self.mass_fit_results['sig_range_nb_qcmc'], np.sqrt(self.mass_fit_results['sig_range_nb_qcmc']), rho=-1.0)
-                self._yields[tag]['qcmc'] = val
+                val = self.mass_fit_results[key]
+                self._yields[tag][key.split('sig_range_nb_')[-1]] = val
         else:
             val = self.re_sample_yields(self.mass_fit_results[key], self.mass_fit_errors[key]) if self._vary else self.mass_fit_results[key]
             self._yields[tag][key.split('sig_range_nb_')[-1]] = val

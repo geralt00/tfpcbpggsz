@@ -466,10 +466,14 @@ class Reweight:
         self.KS_reweight_sheet = self.cal_weights(self.KS_reweight_means_sheet, self.KS_reweight_errors_sheet)
         #apply the weight to the data according to the data['pKs'] range
         self.weights['KS'] = tf.zeros_like(self.data['pKs'])
+        temp_weights = tf.zeros_like(self.data['pKs'])
         for (low, high), weight in self.KS_reweight_sheet.items():
             #print(f"Applying weight {weight} for pKs in range ({low}, {high})")
             mask = tf.logical_and(self.data['pKs'] > low, self.data['pKs'] < high)
-            self.weights['KS'] = tf.where(mask, weight, self.weights['KS'])
+            #self.weights['KS'] = tf.where(mask, weight, self.weights['KS'])
+            temp_weights = tf.where(mask, weight, temp_weights)
+        self.weights['KS'] = temp_weights
+
 
 
     def tracking_reweight(self):
@@ -722,6 +726,7 @@ class Normalisation:
         
         .. math: |A|^2
         """
+        
         if self._normA is None:
             self.amp_MC[self._name], self.ampbar_MC[self._name], self.amp_MC[self._name.replace('_sig', '_tag')], self.ampbar_MC[self._name.replace('_sig', '_tag')], self._mask = amp_mask(self.amp_MC[self._name], self.ampbar_MC[self._name], 
                                                                                   self.amp_MC[self._name.replace('_sig', '_tag')], 

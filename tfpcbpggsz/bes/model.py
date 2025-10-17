@@ -2,7 +2,8 @@ from tfpcbpggsz.tensorflow_wrapper import tf
 import tfpcbpggsz.core as core
 from tfpcbpggsz.phasecorrection import PhaseCorrection as pc
 from tfpcbpggsz.core import Normalisation as normalisation
-
+from tfpcbpggsz.generator.data import data_mask
+import numpy as np
 class BaseModel(object):
     def __init__(self, config):
         self.norm = {}
@@ -11,6 +12,13 @@ class BaseModel(object):
         self.vm = self.pc.vm
         self.tags = self.config_loader.idx
         self.reweight = self.config_loader._config_data.get('reweight', False)
+        self.varing_Fplus = self.config_loader._config_data.get('varing_Fplus', False)
+        self.random_seed = self.config_loader._config_data.get('random_seed', 1234)
+        self._Fplus = 0.9406
+        if self.varing_Fplus:
+            self.random = np.random.default_rng(self.random_seed)
+            self._Fplus = self.random.normal(loc=0.9406, scale=0.006414047, size=(1,))[0]
+            print(f"INFO:: Varing Fplus to {self._Fplus} in the fit")
 
         self.load_norm()
         self._nll = {}
@@ -48,7 +56,7 @@ class BaseModel(object):
                     data_tag = self.config_loader._mc['phsp'][tag].copy()
                     Reweighter_tag = core.Reweight(data_tag, tag='tag', random_seed=self.config_loader._config_data.get('random_seed', 1234), gaussian_reweight_sheet=self.config_loader._config_data.get('gaussian_reweight_sheet', False))
                     Reweighter_tag.init()
-                    self.norm[tag].weights = Reweighter_sig.weights['weights']*Reweighter_tag.weights['weights']
+                    self.norm[tag].weights = data_mask(Reweighter_sig.weights['weights']*Reweighter_tag.weights['weights'], self.config_loader.mask[tag]['phsp'])
                 self.norm[tag].initialise()
 
             else:
@@ -58,7 +66,7 @@ class BaseModel(object):
                 if self.reweight:
                     Reweighter = core.Reweight(self.config_loader._mc['phsp'][tag], random_seed=self.config_loader._config_data.get('random_seed', 1234), gaussian_reweight_sheet=self.config_loader._config_data.get('gaussian_reweight_sheet', False))
                     Reweighter.init()
-                    self.norm[tag].weights = Reweighter.weights['weights']
+                    self.norm[tag].weights = data_mask(Reweighter.weights['weights'], self.config_loader.mask[tag]['phsp'])
                 self.norm[tag].initialise()
 
 
@@ -66,6 +74,7 @@ class BaseModel(object):
 
     #@tf.function
     def NLL_Kspipi(self, tag):
+        
 
         params = self.pc.coefficients.values()
         phase_correction_sig = self.pc.eval_corr(self.config_loader.get_data_srd(tag,'sig'))
@@ -103,8 +112,8 @@ class BaseModel(object):
         self.norm[tag].Update_crossTerms()
 
         if tag == 'pipipi0':
-            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign,self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, Fplus=0.9406, model_name=self.config_loader.amp.model_name)
-            norm = self.norm[tag].Integrated_CP_tag(Dsign, Fplus=0.9406)
+            prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign,self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, Fplus=self._Fplus, model_name=self.config_loader.amp.model_name)
+            norm = self.norm[tag].Integrated_CP_tag(Dsign, Fplus=self._Fplus)
 
         else:
             prob = core.prob_totalAmplitudeSquared_CP_tag(Dsign, self.config_loader.get_data_amp(tag), self.config_loader.get_data_ampbar(tag), pc=phase_correction, model_name=self.config_loader.amp.model_name)
@@ -149,7 +158,7 @@ class BaseModel(object):
             ret += self._nll[tag]
         return ret
     
-    @tf.function
+    #@tf.function
     def nll_cpodd(self):
         ret = 0
         for tag in self.tags:
@@ -159,7 +168,7 @@ class BaseModel(object):
         
         return ret
     
-    @tf.function
+    #@tf.function
     def fun(self, x):
         self.set_params(x)
         ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()

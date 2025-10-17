@@ -174,6 +174,7 @@ class load_data:
         #It will be better to loop over the tags that the data is loaded
         for tag in self.data_path[idx].keys():
             self.data[tag] = {} if tag not in self.data.keys() else self.data[tag]
+            self.config.mask[tag] = {} if tag not in self.config.mask.keys() else self.config.mask[tag]
             cuts=self.config.D02KsPiPi.cuts(tag) if self.apply_cuts else None
             if idx != 'pdf':
                 path = self.data_path[idx][tag]
@@ -185,6 +186,7 @@ class load_data:
                         load_root = root_data(path, self.config._config_data['data'].get('tree'), cut=cuts, branches=branches)
                         load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
                         self.data[tag][idx] = self.data_io.load_all(load_root.load_tuple())
+                        self.config.mask[tag][idx] = self.data_io.mask
                         #print(f'Loading {tag} for {idx} alread: {self.data[tag][idx]}')
                     else:
                         self.data_io = data_io()
@@ -192,14 +194,18 @@ class load_data:
                         load_root = root_data(path, self.config._config_data['data'].get('tree'), cut=cuts)
                         load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
                         self.data[tag][idx] = self.data_io.load_all(load_root.load_tuple())
+                        self.config.mask[tag][idx] = self.data_io.mask
+
                 elif path.endswith('.npy'):
                     self.data[tag][idx] = np.load(path)
                 elif path.endswith('.txt'):
                     self.data[tag][idx] = np.loadtxt(path)
             else:
                 self.data[tag][idx] = {}
+                self.config.mask[tag][idx] = {}
                 for i_pdf in self.data_path[idx][tag].keys():
                     self.data[tag][idx][i_pdf] = {}
+                    self.config.mask[tag][idx][i_pdf] = {}
                     if isinstance(self.data_path[idx][tag][i_pdf], str):
                         #for i_pdf_tag in range(len(self.data_path[idx][tag][i_pdf])):
                         path = self.data_path[idx][tag][i_pdf]
@@ -209,6 +215,7 @@ class load_data:
                             load_root = root_data(path, self.config._config_data['data'].get('tree'))
                             load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
                             self.data[tag][idx][i_pdf] = self.data_io.load_all(load_root.load_tuple())
+                            self.config.mask[tag][idx][i_pdf] = self.data_io.mask
                         elif path.endswith('.npy'):
                             self.data[tag][idx][i_pdf] = np.load(path)
                         elif path.endswith('.txt'):
@@ -222,6 +229,7 @@ class load_data:
                                 load_root = root_data(path, self.config._config_data['data'].get('tree'))
                                 load_root.is_reorder = self.config._config_data['data'].get('is_reorder', True)
                                 self.data[tag][idx][i_pdf][i_ext_pdf] = self.data_io.load_all(load_root.load_tuple())
+                                self.config.mask[tag][idx][i_pdf][i_ext_pdf] = self.data_io.mask
                             elif path.endswith('.npy'):
                                 self.data[tag][idx][i_pdf][i_ext_pdf] = np.load(path)
                             elif path.endswith('.txt'):

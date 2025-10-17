@@ -134,8 +134,9 @@ class pcbpggsz_generator:
             self.deltaB = kwargs['dB']
             self.gamma = kwargs['gamma']   
             self.charge = kwargs['charge']
-            self.efficiency_function  = kwargs['efficiency_function']
-            self.efficiency_variables = kwargs['efficiency_variables']
+            if kwargs.get('efficiency_function') is not None:
+                self.efficiency_function  = kwargs['efficiency_function']
+                self.efficiency_variables = kwargs['efficiency_variables']
             try:
                 self.generate_B_mass = kwargs['generate_B_mass'],
                 B_mass_range    = kwargs['B_mass_range'],
