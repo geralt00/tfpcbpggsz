@@ -11,8 +11,8 @@ class PhaseCorrection:
     def __init__(self, vm=None):
         self.order = 0
         self.correctionType = "singleBias"
+        self._eval_corr_tf = tf.function(self.eval_corr_norm, reduce_retracing=True)
         self.DEBUG = False
-        self.coefficients = {}
         self.nBias_ = None
         self.A_ = [None, None]
         self.epsilon_ = [None, None]
@@ -72,12 +72,11 @@ class PhaseCorrection:
             if self.order != 0 :
                 for order_i in range(self.order):
                     for order_j in range(1, self.order - order_i + 1, 2):
-                        self.coefficients[f'C_{order_i}_{order_j}'] = tf.Variable(tf.random.normal(shape=(1,), dtype=tf.float64))
-                        self.iTerms_.append(f'C_{order_i}_{order_j}')
+                        name = f'C_{order_i}_{order_j}'
+                        self.iTerms_.append(name)
                         self.nTerms_+=1
-                self.vm.variables = self.coefficients
-                self.vm.trainable_vars = self.coefficients
-                self.vm.set_all(vals=self.coefficients, val_in_fit=True)
+                        if name not in self.vm.variables:
+                            self.vm.add_real_var(name, value=0.0, trainable=True, group='phase_correction')
                 
         
 
@@ -89,22 +88,28 @@ class PhaseCorrection:
             The coefficients for the phase correction
 
         """
-        #if self.vm is not None:
-        #    self.coefficients = self.vm.get_all_dic(trainable_only=True)
 
-        #else:
         coefficients = kwargs.get('coefficients', None)
+        group = self.vm.get_group('phase_correction')
+        if group is None or len(group) == 0:
+            raise RuntimeError("Phase correction variables not build in variable manager.")
         if isinstance(coefficients, dict):
-            self.coefficients = coefficients
-        elif isinstance(coefficients, np.ndarray) or isinstance(coefficients, tf.Tensor):
-            for i in range(coefficients.shape[0]):
-                self.coefficients[self.term_to_string(i)] = coefficients[i]
-        elif isinstance(coefficients, list):
-            for i in range(len(coefficients)):
-                self.coefficients[self.term_to_string(i)] = coefficients[i]
+            for k, v in coefficients.items():
+                if k in group:
+                    group[k].assign(tf.cast(v, tf.float64))
+        elif isinstance(coefficients, (list, np.ndarray)):
+            names = self.iTerms_
+            for i, v in enumerate(coefficients):
+                group[names[i]].assign(tf.cast(v, tf.float64))
+
+        elif isinstance(coefficients, tf.Tensor):
+            coeff_list = tf.unstack(tf.reshape(coefficients, [-1]))
+            names = self.iTerms_
+            for i, v in enumerate(coeff_list):
+                group[names[i]].assign(tf.cast(v, tf.float64))
 
         else:
-            raise ValueError("Invalid type for coefficients. Must be dict, list or numpy array; Given: ", type(coefficients))
+            raise ValueError(f"Invalid coefficients type: {type(coefficients)}")
                          
 
     def polynomial(self, s, i, j):
@@ -194,10 +199,11 @@ class PhaseCorrection:
         """
         corr = 0.0
         if self.order != 0:
+            phase_correction_coeff = self.vm.get_group('phase_correction')
             for i in range(self.nTerms_):
-                tf.print("i:", i,'coeff:', self.coefficients[self.iTerms_[i]]) if self.DEBUG else None
+                tf.print("i:", i,'coeff:', phase_correction_coeff[self.iTerms_[i]]) if self.DEBUG else None
                 tf.print("term:",self.iTerms_[i].split('_')[1], self.iTerms_[i].split('_')[2])  if self.DEBUG else None
-                corr += self.polynomial(coords, int(self.iTerms_[i].split('_')[1]), int( self.iTerms_[i].split('_')[2])) * self.coefficients[self.iTerms_[i]]
+                corr += self.polynomial(coords, int(self.iTerms_[i].split('_')[1]), int( self.iTerms_[i].split('_')[2])) * phase_correction_coeff[self.iTerms_[i]]
             return corr
 
         else:
@@ -208,7 +214,7 @@ class PhaseCorrection:
         Returns the phase correction for the given coordinates
         """
 
-        return tf.function(self.eval_corr_norm,reduce_retracing=reduce_retracing)(coords)  
+        return self._eval_corr_tf(coords)
 
     def eval_corr_gen(self, coords):
         """

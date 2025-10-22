@@ -159,6 +159,7 @@ class VarsManager(object):
         self.same_var_map = {}
         self.mask_vars = {}
         self.pre_trans = {}
+        self.groups = {}
 
         self.bnd_dic = {}  # {name:(a,b),...}
 
@@ -169,7 +170,7 @@ class VarsManager(object):
         self.init_val = {}
         self.random_generator = {}
 
-    def add_real_var(self, name, value=None, range_=None, trainable=True):
+    def add_real_var(self, name, value=None, range_=None, trainable=True, group=None):
         """
         Add a real variable named **name** into **self.variables**. If **value** and **range_** are not provided, the initial value
         is set to be a uniform random number between 0 and 1.
@@ -181,13 +182,13 @@ class VarsManager(object):
         """
         if self.multigpu:
             with self.strategy.scope():
-                self._add_real_var(name, value, range_, trainable)
+                self._add_real_var(name, value, range_, trainable, group)
         else:
-            self._add_real_var(name, value, range_, trainable)
+            self._add_real_var(name, value, range_, trainable, group)
 
-    def _add_real_var(self, name, value=None, range_=None, trainable=True):
+    def _add_real_var(self, name, value=None, range_=None, trainable=True, group=None):
         if name in self.variables:  # not a new var
-            return
+            return self.variables[name]
             # if name in self.trainable_vars:
             #    self.trainable_vars.remove(name)
             # warnings.warn("Overwrite variable {}!".format(name))
@@ -220,6 +221,40 @@ class VarsManager(object):
 
         if trainable:
             self.trainable_vars.append(name)
+
+        if group is not None:
+            if group not in self.groups:
+                self.groups[group] = {}
+            self.groups[group][name] = self.variables[name]
+        return self.variables[name]
+
+    def get_group(self, group_name):
+        """Return dict of variables belonging to a group."""
+        return self.groups.get(group_name, {})
+
+    def set_group(self, group_name, vals):
+        """Assign new values to all variables in a group."""
+        group = self.groups.get(group_name, {})
+        for k, v in vals.items():
+            if k in group:
+                group[k].assign(tf.cast(v, self.dtype))
+
+    def set_all(self, vals):
+        for name, v in vals.items():
+            if name in self.variables:
+                self.variables[name].assign(tf.cast(v, self.dtype))
+    
+    def as_list(self, group=None):
+        if group and group in self.groups:
+            return [float(v.numpy()) for v in self.groups[group].values()]
+        else:
+            return [float(v.numpy()) for v in self.variables.values()]
+    
+    def names(self, group=None):
+        if group and group in self.groups:
+            return list(self.groups[group].keys())
+        else:
+            return list(self.variables.keys())
 
     def add_complex_var(
         self, name, polar=None, trainable=True, fix_vals=(1.0, 0.0)

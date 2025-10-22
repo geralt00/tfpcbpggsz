@@ -75,8 +75,9 @@ class BaseModel(object):
     #@tf.function
     def NLL_Kspipi(self, tag):
         
-
-        params = self.pc.coefficients.values()
+        phase_group = self.vm.get_group('phase_correction')
+        names = self.pc.iTerms_
+        params = [phase_group[n] for n in names]
         phase_correction_sig = self.pc.eval_corr(self.config_loader.get_data_srd(tag,'sig'))
         phase_correction_tag = self.pc.eval_corr(self.config_loader.get_data_srd(tag,'tag'))
         self.norm[tag].setParams(params)
@@ -104,7 +105,9 @@ class BaseModel(object):
     #@tf.function    
     def NLL_CP(self, tag, Dsign):
 
-        params = self.pc.coefficients.values()
+        phase_group = self.vm.get_group('phase_correction')
+        names = self.pc.iTerms_
+        params = [phase_group[n] for n in names]
         phase_correction = self.pc.eval_corr(self.config_loader.get_data_srd(tag))
         self.norm[tag].setParams(params)
         phase_correction_MC = self.pc.eval_corr(self.config_loader.get_phsp_srd(tag))
@@ -158,7 +161,7 @@ class BaseModel(object):
             ret += self._nll[tag]
         return ret
     
-    #@tf.function
+    @tf.function
     def nll_cpodd(self):
         ret = 0
         for tag in self.tags:
@@ -168,7 +171,7 @@ class BaseModel(object):
         
         return ret
     
-    #@tf.function
+    @tf.function
     def fun(self, x):
         self.set_params(x)
         ret = self.nll_dks() + self.nll_cpeven() + self.nll_cpodd()

@@ -1,4 +1,4 @@
-name: test 
+name: tfpcbpggsz 
 channels:
   - conda-forge
   - defaults
@@ -14,3 +14,4 @@ dependencies:
   - seaborn
   - uproot
   - sympy
+  - pyyaml

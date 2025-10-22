@@ -18,9 +18,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "pyyaml",
-    "iminuit",
     "plothist"
+    "iminuit",
     ]
 
 [tool.setuptools]
