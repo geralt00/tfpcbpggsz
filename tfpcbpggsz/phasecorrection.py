@@ -229,4 +229,14 @@ class PhaseCorrection:
         """
         return self.iTerms_[i]
     
-    
+
+if __name__ == "__main__":
+    from tfpcbpggsz.variable import VarsManager
+    vm = VarsManager()
+    pc = PhaseCorrection(vm=vm)
+    pc.correctionType = "antiSym_legendre"
+    pc.order = 6
+    pc.PhaseCorrection()
+    x = [0.0, 0.5, 0.9, -0.2, -0.5, -0.9, 0.3, 0.7, -0.7, -0.3, 0.1]
+    pc.set_coefficients(coefficients=[0.1]*pc.nTerms_)
+    print(pc.vm.get_group('phase_correction'))
