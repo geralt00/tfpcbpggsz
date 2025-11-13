@@ -6,6 +6,9 @@ from libcpp.complex cimport complex as c_complex # Standard alias for std::compl
 from libcpp.string cimport string # Not used in the provided snippet, but kept if needed elsewhere
 import importlib.resources
 
+import numpy as np
+cimport numpy as np
+
 # This line is often not strictly necessary if all declarations are in the .h file,
 # but it doesn't harm.
 cdef extern from "D0ToKspipi2018.cxx":
@@ -17,7 +20,11 @@ cdef extern from "D0ToKspipi2018.h":
         void init(const char* data_file_path) except + nogil
         # Assuming get_amp might also throw or could be long-running
         vector[c_complex[double]] get_amp(double zm, double zp) except + nogil  # get_amp method with exception handling and nogil
+        vector[c_complex[double]] get_amp_vec(const double* zm, const double* zp) except + nogil
         vector[vector[c_complex[double]]] AMP(vector[double] zm, vector[double] zp) except + nogil  # AMP method with exception handling and nogil
+        vector[c_complex[double]] AMP_bulk(const double* zm,
+                                           const double* zp,
+                                           size_t N) except + nogil  # New bulk AMP method
 
 
 cdef class PyD0ToKspipi2018:
@@ -35,10 +42,11 @@ cdef class PyD0ToKspipi2018:
             del self.thisptr
             self.thisptr = NULL # Good practice to nullify after delete
 
-    def init(self):
+    def init(self, file_path=None):
         """Wraps the C++ init method."""
         # Consider GIL release if init() is potentially long and thread-safe
         # with nogil:
+
         file_ref = (importlib.resources.files('tfpcbpggsz')
                     .joinpath('external')
                     .joinpath('BELLE2018_data.txt'))
@@ -46,6 +54,8 @@ cdef class PyD0ToKspipi2018:
             # data_path is a pathlib.Path object. It is only valid inside this block.
             # Convert the path to bytes for the const char* argument.
             path_bytes = str(data_path).encode('utf-8')
+            if file_path is not None:
+                path_bytes = file_path.encode('utf-8')
 
             # 3. Call the C++ init method with the guaranteed path.
             #    The GIL is released automatically due to the 'nogil' declaration.
@@ -62,6 +72,25 @@ cdef class PyD0ToKspipi2018:
 
         return self.thisptr.get_amp(czm, czp)
 
+    def AMP(self,
+            np.ndarray[np.double_t, ndim=1, mode="c"] zm,
+            np.ndarray[np.double_t, ndim=1, mode="c"] zp):
+
+        cdef Py_ssize_t N = zm.shape[0]
+        cdef const double* ptr_zm  = <const double*> zm.data
+        cdef const double* ptr_zp = <const double*> zp.data
+
+        cdef vector[c_complex[double]] result = self.thisptr.AMP_bulk(ptr_zm, ptr_zp, N)
+        # Convert vector to numpy array
+        cdef np.ndarray[np.complex128_t, ndim=2] arr = np.empty((N, 2), dtype=np.complex128)
+        cdef np.npy_intp shape[2]
+        shape[0] = N
+        shape[1] = 2
+        arr = np.PyArray_SimpleNewFromData(2, shape, np.NPY_COMPLEX128, &result[0])
+        arr = np.array(arr, copy=True)  # make Python own a copy
+        return arr
+
+'''
     def AMP(self, vector[double] zm, vector[double] zp):
         """
         Calculates the amplitude by calling the C++ AMP method,
@@ -72,3 +101,5 @@ cdef class PyD0ToKspipi2018:
         cdef vector[double] czp = zp
 
         return self.thisptr.AMP(czm, czp)
+
+'''

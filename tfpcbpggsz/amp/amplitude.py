@@ -1,7 +1,6 @@
 import numpy as np
-from sympy import Ci, denom
-from tfpcbpggsz.amp.evtgen.D0ToKspipi2018 import PyD0ToKspipi2018
-from tfpcbpggsz.amp.ampgen.D0ToKSpipi2018 import PyD0ToKSpipi2018
+from tfpcbpggsz.amp.ampgen.D0ToKSpipi2018 import D0ToKSpipi_ampgen as D0ToKSpipi_ampgen
+from tfpcbpggsz.amp.evtgen.D0ToKspipi2018 import D0ToKSpipi_evtgen as D0ToKSpipi_evtgen
 from tfpcbpggsz.amp.bes.D0ToKspipi2025 import PyD0ToKspipi2025
 from tfpcbpggsz.amp.bes_test import D0ToKSpipi
 from tfpcbpggsz.ulti import p4_to_phsp, p4_to_srd
@@ -20,13 +19,15 @@ class Amplitude:
         self.model_name = model
         self.model_instance_alt = None
         if model == 'evtgen':
-            self.model_instance = PyD0ToKspipi2018()
+            self.model_instance = D0ToKSpipi_evtgen()
         elif model == 'ampgen':
-            self.model_instance = PyD0ToKSpipi2018()
+            self.model_instance = D0ToKSpipi_ampgen()
         elif model == 'bes':
             self.model_instance = PyD0ToKspipi2025()
         elif model == 'bes_test':
             self.model_instance = D0ToKSpipi
+        elif model == 'ampgen_mixing':
+            self.model_instance = D0ToKSpipi_ampgen()
 
         else:
             raise ValueError("Model must be either 'evtgen', 'ampgen', or 'bes'.")
@@ -38,7 +39,7 @@ class Amplitude:
         
         if 'amp_file' in kwargs:
             if model == 'evtgen':
-                self.model_instance_alt = PyD0ToKspipi2018()
+                self.model_instance_alt = D0ToKSpipi_evtgen()
             elif model == 'bes_test':
                 self.model_instance_alt = D0ToKSpipi
             else:
@@ -55,6 +56,7 @@ class Amplitude:
                 self.model_instance.init()
             else:
                 self.model_instance.init()
+                print(f"Initialized model instance with amp file: {self._amp_file}")
                 self.model_instance_alt.init(self._amp_file)
         else:
             print("Model instance does not have an init method.")
@@ -98,27 +100,29 @@ class Amplitude:
         Ensures that Kspipi.AMP is called only if necessary and caches its raw result.
         This is the core of the optimization.
         """
-        
         phsp_points = []
         raw_A_output, raw_Abar_output = None, None
         self._data = data_input
-        phsp_points = p4_to_phsp(data_input)
+        #check the shape of data, if it is for momentum for 3 particles or phsp for 2 particles
+        if len(data_input) == 2:
+            phsp_points = data_input
+        else:
+            phsp_points = p4_to_phsp(data_input)
         if self.res is True:
             phsp_points += self.res_params
         if self.model_name == 'bes':
             #swap pi+ and pi- for bes model
             phsp_points = [phsp_points[1], phsp_points[0]]
 
-        raw_A_total = self.model_instance.AMP(phsp_points[0].tolist(), phsp_points[1].tolist())
+        raw_A_total = self.model_instance.AMP(phsp_points[0], phsp_points[1])
         raw_A_total = tf.cast(raw_A_total, tf.complex128)
         raw_A_output, raw_Abar_output = raw_A_total[:, 0], raw_A_total[:, 1]
         if self.model_instance_alt is not None:
-            raw_A_total_alt = self.model_instance_alt.AMP(phsp_points[0].tolist(), phsp_points[1].tolist())
+            raw_A_total_alt = self.model_instance_alt.AMP(phsp_points[0], phsp_points[1])
             raw_A_total_alt = tf.cast(raw_A_total_alt, tf.complex128)
             raw_A_output_alt, raw_Abar_output_alt = raw_A_total_alt[:, 0], raw_A_total_alt[:, 1]
             raw_A_output = self.replace_magnitude(raw_A_output, raw_A_output_alt)
             raw_Abar_output = self.replace_magnitude(raw_Abar_output, raw_Abar_output_alt)
-
 
 
         return raw_A_output, raw_Abar_output
@@ -128,7 +132,7 @@ class Amplitude:
         Ensures that Kspipi.AMP is called only if necessary and caches its raw result.
         This is the core of the optimization.
         """
-        
+
         p1, p2, p3 = data_input
         p1_flatten, p2_flatten, p3_flatten = [], [], []
         raw_A_output, raw_Abar_output = None, None
@@ -154,13 +158,13 @@ class Amplitude:
 
 
 
+
         return raw_A_output, raw_Abar_output
 
     def amp(self, data):
         """
         Calculates the amplitude of the decay from momenta.
         """
-
         Kspipi = self.model_instance
         if self.model_name == 'evtgen' or self.model_name == 'bes':
             raw_tensor = self._ensure_amplitudes_computed(data)
@@ -187,11 +191,13 @@ class Amplitude:
         else:
             p1,p2,p3 = data
             if not isinstance(p1, tf.Tensor):
-                amp_i = Kspipi.AMP(p1.tolist(), p2.tolist(), p3.tolist())     
+                amp_i = Kspipi.AMP(p1, p2, p3)     
             else:
-                amp_i = Kspipi.AMP(p1.numpy().tolist(), p2.numpy().tolist(), p3.numpy().tolist())    
+                amp_i = Kspipi.AMP(p1.numpy(), p2.numpy(), p3.numpy())    
+
             amp_i = tf.cast(amp_i, tf.complex128)
             return amp_i
+
     
     def ampbar(self, data):
         #"""Calculate the amplitude of the decay from momenta."""
@@ -222,10 +228,42 @@ class Amplitude:
             return ampbar_result
         else:
             p1,p2,p3 = data
+            ampbar_i = None
             p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
-            ampbar_i = Kspipi.AMP(p1bar.numpy().tolist(), p3bar.numpy().tolist(), p2bar.numpy().tolist())
-            ampbar_i = tf.cast(tf.negative(ampbar_i), tf.complex128)
-            return ampbar_i
+            if not isinstance(p1bar, tf.Tensor):
+                ampbar_i = tf.cast(Kspipi.AMP(p1bar, p3bar, p2bar), tf.complex128)
+            else:
+                ampbar_i = tf.cast(Kspipi.AMP(p1bar.numpy(), p3bar.numpy(), p2bar.numpy())  , tf.complex128)
+            return tf.cast(tf.negative(ampbar_i), tf.complex128)
+
+    #TEMP 
+    def amp_swap(self, data):
+        """
+        Calculates the amplitude of the decay from momenta.
+        """
+        Kspipi = self.model_instance
+        p1,p2,p3 = data
+        if not isinstance(p1, tf.Tensor):
+            amp_i = Kspipi.AMP(p1, p3, p2)     
+        else:
+            amp_i = Kspipi.AMP(p1.numpy(), p3.numpy(), p2.numpy())    
+    
+        amp_i = tf.cast(tf.negative(amp_i), tf.complex128)
+        return amp_i
+
+    #TEMP
+    def ampbar_swap(self, data):
+        #"""Calculate the amplitude of the decay from momenta."""
+        Kspipi = self.model_instance
+
+        p1,p2,p3 = data
+        ampbar_i = None
+        p1bar, p2bar, p3bar = tf.concat([p1[:, :1], tf.negative(p1[:, 1:])], axis=1), tf.concat([p2[:, :1], tf.negative(p2[:, 1:])], axis=1), tf.concat([p3[:, :1], tf.negative(p3[:, 1:])], axis=1)
+        if not isinstance(p1bar, tf.Tensor):
+            ampbar_i = tf.cast(Kspipi.AMP(p1bar, p2bar, p3bar), tf.complex128)
+        else:
+            ampbar_i = tf.cast(Kspipi.AMP(p1bar.numpy(), p2bar.numpy(), p3bar.numpy())  , tf.complex128)
+        return tf.cast(ampbar_i, tf.complex128)
         
     def DeltadeltaD(self, amp, ampbar):
         """
@@ -344,14 +382,17 @@ class GetCiSi:
 
 if __name__ == "__main__":
     # Example usage
-    model = 'bes_test'  
+    model = 'evtgen'  
     amplitude = Amplitude(model=model)
     amplitude.init()
     k0 = [0.66786802, -0.37050274, -0.07949114,  0.23417914]
     pim = [0.65777907, 0.14400027, -0.23772302, -0.57960771]
     pip = [0.5391929, 0.22650247, 0.31721417, 0.34542857]
 
+
     data = [np.array([k0]), np.array([pim]), np.array([pip])]
+    s12, s13 = p4_to_phsp(data)
+    #data = [s12, s13]
     amp = amplitude.amp(data)
     ampbar = amplitude.ampbar(data)
     print(np.abs(amp), np.angle(amp))

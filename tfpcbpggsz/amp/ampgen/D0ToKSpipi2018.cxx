@@ -293,8 +293,72 @@ vector<complex<double>> D0ToKSpipi2018::AMP(vector<vector<double>> ks, vector<ve
 
 }
 
+std::vector<std::complex<double>> D0ToKSpipi2018::AMP_bulk(const double* ks,
+                                           const double* pi1,
+                                           const double* pi2,
+                                           size_t N)
+{
+    std::vector<std::complex<double>> out(N);
+#pragma omp parallel for
+    for (size_t i=0;i<N;++i) {
+        double x0[12];
+        // read directly from flat arrays: ks[4*i + j]
+        out[i] = get_amp_vec(&ks[4*i], &pi1[4*i], &pi2[4*i]);
+    }
+    return out;
+}
 
-complex<double> D0ToKSpipi2018::get_amp(vector<double> ks, vector<double> pi1, vector<double> pi2){
+complex<double> D0ToKSpipi2018::get_amp_vec(const double* ks,
+                                        const double* pi1,
+                                        const double* pi2)
+{
+  double x0[12];
+  x0[0] = (ks[1]);
+  x0[1] = (ks[2]);
+  x0[2] = (ks[3]);
+  x0[3] = (ks[0]);
+
+
+  x0[4] = (pi1[1]);
+  x0[5] = (pi1[2]);
+  x0[6] = (pi1[3]);
+  x0[7] = (pi1[0]);
+
+ 
+  x0[8] = (pi2[1]);
+  x0[9] = (pi2[2]);
+  x0[10] = (pi2[3]);
+  x0[11] = (pi2[0]);
+
+  const vector<complex<double> >  v741357864 = all_amplitudes(x0);
+
+return std::complex<double>(
+  std::complex<double>(0.0255993,-0.194327)*v741357864[int(1)] 
+  + std::complex<double>(0.0095653,0.00601207)*v741357864[int(0)] 
+  + std::complex<double>(0.0133101,0.0170886)*v741357864[int(2)]
+  -std::complex<double>(0.107163,-0.104979)*v741357864[int(3)] 
+  + std::complex<double>(0.00296544,0.014186)*v741357864[int(4)]
+  -std::complex<double>(0.0339155,-0.0613357)*v741357864[int(5)]
+  -std::complex<double>(0.0535469,-0.0272353)*v741357864[int(6)] 
+  + std::complex<double>(0.126313,-0.140858)*v741357864[int(7)]
+  -std::complex<double>(1.37962,-1.49371)*v741357864[int(8)]
+  -std::complex<double>(0.696212,0.564193)*v741357864[int(9)]
+  -std::complex<double>(1.1781,0.387498)*v741357864[int(10)]
+  -std::complex<double>(3.56439,0.302991)*v741357864[int(11)]
+  -std::complex<double>(0.654174,-0.779454)*v741357864[int(12)] 
+  + std::complex<double>(0.722348,0.555636)*v741357864[int(13)] 
+  + std::complex<double>(3.23771,0.614543)*v741357864[int(14)] 
+  + std::complex<double>(1.67044,2.7479)*v741357864[int(15)] 
+  + std::complex<double>(2.36804,1.81536)*v741357864[int(16)]
+  -std::complex<double>(0.125526,-0.0943573)*v741357864[int(17)]
+  -std::complex<double>(0.0640864,-0.12832)*v741357864[int(18)] 
+  + std::complex<double>(0.160532,0.0886014)*v741357864[int(19)] 
+  + v741357864[int(20)]);
+}
+
+
+complex<double> D0ToKSpipi2018::get_amp(vector<double> ks, vector<double> pi1, vector<double> pi2)
+{
   double x0[12];
   x0[0] = (ks[1]);
   x0[1] = (ks[2]);

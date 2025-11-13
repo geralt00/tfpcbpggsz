@@ -28,7 +28,7 @@ public:
 	    double RAmp,
 	    double RPhase,
 	    double RMass,
-            double RWidth,
+      double RWidth,
 	    int RSpin,
 	    double RRadii,
 	    double DRadii,

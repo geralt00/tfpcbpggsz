@@ -19,8 +19,13 @@ public:
 
   void init(const char* data_file_path);  
   std::vector<std::complex<double>> get_amp(double _zm, double _zp) const;
+  std::vector<std::complex<double>> get_amp_vec(const double* _zm, const double* _zp) const;
+  
   //std::complex<double> get_amp(double _x, double _y, int D_flag);
   std::vector<std::vector<std::complex<double>>> AMP(vector<double> _zm, vector<double> _zp) const;
+  std::vector<std::complex<double>> AMP_bulk(const double* zm,
+                                           const double* zp,
+                                           size_t N);
   // arrays for the Dalitz model results without systematics
   std::complex<double> Amp(const DalitzPoint& point, const double* par) const;
   //TComplex Amp(double *x, double *par);

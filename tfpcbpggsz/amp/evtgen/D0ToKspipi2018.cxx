@@ -82,17 +82,53 @@ std::vector<std::complex<double>> D0ToKspipi2018::get_amp(double _zm, double _zp
   return result;
 }
 
+std::vector<std::complex<double>> D0ToKspipi2018::get_amp_vec(const double* _zm, const double* _zp) const
+{
+
+  // init();
+  // std::cout << "I'm trying something here" << std::endl;
+
+  const double mSq0p = (*_zp);
+  const double mSq0n = (*_zm);
+  const double mSqpn = mD0 * mD0 + 2*mPi*mPi + mKs*mKs - mSq0p -mSq0n;
+  // Direct and conjugated Dalitz points.
+  const DalitzPoint pointD0( mKs, mPi, mPi, mSq0n, mSq0p, mSqpn );
+  const DalitzPoint pointD0b( mKs, mPi, mPi, mSq0p, mSq0n, mSqpn );
+  // Direct and conjugated amplitudes.
+  const std::complex<double> ampD0  = Amp( pointD0,_parameter_value ); 
+  const std::complex<double> ampD0b = Amp( pointD0b, _parameter_value );
+  
+
+  const std::vector<std::complex<double>> result = {ampD0, ampD0b};
+  return result;
+}
+
+
 std::vector<std::vector<std::complex<double>>> D0ToKspipi2018::AMP(vector<double> _zm, vector<double> _zp) const{
 
   std::vector<std::vector<std::complex<double>>> results;
   
   for(int i = 0; i < int(_zm.size()); i++){
     results.push_back(get_amp(_zm[i], _zp[i]));
-    //std::complex<double> amp = get_amp(_zm[i], _zp[i], 1);
-    //std::complex<double> amp_conj = get_amp(_zm[i], _zp[i], -1);
-    //results.push_back({amp, amp_conj});
   }
   return results;
+}
+
+std::vector<std::complex<double>> 
+D0ToKspipi2018::AMP_bulk(const double* zm,
+                              const double* zp,
+                              size_t N)
+{
+    std::vector<std::complex<double>> out(N * 2);
+
+#pragma omp parallel for
+    for (size_t i = 0; i < N; ++i) {
+        auto amps = get_amp_vec(&zm[i], &zp[i]);  // vector<complex<double>> of size 2
+        out[2*i]   = amps[0];  // A
+        out[2*i+1] = amps[1];  // Abar
+    }
+
+    return out;
 }
 
 

@@ -1,14 +1,17 @@
 from setuptools import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
-
+import numpy as np
 import os
 #Get the path of the installed package
 path = os.path.dirname(os.path.abspath(__file__))
 
 extensions = [
     Extension("D0ToKspipi2018",
-              sources=[f"{path}/D0ToKspipi2018.pyx"], language="c++") ]
+              include_dirs=[np.get_include()],
+              extra_compile_args=["-O3", "-std=c++17", "-fopenmp"],
+              extra_link_args=["-fopenmp"],
+              sources=[f"{path}/D0ToKspipi2018.pyx"], language="c++")]
 
 setup(
     name="D0ToKspipi2018",

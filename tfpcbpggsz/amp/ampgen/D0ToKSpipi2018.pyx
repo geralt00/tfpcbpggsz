@@ -4,6 +4,10 @@
 from libcpp.vector cimport vector
 from libcpp.complex cimport complex as c_complex
 from libcpp.string cimport string
+
+import numpy as np
+cimport numpy as np
+
 cdef extern from  "D0ToKSpipi2018.cxx":
     pass
 
@@ -15,6 +19,10 @@ cdef extern from "D0ToKSpipi2018.h":
         vector[c_complex[double]] all_amplitudes(double[:] x1)        
         c_complex[double] get_amp(vector[double] k0l, vector[double] pip, vector[double] pim);
         vector[c_complex[double]] AMP(vector[vector[double]] ks, vector[vector[double]] pi1, vector[vector[double]] pi2);
+        vector[c_complex[double]] AMP_bulk(const double* ks,
+                                     const double* pi1,
+                                     const double* pi2,
+                                     size_t N)
 
 
         c_complex[double] D0_K_0_s_1430_p_GLASS__K0S0_pip__pim_(double[:] x0, double[:] x1);
@@ -88,6 +96,26 @@ cdef class PyD0ToKSpipi2018:
 
         return self.thisptr.get_amp(ck0, cpip, cpim)
 
+    def AMP(self,
+            np.ndarray[np.double_t, ndim=2, mode="c"] ks,
+            np.ndarray[np.double_t, ndim=2, mode="c"] pi1,
+            np.ndarray[np.double_t, ndim=2, mode="c"] pi2):
+        cdef Py_ssize_t N = ks.shape[0]
+        cdef const double* ptr_ks  = <const double*> ks.data
+        cdef const double* ptr_pi1 = <const double*> pi1.data
+        cdef const double* ptr_pi2 = <const double*> pi2.data
+
+        cdef vector[c_complex[double]] result = self.thisptr.AMP_bulk(ptr_ks, ptr_pi1, ptr_pi2, N)
+
+        # Convert vector to numpy array
+        cdef np.ndarray[np.complex128_t, ndim=1] arr = np.empty(N, dtype=np.complex128)
+        cdef np.npy_intp shape[1]
+        shape[0] = N
+        arr = np.PyArray_SimpleNewFromData(1, shape, np.NPY_COMPLEX128, &result[0])
+        arr = np.array(arr, copy=True)  # make Python own a copy
+        return arr
+
+'''
     def AMP(self, list[list[double]] ks, list[list[double]] pi1, list[list[double]] pi2):
         """
         Calculate the amplitude for the D0 -> K0S0 pi+ pi- decay., old version, not tensorized
@@ -101,5 +129,7 @@ cdef class PyD0ToKSpipi2018:
             result.push_back(self.get_amp(ks[i], pi1[i], pi2[i]))
 
         return result
+'''
+
 
 

@@ -2,6 +2,7 @@
 #define D0TOKSPIPI2018_H
 #include <vector>
 #include <complex>
+#include <cstddef>
 using namespace std;
 
 class D0ToKSpipi2018 {
@@ -12,7 +13,14 @@ public:
     // Initialization method
     void init();
     std::complex<double> get_amp(vector<double> ks, vector<double> pi1, vector<double> pi2);
+    std::complex<double> get_amp_vec(const double* ks,
+                                            const double* pi1,
+                                            const double* pi2);
     std::vector<complex<double>> AMP(vector<vector<double>> ks, vector<vector<double>> pi1, vector<vector<double>> pi2);
+    std::vector<std::complex<double>> AMP_bulk(const double* ks,
+                                               const double* pi1,
+                                               const double* pi2,
+                                               size_t N);
 
 private:
     std::vector<std::complex<double> > all_amplitudes(double const* x1);
